@@ -72,7 +72,7 @@ func (i *Conn) GetMessage() (text string) {
 	text = string(buf[:n])
 
 	if strings.Contains(text, "PING") {
-		i.SendMessage("PONG")
+		i.irc.Write([]byte("PONG :pingis\r\n"))
 	}
 	return
 }
