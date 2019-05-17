@@ -15,12 +15,6 @@ import (
 	"github.com/mholt/archiver"
 )
 
-// Default Locations
-const searchFolder string = "./Searches/"
-const bookFolder string = "./Books/"
-
-// TODO: File downloads and extractions are fucked. Something to do with paths i think
-
 // Conn rerepesents a DCC connection to a server
 type Conn struct {
 	dcc      net.Conn
@@ -33,6 +27,13 @@ type Conn struct {
 // NewDownload parses the string and downloads the file
 func NewDownload(text string, isBook bool, doneChan chan<- bool) {
 	dcc := Conn{}
+
+	downloadDir, err := os.UserHomeDir()
+	if err != nil {
+		log.Fatal("Erorr: ", err)
+	}
+
+	downloadDir += "/Downloads/"
 
 	defer func() {
 		// Send message to continue listening when finished downloading
@@ -60,7 +61,7 @@ func NewDownload(text string, isBook bool, doneChan chan<- bool) {
 	dcc.dcc = conn
 
 	// Create New File based on parsed filename
-	zipfile, err := os.Create(dcc.filename)
+	zipfile, err := os.Create(downloadDir + dcc.filename)
 	if err != nil {
 		log.Fatal("Error Creating File", err)
 	}
@@ -71,6 +72,7 @@ func NewDownload(text string, isBook bool, doneChan chan<- bool) {
 	}
 	defer zipfile.Close()
 
+	// Download the file
 	received := 0
 	bytes := make([]byte, 1024)
 	for received < dcc.size {
@@ -83,11 +85,12 @@ func NewDownload(text string, isBook bool, doneChan chan<- bool) {
 	}
 
 	// For each file in the archive, save the data to a new file (extract)
-	err = archiver.Walk(dcc.filename, func(f archiver.File) error {
+	err = archiver.Walk(downloadDir+dcc.filename, func(f archiver.File) error {
 		fName := f.Name()
 
-		file, err := os.Create(fName)
+		file, err := os.Create(downloadDir + fName)
 		defer file.Close()
+		fmt.Println("File has been downloaded to " + downloadDir)
 		if err != nil {
 			log.Println("Error Creating TXT: " + fName)
 		}
@@ -102,13 +105,10 @@ func NewDownload(text string, isBook bool, doneChan chan<- bool) {
 
 			writer.Write(data[:n])
 			if err != nil {
-				fmt.Println(err)
-				fmt.Println("BUFFER SIZE: " + strconv.Itoa(writer.Buffered()))
 				writer.Flush()
 				break
 			}
 		}
-		fmt.Println("File has been downloaded")
 		return nil
 	})
 }
@@ -133,8 +133,7 @@ func (dcc *Conn) ParseSearch(text string) error {
 
 // ParseBook parses the important data of a book download string
 func (dcc *Conn) ParseBook(text string) error {
-	re := regexp.MustCompile(`DCC SEND (.+)\s+(\d+)\s+(\d+)\s+(\d+)\s*`)
-	// re := regexp.MustCompile(`"(.+)"\s+(\d+)\s+(\d+)\s+(\d+)\s*`)
+	re := regexp.MustCompile(`DCC SEND "?(.+[^"])"?\s(\d+)\s+(\d+)\s+(\d+)\s*`)
 	groups := re.FindStringSubmatch(text)
 
 	if len(groups) == 0 {
@@ -145,10 +144,10 @@ func (dcc *Conn) ParseBook(text string) error {
 	dcc.ip = stringToIP(groups[2])
 	dcc.port = groups[3]
 	dcc.size, _ = strconv.Atoi(groups[4])
-	print("Parsed book string")
 	return nil
 }
 
+// Convert a given 32 bit IP integer to an IP string (ex. 192.168.1.1)
 func stringToIP(nn string) string {
 	temp, err := strconv.ParseUint(nn, 10, 32)
 	if err != nil {

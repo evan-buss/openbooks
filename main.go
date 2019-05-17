@@ -3,13 +3,14 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"openbooks/dcc"
-	"openbooks/irc"
 	"os"
 	"os/user"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/evan-buss/openbooks-cli/dcc"
+	"github.com/evan-buss/openbooks-cli/irc"
 )
 
 // Establishes connection with IRC server, displays menu, spawns goroutines
@@ -108,8 +109,8 @@ func readDaemon(irc *irc.Conn, statusC chan<- bool, stateC <-chan bool) {
 		if strings.Contains(text, "DCC SEND") {
 			go dcc.NewDownload(text, isBook, doneChan)
 		} else if strings.Contains(text, "NOTICE") {
-			n := strings.LastIndex(text, "evan_bot") + len("evan_bot") + 1
-			fmt.Println("Server Message: " + text[n:])
+			// n := strings.LastIndex(text, "evan_bot") + len("evan_bot") + 1
+			// fmt.Println("Server Message: " + text[n:])
 
 			if strings.Contains(text, "Sorry") {
 				// There were no results
@@ -123,7 +124,7 @@ func readDaemon(irc *irc.Conn, statusC chan<- bool, stateC <-chan bool) {
 			} else if strings.Contains(text, "matches") {
 				start := strings.LastIndex(text, "returned") + 9
 				end := strings.LastIndex(text, "matches") - 1
-				fmt.Println("Your search returned" + text[start:end] + " matches.")
+				fmt.Println("Your search returned " + text[start:end] + " matches.")
 			}
 		}
 

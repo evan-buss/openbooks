@@ -1,0 +1,11 @@
+✔ Files should be saved to the user's download directory @done(19-05-17 17:58)
+
+
+Bugs:
+  ☐ Intial search results zip file doesn't use the given name but the entire line
+    The user never sees this because the inner file is extracted and the zip deleted
+    Probably has something to do with regex but I cannot figure it out. In tests
+      it is working fine...
+  ✔ Download Book Files are surrounded with double quotes ("") @done(19-05-17 17:58)
+    The regular expression had to be updated to account for strings that may or
+      may not contain quotes.
