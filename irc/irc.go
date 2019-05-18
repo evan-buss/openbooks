@@ -66,7 +66,8 @@ func (i *Conn) GetMessage() (text string) {
 	n, err := i.irc.Read(buf)
 
 	if err != nil {
-		log.Print("Get Message Error", err)
+		log.Println("Probably a connection error.")
+		log.Fatal("Get Message Error: ", err)
 	}
 
 	text = string(buf[:n])

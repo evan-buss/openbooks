@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"log"
 	"os"
 	"os/user"
 	"strconv"
@@ -18,8 +19,21 @@ func main() {
 	fmt.Println("=======================================")
 	fmt.Println("          Welcome to OpenBooks         ")
 	fmt.Println("=======================================")
-	currentUser, _ := user.Current()
-	irc := irc.New(currentUser.Name, currentUser.Name)
+
+	// Username can be supplied via ARGS or found from the user's system name
+	var currentUser string
+	if len(os.Args) == 2 {
+		currentUser = os.Args[1]
+	} else {
+		user, _ := user.Current()
+		currentUser = user.Name
+	}
+
+	if strings.Contains(currentUser, " ") {
+		log.Fatal("Please supply a single word username. Cannot use " + currentUser)
+	}
+
+	irc := irc.New(currentUser, currentUser)
 	irc.Connect("irc.irchighway.net")
 
 	time.Sleep(time.Second * 2)
@@ -54,21 +68,23 @@ func main() {
 			fmt.Print("\ns)search\ng)et book\nd)one\n~> ")
 
 			input, _ := reader.ReadString('\n')
+			input = strings.TrimRight(input, "\n")
+			input = strings.TrimRight(input, "\r")
 
 			switch input {
-			case "s\n":
+			case "s":
 				fmt.Print("@search ")
 				message, _ := reader.ReadString('\n')
 				irc.SendMessage("@search " + message)
 				stateC <- false
 				isDownloading = true
-			case "g\n":
+			case "g":
 				fmt.Print("Download String: ")
 				message, _ := reader.ReadString('\n')
 				irc.SendMessage(message)
 				stateC <- true
 				isDownloading = true
-			case "d\n":
+			case "d":
 				fmt.Println("disonnecting")
 				irc.Disconnect()
 				os.Exit(0)
@@ -97,7 +113,6 @@ func readDaemon(irc *irc.Conn, statusC chan<- bool, stateC <-chan bool) {
 
 	for {
 		text := irc.GetMessage()
-		// fmt.Println(text)
 		f.WriteString(text)
 
 		select {
@@ -109,9 +124,6 @@ func readDaemon(irc *irc.Conn, statusC chan<- bool, stateC <-chan bool) {
 		if strings.Contains(text, "DCC SEND") {
 			go dcc.NewDownload(text, isBook, doneChan)
 		} else if strings.Contains(text, "NOTICE") {
-			// n := strings.LastIndex(text, "evan_bot") + len("evan_bot") + 1
-			// fmt.Println("Server Message: " + text[n:])
-
 			if strings.Contains(text, "Sorry") {
 				// There were no results
 				fmt.Println("No results returned for that search...")
@@ -127,7 +139,6 @@ func readDaemon(irc *irc.Conn, statusC chan<- bool, stateC <-chan bool) {
 				fmt.Println("Your search returned " + text[start:end] + " matches.")
 			}
 		}
-
 		select {
 		case <-doneChan:
 			// Send message when finished downloading

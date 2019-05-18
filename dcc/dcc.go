@@ -33,7 +33,8 @@ func NewDownload(text string, isBook bool, doneChan chan<- bool) {
 		log.Fatal("Erorr: ", err)
 	}
 
-	downloadDir += "/Downloads/"
+	downloadDir += string(os.PathSeparator) + "Downloads" + string(os.PathSeparator)
+	defer fmt.Println("File has been downloaded to " + downloadDir)
 
 	defer func() {
 		// Send message to continue listening when finished downloading
@@ -48,6 +49,7 @@ func NewDownload(text string, isBook bool, doneChan chan<- bool) {
 		}
 	} else {
 		err := dcc.ParseSearch(text)
+		dcc.filename = "search_results.zip"
 		if err != nil {
 			log.Fatal("Parse Books: ", err)
 		}
@@ -90,7 +92,6 @@ func NewDownload(text string, isBook bool, doneChan chan<- bool) {
 
 		file, err := os.Create(downloadDir + fName)
 		defer file.Close()
-		fmt.Println("File has been downloaded to " + downloadDir)
 		if err != nil {
 			log.Println("Error Creating TXT: " + fName)
 		}
@@ -126,8 +127,6 @@ func (dcc *Conn) ParseSearch(text string) error {
 	dcc.ip = stringToIP(groups[2])
 	dcc.port = groups[3]
 	dcc.size, _ = strconv.Atoi(groups[4])
-	print("Parsed search string")
-
 	return nil
 }
 
