@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -14,26 +15,36 @@ import (
 	"github.com/evan-buss/openbooks-cli/irc"
 )
 
+var logIRC bool
+var userName string
+
+// Retrieve command line arguments and set appropriate variables
+func parseArgs() {
+	flag.BoolVar(&logIRC, "log", false, "Save IRC logs")
+	flag.StringVar(&userName, "name", "", "Set username different than your account name")
+	flag.Parse()
+}
+
 // Establishes connection with IRC server, displays menu, spawns goroutines
 func main() {
 	fmt.Println("=======================================")
 	fmt.Println("          Welcome to OpenBooks         ")
 	fmt.Println("=======================================")
 
+	parseArgs()
+
 	// Username can be supplied via ARGS or found from the user's system name
-	var currentUser string
-	if len(os.Args) == 2 {
-		currentUser = os.Args[1]
-	} else {
+
+	if userName == "" {
 		user, _ := user.Current()
-		currentUser = user.Name
+		userName = user.Name
 	}
 
-	if strings.Contains(currentUser, " ") {
-		log.Fatal("Please supply a single word username. Cannot use " + currentUser)
+	if strings.Contains(userName, " ") {
+		log.Fatal("Please supply a single word username. Cannot use " + userName)
 	}
 
-	irc := irc.New(currentUser, currentUser)
+	irc := irc.New(userName, userName)
 	irc.Connect("irc.irchighway.net")
 
 	time.Sleep(time.Second * 2)
@@ -99,13 +110,18 @@ func main() {
 // Designed to be launched as a goroutine. Listens for specific messages and
 // responds accordingly
 func readDaemon(irc *irc.Conn, statusC chan<- bool, stateC <-chan bool) {
-	f, err := os.OpenFile("log.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	f.WriteString("\n==================== NEW LOG ======================\n")
+	var f *os.File
+	var err error
 
-	if err != nil {
-		panic(err)
+	if logIRC {
+		f, err = os.OpenFile("log.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		defer f.Close()
+		f.WriteString("\n==================== NEW LOG ======================\n")
+
+		if err != nil {
+			panic(err)
+		}
 	}
-	defer f.Close()
 
 	isBook := false
 
@@ -113,7 +129,10 @@ func readDaemon(irc *irc.Conn, statusC chan<- bool, stateC <-chan bool) {
 
 	for {
 		text := irc.GetMessage()
-		f.WriteString(text)
+
+		if logIRC {
+			f.WriteString(text)
+		}
 
 		select {
 		// Get state of app from menu. isBook = download book; !isBook = search
