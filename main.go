@@ -21,7 +21,9 @@ var userName string
 // Retrieve command line arguments and set appropriate variables
 func parseArgs() {
 	flag.BoolVar(&logIRC, "log", false, "Save IRC logs")
-	flag.StringVar(&userName, "name", "", "Set username different than your account name")
+	user, _ := user.Current() // Get current user
+	userName = user.Name      // Retrieve their name
+	flag.StringVar(&userName, "name", userName, "Set username different than your account name")
 	flag.Parse()
 }
 
@@ -33,13 +35,7 @@ func main() {
 
 	parseArgs()
 
-	// Username can be supplied via ARGS or found from the user's system name
-
-	if userName == "" {
-		user, _ := user.Current()
-		userName = user.Name
-	}
-
+	// Username can be supplied via ARGS or found from the OS's current user
 	if strings.Contains(userName, " ") {
 		log.Fatal("Please supply a single word username. Cannot use " + userName)
 	}
@@ -47,8 +43,9 @@ func main() {
 	irc := irc.New(userName, userName)
 	irc.Connect("irc.irchighway.net")
 
+	// Wait before joining the ebooks room
+	// Often you recieve a private message from the server
 	time.Sleep(time.Second * 2)
-
 	irc.JoinChannel("ebooks")
 
 	statusC := make(chan bool)
