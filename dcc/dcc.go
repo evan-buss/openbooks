@@ -15,6 +15,14 @@ import (
 	"github.com/mholt/archiver"
 )
 
+// There are two types of DCC strings this program accepts.
+// Search Results
+// 	- A text file containing a list of search results returned from your search
+//    query.
+// Book Files
+//  - The actual book file itself. You get the download string from the search
+//    results, enter it, then the book is sent to you.
+
 // Conn rerepesents a DCC connection to a server
 type Conn struct {
 	dcc      net.Conn
@@ -146,7 +154,8 @@ func (dcc *Conn) ParseBook(text string) error {
 	return nil
 }
 
-// Convert a given 32 bit IP integer to an IP string (ex. 192.168.1.1)
+// Convert a given 32 bit IP integer to an IP string
+// Ex) 2907707975 -> 192.168.1.1
 func stringToIP(nn string) string {
 	temp, err := strconv.ParseUint(nn, 10, 32)
 	if err != nil {

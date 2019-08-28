@@ -24,7 +24,7 @@ func parseArgs() {
 	userName = user.Name
 
 	flag.BoolVar(&logIRC, "log", false, "Save IRC logs")
-	flag.StringVar(&userName, "name", userName, "Set username different than your user name")
+	flag.StringVar(&userName, "name", userName, "Use a name that differs from your account name.")
 	flag.Parse()
 }
 
@@ -44,8 +44,9 @@ func main() {
 	irc := irc.New(userName, userName)
 	irc.Connect("irc.irchighway.net")
 
+	// Wait before joining the ebooks room
+	// Often you recieve a private message from the server
 	time.Sleep(time.Second * 2)
-
 	irc.JoinChannel("ebooks")
 
 	statusC := make(chan bool)
