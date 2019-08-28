@@ -20,8 +20,11 @@ var userName string
 
 // Retrieve command line arguments and set appropriate variables
 func parseArgs() {
+	user, _ := user.Current()
+	userName = user.Name
+
 	flag.BoolVar(&logIRC, "log", false, "Save IRC logs")
-	flag.StringVar(&userName, "name", "", "Set username different than your account name")
+	flag.StringVar(&userName, "name", userName, "Set username different than your user name")
 	flag.Parse()
 }
 
@@ -34,12 +37,6 @@ func main() {
 	parseArgs()
 
 	// Username can be supplied via ARGS or found from the user's system name
-
-	if userName == "" {
-		user, _ := user.Current()
-		userName = user.Name
-	}
-
 	if strings.Contains(userName, " ") {
 		log.Fatal("Please supply a single word username. Cannot use " + userName)
 	}
@@ -108,7 +105,11 @@ func main() {
 }
 
 // Designed to be launched as a goroutine. Listens for specific messages and
-// responds accordingly
+// 	responds accordingly
+// Params: irc - IRC connection
+//  			 statusC - boolean channel returns true when the download has finished
+// 				 stateC - boolean channel recieves messages from user menu
+// 									(true = book download, false = search results download)
 func readDaemon(irc *irc.Conn, statusC chan<- bool, stateC <-chan bool) {
 	var f *os.File
 	var err error
@@ -141,8 +142,10 @@ func readDaemon(irc *irc.Conn, statusC chan<- bool, stateC <-chan bool) {
 		}
 
 		if strings.Contains(text, "DCC SEND") {
+			// Respond to Direct Client-to-Client downloads
 			go dcc.NewDownload(text, isBook, doneChan)
 		} else if strings.Contains(text, "NOTICE") {
+			// Notice is a message sent directly to the user
 			if strings.Contains(text, "Sorry") {
 				// There were no results
 				fmt.Println("No results returned for that search...")
