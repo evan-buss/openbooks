@@ -11,8 +11,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/evan-buss/openbooks-cli/dcc"
-	"github.com/evan-buss/openbooks-cli/irc"
+	"github.com/evan-buss/openbooks/dcc"
+	"github.com/evan-buss/openbooks/irc"
 )
 
 var logIRC bool
