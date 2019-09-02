@@ -1,4 +1,4 @@
-# openbooks-cli
+# openbooks
 Openbooks is a command line utility to download ebooks from irchighway.net. 
 
 ## Features
@@ -19,5 +19,5 @@ Openbooks is a command line utility to download ebooks from irchighway.net.
   - The book file will be downloaded to your `~/Downloads` directory
   - If the book is contained within a compressed archive, it is extracted automatically
 
-## How it works
+## Why / How
 - I wrote this program mainly as a way to learn the [IRC](https://en.wikipedia.org/wiki/Internet_Relay_Chat) protocol. Many IRC clients also allow file downloads which are implemented using the [DCC](https://en.wikipedia.org/wiki/Direct_Client-to-Client) protocol. The essentials of both are implemented in order for the application to work.
