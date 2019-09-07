@@ -19,13 +19,11 @@ var logIRC bool
 var userName string
 
 // Retrieve command line arguments and set appropriate variables
-func parseArgs() {
+func init() {
 	user, _ := user.Current()
 	userName = user.Name
-
 	flag.BoolVar(&logIRC, "log", false, "Save IRC logs")
 	flag.StringVar(&userName, "name", userName, "Use a name that differs from your account name.")
-	flag.Parse()
 }
 
 // Establishes connection with IRC server, displays menu, spawns goroutines
@@ -34,7 +32,7 @@ func main() {
 	fmt.Println("          Welcome to OpenBooks         ")
 	fmt.Println("=======================================")
 
-	parseArgs()
+	flag.Parse()
 
 	// Username can be supplied via ARGS or found from the user's system name
 	if strings.Contains(userName, " ") {
