@@ -1,0 +1,32 @@
+input {
+  border: none;
+  background: none;
+}
+
+#search-container {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+#search {
+  border-radius: 16px;
+  background-color: hsl(220, 13%, 5%);
+  box-shadow: 0 3px 2px hsl(220, 13%, 30%);
+  color: #09d3ac;
+  font-size: 48px;
+  padding: 20px;
+  caret-color: #09d3ac;
+  margin-right: 20px;
+  width: 100%;
+}
+
+#search-button {
+  font-size: 48px;
+  padding: 20px;
+  border-radius: 16px;
+  background-color: hsl(220, 13%, 5%);
+  color: #09d3ac;
+}
