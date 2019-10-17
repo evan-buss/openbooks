@@ -1,0 +1,15 @@
+#container {
+  width: 100%;
+}
+
+h1 {
+  margin-top: 60px;
+  font-size: 2rem;
+}
+
+#table {
+  border-radius: 16px;
+  /* padding-top: 5px;
+  padding-bottom: 5px; */
+  background-color: whitesmoke;
+}
