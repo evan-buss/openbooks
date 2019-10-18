@@ -9,7 +9,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "react-scripts build && cd .. && packr2 && go build && packr2 clean",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
