@@ -1,16 +1,10 @@
-package main
+package server
 
 import (
 	"encoding/json"
 	"errors"
 	"io/ioutil"
 )
-
-// Handler defines a generic message handler. All handlers should implement
-// the handle() method. The method either returns a JSON string or an error
-type Handler interface {
-	handle() (interface{}, error)
-}
 
 // ERROR represents some sort of error outside of specific handlers
 // such as parsing requests
@@ -92,7 +86,7 @@ type ServersResponse struct {
 
 // DownloadRequest is a request for a specific book string
 type DownloadRequest struct {
-	book string `json:"download"`
+	Book string `json:"download"`
 }
 
 // DownloadResponse is a response with a book file
@@ -100,6 +94,12 @@ type DownloadResponse struct {
 	MessageType int    `json:"type"`
 	Name        string `json:"name"`
 	File        []byte `json:"file"`
+}
+
+// Handler defines a generic message handler. All handlers should implement
+// the handle() method. The method either returns a JSON string or an error
+type Handler interface {
+	handle() (interface{}, error)
 }
 
 func messageRouter(message Request) (interface{}, error) {

@@ -1,9 +1,15 @@
-package main
+package server
 
 import (
+	"fmt"
 	"log"
 	"net/http"
+	"os/exec"
+	"runtime"
+	"strconv"
+	"time"
 
+	"github.com/evan-buss/openbooks/irc"
 	"github.com/gobuffalo/packr/v2"
 	"github.com/gorilla/websocket"
 )
@@ -11,6 +17,20 @@ import (
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
+}
+
+// Start instantiates the web server and opens the browser
+func Start(irc *irc.Conn, port int) {
+	// This should ideally be called from the server
+	connect(irc)
+
+	box := packr.New("ReactApp", "./app/build")
+
+	http.Handle("/", http.FileServer(box))
+	http.HandleFunc("/ws", wsEndpoint)
+
+	openbrowser("http://localhost:" + strconv.Itoa(port) + "/")
+	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(port), nil))
 }
 
 // wsEndpoint handles upgrading and connecting websocket requests
@@ -74,11 +94,28 @@ func asyncResponse(conn *websocket.Conn, message Request) {
 	}
 }
 
-func main() {
-	box := packr.New("ReactApp", "./web/build")
+func connect(irc *irc.Conn) {
+	irc.Connect("irc.irchighway.net")
+	// Wait before joining the ebooks room
+	// Often you recieve a private message from the server
+	time.Sleep(time.Second * 2)
+	irc.JoinChannel("ebooks")
+}
 
-	http.Handle("/", http.FileServer(box))
-	http.HandleFunc("/ws", wsEndpoint)
+func openbrowser(url string) {
+	var err error
 
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	switch runtime.GOOS {
+	case "linux":
+		err = exec.Command("xdg-open", url).Start()
+	case "windows":
+		err = exec.Command("rundll32", "url.dll,FileProtocolHandler", url).Start()
+	case "darwin":
+		err = exec.Command("open", url).Start()
+	default:
+		err = fmt.Errorf("unsupported platform")
+	}
+	if err != nil {
+		log.Fatal(err)
+	}
 }
