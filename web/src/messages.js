@@ -1,11 +1,20 @@
 const MessageTypes = {
-  ERROR: -1,
-  CONNECT: 0,
-  SEARCH: 1,
-  DOWNLOAD: 2
+  ERROR: 0,
+  CONNECT: 1,
+  SEARCH: 2,
+  DOWNLOAD: 3,
+  SERVERS: 4
 }
 
+// Message router returns new state objects
+// It handles delegation of data to the App component
+// depending on the JSON message type
 function messageRouter(message) {
+  if (message.error) {
+    console.error("ERROR: ABORTING")
+    return
+  }
+
   switch (message.type) {
     case MessageTypes.ERROR:
       console.log("ERROR")
@@ -13,15 +22,25 @@ function messageRouter(message) {
       break
     case MessageTypes.CONNECT:
       console.log("CONNECT")
-      console.log(message.status)
-      break
+      return { connectionState: message.status }
     case MessageTypes.SEARCH:
-      console.log("SEARCH")
+      return { items: message.books, loading: false }
+    case MessageTypes.DOWNLOAD:
+      saveByteArray(message.name, message.file)
+      return { loading: false };
+    case MessageTypes.SERVERS:
       break
     default:
-      console.log("INVALID")
+      console.error("Unkown Server Message")
   }
 }
+
+function saveByteArray(fileName, byte) {
+  var link = document.createElement('a');
+  link.href = `data:application/octet-stream;base64,${byte}`
+  link.download = fileName;
+  link.click();
+};
 
 export {
   MessageTypes,

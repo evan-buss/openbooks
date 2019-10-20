@@ -3,13 +3,25 @@
 }
 
 h1 {
-  margin-top: 60px;
   font-size: 2rem;
 }
 
-#table {
+table {
+  border-collapse: separate;
+  border-spacing: 0;
+  background-color: white;
+  font-size: 20px;
+  width: 100%;
+  text-align: center;
   border-radius: 16px;
-  /* padding-top: 5px;
-  padding-bottom: 5px; */
-  background-color: whitesmoke;
+}
+
+th {
+  color: black;
+  padding: 15px;
+  border-bottom: 1px solid #f2f5f7;
+}
+
+tr > td {
+  padding: 10px;
 }
