@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"log"
 	"os/user"
 	"strings"
 
@@ -32,10 +31,13 @@ func main() {
 
 	// Username can be supplied via ARGS or found from the user's system name
 	if strings.Contains(userName, " ") {
-		log.Fatal("Please supply a single word username. Cannot use " + userName)
+		// If there is a space split it and take the first word
+		userName = strings.Split(userName, " ")[0]
 	}
+	// log.Fatal("Please supply a single word username. Cannot use " + userName)
 
 	irc := irc.New(userName, userName)
+	irc.Logging = logIRC
 
 	if cliMode {
 		cli.Start(irc)

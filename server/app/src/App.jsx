@@ -2,7 +2,7 @@ import React from 'react';
 import './App.css';
 import Search from './components/Search';
 import Table from './components/Table';
-import { messageRouter } from "./messages"
+import { messageRouter, MessageTypes } from "./messages"
 import GridLoader from 'react-spinners/GridLoader'
 
 class App extends React.Component {
@@ -11,7 +11,7 @@ class App extends React.Component {
 
     // NOTE: Set state via function if you need the existing state to calculate new state
     this.state = {
-      username: "",
+      status: "",
       searchString: "",
       items: [],
       servers: [],
@@ -24,8 +24,18 @@ class App extends React.Component {
     this.setState({ loading: bool })
   }
 
+  handleConnect = () => {
+    if (this.state.socket) {
+      this.state.socket.send(JSON.stringify({
+        type: MessageTypes.CONNECT,
+        payload: {
+          name: "evan_bot"
+        }
+      }))
+    }
+  }
+
   componentDidMount() {
-    // Connect websocket here
     let socket = new WebSocket("ws://127.0.0.1:8080/ws");
 
     socket.onopen = () => {
@@ -52,14 +62,14 @@ class App extends React.Component {
     socket.onmessage = message => {
       this.setState(messageRouter(JSON.parse(message.data)))
     }
-
   }
 
   render() {
     return (
       <div className="app-body">
         <div id="app-container">
-          <p>{this.state.username}</p>
+          <button onClick={this.handleConnect}>Connect</button>
+          <h1>{this.state.status}</h1>
           <Search socket={this.state.socket}
             loadingCallback={this.loadingCallback} />
           {this.state.loading ? (

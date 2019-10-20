@@ -4,6 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"io/ioutil"
+	"log"
+
+	"github.com/evan-buss/openbooks/core"
 )
 
 // ERROR represents some sort of error outside of specific handlers
@@ -16,6 +19,7 @@ const (
 	SEARCH
 	DOWNLOAD
 	SERVERS
+	WAIT
 )
 
 // Request is the generic wrapper for all received messages.
@@ -46,6 +50,7 @@ type ConnectionRequest struct {
 type ConnectionResponse struct {
 	MessageType int    `json:"type"`
 	Status      string `json:"status"`
+	Wait        int    `json:"wait"`
 }
 
 // SearchRequest represents a user's search for a book
@@ -96,14 +101,22 @@ type DownloadResponse struct {
 	File        []byte `json:"file"`
 }
 
-// Handler defines a generic message handler. All handlers should implement
+// WaitResponse is sent when the server has successfully recieved a
+// message but nothing is available yet. Such as searching, we don't
+// have an exact timeframe for when it will complete.
+type WaitResponse struct {
+	MessageType int    `json:"type"`
+	Status      string `json:"status"`
+}
+
+// RequestHandler defines a generic message handler. All handlers should implement
 // the handle() method. The method either returns a JSON string or an error
-type Handler interface {
+type RequestHandler interface {
 	handle() (interface{}, error)
 }
 
 func messageRouter(message Request) (interface{}, error) {
-	var obj Handler
+	var obj RequestHandler
 
 	switch message.RequestType {
 	case CONNECT:
@@ -127,43 +140,37 @@ func messageRouter(message Request) (interface{}, error) {
 
 // Sends a connection response object or a connection error object
 func (c ConnectionRequest) handle() (interface{}, error) {
+	log.Println("CONNECTION REQUEST. STARTING IRC")
+	core.Join(IRC)
+	go core.ReadDaemon(IRC, Handler{})
+
 	return ConnectionResponse{
 		MessageType: CONNECT,
 		Status:      "Connected",
+		Wait:        30,
 	}, nil
 }
 
+// Search for the given book.
 func (s SearchRequest) handle() (interface{}, error) {
-	return SearchResponse{
-		MessageType: SEARCH,
-		Books: []BookDetail{
-			BookDetail{
-				Server: "Oatmeal",
-				Author: "Kurt Vonnegut",
-				Title:  "Slaughterhouse Five",
-				Format: "PDF",
-				Size:   "220.0KB",
-				Full:   "THIS IS THE FULL DOWNLOAD STRING",
-			},
-			BookDetail{
-				Server: "Pondering42",
-				Author: "Kurt Vonnegut",
-				Title:  "Slaughterhouse Five",
-				Format: "rar",
-				Size:   "245.9KB",
-				Full:   "THIS IS THE FULL DOWNLOAD STRING",
-			},
-		},
+	log.Println("Recieved SearchRequest for: " + s.Query)
+	core.SearchBook(IRC, s.Query)
+	// Need to return something, but this is asynchronous...
+	return WaitResponse{
+		MessageType: WAIT,
+		Status:      "Search request sent to IRC server",
 	}, nil
 }
 
 func (s ServersRequest) handle() (interface{}, error) {
+	log.Println("Received ServersRequest")
 	return ServersResponse{
 		MessageType: SERVERS,
 	}, nil
 }
 
 func (d DownloadRequest) handle() (interface{}, error) {
+	log.Println("Recieved DownloadRequest")
 	fileName := "blood.mobi"
 	// fileName := "cover.jpg"
 	dat, err := ioutil.ReadFile(fileName)

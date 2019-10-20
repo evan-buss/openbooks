@@ -5,8 +5,28 @@ import (
 	"os"
 	"strings"
 
-	"github.com/evan-buss/openbooks/dcc"
 	"github.com/evan-buss/openbooks/irc"
+)
+
+// EventHandler handles and responds to different IRC events
+// Both the CLI and Server versions implement this interface
+type EventHandler interface {
+	DownloadSearchResults(text string)
+	DownloadBookFile(text string)
+	NoResults()
+	BadServer()
+	SearchAccepted()
+	MatchesFound(num string)
+}
+
+// Possible messages that are sent by the server. We respond accordingly
+const (
+	sendMessage       = "DCC SEND"
+	noticeMessage     = "NOTICE"
+	noResults         = "Sorry"
+	serverUnavailable = "try another server"
+	searchAccepted    = "has been accepted"
+	numMatches        = "matches"
 )
 
 // ReadDaemon is designed to be launched as a goroutine. Listens for
@@ -15,7 +35,7 @@ import (
 //  			 statusC - boolean channel returns true when the download has finished
 // 				 stateC - boolean channel recieves messages from user menu
 // 									(true = book download, false = search results download)
-func ReadDaemon(irc *irc.Conn, statusC chan<- bool, stateC <-chan bool) {
+func ReadDaemon(irc *irc.Conn, handler EventHandler) {
 
 	var f *os.File
 	var err error
@@ -30,10 +50,6 @@ func ReadDaemon(irc *irc.Conn, statusC chan<- bool, stateC <-chan bool) {
 		}
 	}
 
-	isBook := false
-
-	doneChan := make(chan bool)
-
 	for {
 		text := irc.GetMessage()
 
@@ -41,37 +57,28 @@ func ReadDaemon(irc *irc.Conn, statusC chan<- bool, stateC <-chan bool) {
 			f.WriteString(text)
 		}
 
-		select {
-		// Get state of app from menu. isBook = download book; !isBook = search
-		case isBook = <-stateC:
-		default:
-		}
-
-		if strings.Contains(text, "DCC SEND") {
+		if strings.Contains(text, sendMessage) {
 			// Respond to Direct Client-to-Client downloads
-			go dcc.NewDownload(text, isBook, doneChan)
-		} else if strings.Contains(text, "NOTICE") {
-			// Notice is a message sent directly to the user
-			if strings.Contains(text, "Sorry") {
-				// There were no results
-				fmt.Println("No results returned for that search...")
-				statusC <- !isBook
-			} else if strings.Contains(text, "try another server") {
-				fmt.Println("That server is not available. Try again...")
-				statusC <- !isBook
-			} else if strings.Contains(text, "has been accepted") {
-				fmt.Println("Search has been accepted. Please wait.")
-			} else if strings.Contains(text, "matches") {
+
+			if strings.Contains(text, "_results_for") {
+				fmt.Println("SEARCH RESULTS")
+				go handler.DownloadSearchResults(text)
+			} else {
+				fmt.Println("BOOK DOWNLOAD")
+				go handler.DownloadBookFile(text)
+			}
+		} else if strings.Contains(text, noticeMessage) {
+			if strings.Contains(text, noResults) {
+				handler.NoResults()
+			} else if strings.Contains(text, serverUnavailable) {
+				handler.BadServer()
+			} else if strings.Contains(text, searchAccepted) {
+				handler.SearchAccepted()
+			} else if strings.Contains(text, numMatches) {
 				start := strings.LastIndex(text, "returned") + 9
 				end := strings.LastIndex(text, "matches") - 1
-				fmt.Println("Your search returned " + text[start:end] + " matches.")
+				handler.MatchesFound(text[start:end])
 			}
-		}
-		select {
-		case <-doneChan:
-			// Send message when finished downloading
-			statusC <- true
-		default:
 		}
 	}
 }

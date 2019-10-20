@@ -5,6 +5,8 @@ import (
 	"testing"
 )
 
+// TestSearchParse makes sure that data is properly extracted from the DCC
+// response string
 func TestSearchParse(t *testing.T) {
 	tables := []struct {
 		search   string
