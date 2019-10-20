@@ -12,6 +12,7 @@ type Conn struct {
 	channel  string
 	username string
 	realname string
+	Logging  bool
 }
 
 // New creates a new IRC connection to the server using the supplied username and realname
