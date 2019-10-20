@@ -2,18 +2,26 @@ import React from 'react';
 import './App.css';
 import Search from './components/Search';
 import Table from './components/Table';
-import { MessageTypes, messageRouter } from "./messages"
+import { messageRouter } from "./messages"
+import GridLoader from 'react-spinners/GridLoader'
 
 class App extends React.Component {
-
   constructor(props) {
     super(props);
 
+    // NOTE: Set state via function if you need the existing state to calculate new state
     this.state = {
-      name: "",
+      username: "",
+      searchString: "",
       items: [],
-      socket: null
+      servers: [],
+      socket: null,
+      loading: false
     }
+  }
+
+  loadingCallback = (bool) => {
+    this.setState({ loading: bool })
   }
 
   componentDidMount() {
@@ -42,31 +50,28 @@ class App extends React.Component {
     };
 
     socket.onmessage = message => {
-      messageRouter(JSON.parse(message.data))
-      // this.setState({
-      //   name: message.data
-      // })
+      this.setState(messageRouter(JSON.parse(message.data)))
     }
 
-  }
-
-  sendMessage = () => {
-    this.state.socket.send(JSON.stringify({
-      "type": MessageTypes.CONNECT,
-      "payload": {
-        "value": 20
-      }
-    }))
   }
 
   render() {
     return (
       <div className="app-body">
-        <button onClick={this.sendMessage}>Test Button</button>
         <div id="app-container">
-          <p>{this.state.name}</p>
-          <Search />
-          <Table />
+          <p>{this.state.username}</p>
+          <Search socket={this.state.socket}
+            loadingCallback={this.loadingCallback} />
+          {this.state.loading ? (
+            <GridLoader
+              color="#09d3ac"
+              css={
+                `size: 100;`
+              }
+            />
+          ) : (
+              <Table items={this.state.items} socket={this.state.socket} />
+            )}
         </div>
       </div>
     );

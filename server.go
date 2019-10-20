@@ -39,12 +39,12 @@ func wsEndpoint(w http.ResponseWriter, req *http.Request) {
 // the response handler if there is not an error parsing the json
 func reader(conn *websocket.Conn) {
 	for {
-		var message Message
+		var message Request
 		err := conn.ReadJSON(&message)
 		if err != nil {
 			log.Println(err)
 			conn.WriteJSON(ErrorMessage{
-				Error:   -1,
+				Error:   ERROR,
 				Details: err.Error(),
 			})
 			return
@@ -56,13 +56,13 @@ func reader(conn *websocket.Conn) {
 
 // asyncResponse handles the given JSON messages via the messageRouter
 // The messageRouter writes the results
-func asyncResponse(conn *websocket.Conn, message Message) {
+func asyncResponse(conn *websocket.Conn, message Request) {
 	result, err := messageRouter(message)
 	if err != nil {
 		log.Println(err)
 		// Write the error to the socket if bad
 		conn.WriteJSON(ErrorMessage{
-			Error:   message.MessageType,
+			Error:   message.RequestType,
 			Details: err.Error(),
 		})
 		return
