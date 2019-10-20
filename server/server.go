@@ -1,13 +1,9 @@
 package server
 
 import (
-	"fmt"
 	"log"
 	"net/http"
-	"os/exec"
-	"runtime"
 	"strconv"
-	"time"
 
 	"github.com/evan-buss/openbooks/irc"
 	"github.com/gobuffalo/packr/v2"
@@ -19,22 +15,28 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
+// IRC is a global variable to access the current IRC connection
+var IRC *irc.Conn
+
+// WS is a global variable to access the current Websocket Connection
+var WS *websocket.Conn
+
 // Start instantiates the web server and opens the browser
 func Start(irc *irc.Conn, port int) {
-	// This should ideally be called from the server
-	connect(irc)
+	IRC = irc
 
+	// Access the bundled assets
 	box := packr.New("ReactApp", "./app/build")
 
 	http.Handle("/", http.FileServer(box))
-	http.HandleFunc("/ws", wsEndpoint)
+	http.HandleFunc("/ws", wsHandler)
 
 	openbrowser("http://localhost:" + strconv.Itoa(port) + "/")
 	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(port), nil))
 }
 
-// wsEndpoint handles upgrading and connecting websocket requests
-func wsEndpoint(w http.ResponseWriter, req *http.Request) {
+// wsHandler handles upgrading and connecting websocket requests
+func wsHandler(w http.ResponseWriter, req *http.Request) {
 	upgrader.CheckOrigin = func(req *http.Request) bool {
 		return true
 	}
@@ -45,6 +47,8 @@ func wsEndpoint(w http.ResponseWriter, req *http.Request) {
 		log.Println(err)
 		return
 	}
+
+	WS = ws
 
 	log.Println("Client connected: " + req.RemoteAddr)
 	ws.SetCloseHandler(func(code int, text string) error {
@@ -91,31 +95,5 @@ func asyncResponse(conn *websocket.Conn, message Request) {
 	if err := conn.WriteJSON(result); err != nil {
 		log.Println(err)
 		return
-	}
-}
-
-func connect(irc *irc.Conn) {
-	irc.Connect("irc.irchighway.net")
-	// Wait before joining the ebooks room
-	// Often you recieve a private message from the server
-	time.Sleep(time.Second * 2)
-	irc.JoinChannel("ebooks")
-}
-
-func openbrowser(url string) {
-	var err error
-
-	switch runtime.GOOS {
-	case "linux":
-		err = exec.Command("xdg-open", url).Start()
-	case "windows":
-		err = exec.Command("rundll32", "url.dll,FileProtocolHandler", url).Start()
-	case "darwin":
-		err = exec.Command("open", url).Start()
-	default:
-		err = fmt.Errorf("unsupported platform")
-	}
-	if err != nil {
-		log.Fatal(err)
 	}
 }

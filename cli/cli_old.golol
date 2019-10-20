@@ -1,0 +1,77 @@
+package cli
+
+import (
+	"bufio"
+	"fmt"
+	"os"
+	"strconv"
+	"strings"
+	"time"
+
+	"github.com/evan-buss/openbooks/core"
+	"github.com/evan-buss/openbooks/irc"
+)
+
+// Start instantiates the OpenBooks CLI interface
+func Start(irc *irc.Conn) {
+	fmt.Println("=======================================")
+	fmt.Println("          Welcome to OpenBooks         ")
+	fmt.Println("=======================================")
+
+	core.Join(irc)
+
+	statusC := make(chan bool)
+	stateC := make(chan bool)
+
+	go core.ReadDaemon(irc, Handler{}, statusC, stateC)
+
+	fmt.Println("Connection established...")
+
+	for i := 30; i > 0; i-- {
+		fmt.Print("\rServer rules mandate a " + strconv.Itoa(i) + " second wait period   ")
+		time.Sleep(time.Second)
+	}
+
+	fmt.Print("\r")
+
+	reader := bufio.NewReader(os.Stdin)
+	isDownloading := false // Hide menu when download in progress
+
+	for {
+		select {
+		case <-statusC:
+			isDownloading = false
+		default:
+		}
+
+		if !isDownloading {
+			fmt.Print("\ns)search\ng)et book\nd)one\n~> ")
+
+			input, _ := reader.ReadString('\n')
+			input = strings.TrimRight(input, "\n")
+			input = strings.TrimRight(input, "\r")
+
+			switch input {
+			case "s":
+				fmt.Print("@search ")
+				message, _ := reader.ReadString('\n')
+				core.SearchBook(irc, message)
+				stateC <- false
+				isDownloading = true
+			case "g":
+				fmt.Print("Download String: ")
+				message, _ := reader.ReadString('\n')
+				core.DownloadBook(irc, message)
+				stateC <- true
+				isDownloading = true
+			case "d":
+				fmt.Println("disonnecting")
+				irc.Disconnect()
+				os.Exit(0)
+			default:
+				fmt.Println("Invalid Selection")
+			}
+		}
+		time.Sleep(time.Millisecond * 100)
+	}
+}

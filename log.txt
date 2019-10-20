@@ -1,0 +1,178 @@
+
+==================== NEW LOG ======================
+:zathras.mo.us.irchighway.net NOTICE Auth :*** Looking up your hostname...
+:zathras.mo.us.irchighway.net NOTICE Auth :*** Found your hostname (24.115.62.32.res-cmts.sm.ptd.net) -- cached
+:zathras.mo.us.irchighway.net NOTICE Auth :Welcome to irchighway!
+:zathras.mo.us.irchighway.net 001 bob28 :Welcome to the irchighway IRC Network bob28!bob28@24.115.62.32.res-cmts.sm.ptd.net
+:zathras.mo.us.irchighway.net 002 bob28 :Your host is zathras.mo.us.irchighway.net, running version InspIRCd-2.0
+:zathras.mo.us.irchighway.net 003 bob28 :This server was created 18:59:26 Dec 24 2017
+:zathras.mo.us.irchighway.net 004 bob28 zathras.mo.us.irchighway.net InspIRCd-2.0 BIRSWghiorswx ACDIMNORSTabcdehiklmnopqrstvz Iabdehkloqv
+:zathras.mo.us.irchighway.net 005 bob28 AWAYLEN=200 CALLERID=g CASEMAPPING=rfc1459 CHANMODES=Ibe,k,dl,ACDMNORSTcimnprstz CHANNELLEN=64 CHANTYPES=# CHARSET=ascii ELIST=MU ESILENCE EXCEPTS=e EXTBAN=,ACNORSTUcjmz FNC INVEX=I :are supported by this server
+:zathras.mo.us.irchighway.net 005 bob28 KICKLEN=255 MAP MAXBANS=60 MAXCHANNELS=30 MAXPARA=32 MAXTARGETS=20 MODES=20 NAMESX NETWORK=irchighway NICKLEN=31 PREFIX=(qaohv)~&@%+ SILENCE=32 SSL=209.126.101.164:6697 :are supported by this server
+:zathras.mo.us.irchighway.net 005 bob28 STARTTLS STATUSMSG=~&@%+ TOPICLEN=307 UHNAMES USERIP VBANLIST WALLCHOPS WALLVOICES :are supported by this server
+:zathras.mo.us.irchighway.net 042 bob28 536ABIE55 :your unique ID
+:zathras.mo.us.irchighway.net 375 bob28 :zathras.mo.us.irchighway.net message of the day
+:zathras.mo.us.irchighway.net 372 bob28 :- -
+:zathras.mo.us.irchighway.net 372 bob28 :- no bottler clients please
+:zathras.mo.us.irchighway.net 372 bob28 :- -
+:zathras.mo.us.irchighway.net 372 bob28 :- ::::: zathras.mo.us.irchighway.net ::::::::::::::::::::::::::::::::::
+:zathras.mo.us.irchighway.net 372 bob28 :- 
+:zathras.mo.us.irchighway.net 372 bob28 :- Welcome to the IRCHighWay network!
+:zathras.mo.us.irchighway.net 372 bob28 :- 
+:zathras.mo.us.irchighway.net 372 bob28 :- You are connected to zathras.mo.us.irchighway.net
+:zathras.mo.us.irchighway.net 372 bob28 :- Location        : St. Louis, MO, US
+:zathras.mo.us.irchighway.net 372 bob28 :- Ports           : 6660-6669, 7000
+:zathras.mo.us.irchighway.net 372 bob28 :- SSL-Ports       : 6697, 9999
+:zathras.mo.us.irchighway.net 372 bob28 :- 
+:zathras.mo.us.irchighway.net 372 bob28 :- ::::: Operators ::::::::::::::::::::::::::::::::::::::::::::::::::
+:zathras.mo.us.irchighway.net 372 bob28 :- 
+:zathras.mo.us.irchighway.net 372 bob28 :- Server Admin    : MH  <MH [at] irchighway.net>
+:zathras.mo.us.irchighway.net 372 bob28 :- 
+:zathras.mo.us.irchighway.net 372 bob28 :- 
+:zathras.mo.us.irchighway.net 372 bob28 :- ::::: Disclaimer :::::::::::::::::::::::::::::::::::::::::::::::::
+:zathras.mo.us.irchighway.net 372 bob28 :- 
+:zathras.mo.us.irchighway.net 372 bob28 :- The use of our server and network is a privilege, not a right.
+:zathras.mo.us.irchighway.net 372 bob28 :- 
+:zathras.mo.us.irchighway.net 372 bob28 :- We reserve the right to deny access to anyone for any reason. If 
+:zathras.mo.us.irchighway.net 372 bob28 :- you were akilled and you think that it was unjustified, feel free 
+:zathras.mo.us.irchighway.net 372 bob28 :- to appeal to banned [at] irchighway.net.
+:zathras.mo.us.irchighway.net 372 bob28 :- 
+:zathras.mo.us.irchighway.net 372 bob28 :- The network operators take no responsibility whatsoever for the 
+:zathras.mo.us.irchighway.net 372 bob28 :- opinions expressed or the actions taken by users.
+:zathras.mo.us.irchighway.net 372 bob28 :- 
+:zathras.mo.us.irchighway.net 372 bob28 :- By connecting to this network you agree to have your host scanned 
+:zathras.mo.us.irchighway.net 372 bob28 :- for open proxies.
+:zathras.mo.us.irchighway.net 372 bob28 :- 
+:zathras.mo.us.irchighway.net 372 bob28 :- ::::: Rules ::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:zathras.mo.us.irchighway.net 372 bob28 :- 
+:zathras.mo.us.irchighway.net 372 bob28 :- This server is part of the the IRCHighWay network. Continued use 
+:zathras.mo.us.irchighway.net 372 bob28 :- of our services implies that you agree with our Acceptable Use 
+:zathras.mo.us.irchighway.net 372 bob28 :- Policy (AUP) which can be found at the following URL: 
+:zathras.mo.us.irchighway.net 372 bob28 :- 
+:zathras.mo.us.irchighway.net 372 bob28 :- http://www.irchighway.net/rules
+:zathras.mo.us.irchighway.net 372 bob28 :- 
+:zathras.mo.us.irchighway.net 372 bob28 :- Bottler, Irc-Ork, XDCC-Catcher and similar clients are not 
+:zathras.mo.us.irchighway.net 372 bob28 :- permitted.
+:zathras.mo.us.irchighway.net 372 bob28 :- Non-abusive bots are tolerated, *NOT* supported.
+:zathras.mo.us.irchighway.net 372 bob28 :- We do not and never will hire IRCops. So don't bother asking.
+:zathras.mo.us.irchighway.net 372 bob28 :- 
+:zathras.mo.us.irchighway.net 372 bob28 :- We will not tolerate:
+:zathras.mo.us.irchighway.net 372 bob28 :-  * Flooding
+:zathras.mo.us.irchighway.net 372 bob28 :-  * Spamming 
+:zathras.mo.us.irchighway.net 372 bob28 :-  * Channel or nick takeovers
+:zathras.mo.us.irchighway.net 372 bob28 :-  * Distribution of malware (trojans etc.)
+:zathras.mo.us.irchighway.net 372 bob28 :- 
+:zathras.mo.us.irchighway.net 372 bob28 :- For more information about the IRCHighWay network, such as our 
+:zathras.mo.us.irchighway.net 372 bob28 :- Privacy Policy, you are welcome to visit our website at 
+:zathras.mo.us.irchighway.net 372 bob28 :- http://www.irchighway.net/ :)
+:zathras.mo.us.irchighway.net 372 bob28 :- 
+:zathras.mo.us.irchighway.net 372 bob28 :- ::::: Official Channels ::::::::::::::::::::::::::::::::::::::::::
+:zathras.mo.us.irchighway.net 372 bob28 :- 
+:zathras.mo.us.irchighway.net 372 bob28 :- You might want to have a look at these channels:
+:zathras.mo.us.irchighway.net 372 bob28 :-      #irchighway   - for general chat
+:zathras.mo.us.irchighway.net 372 bob28 :-      #help         - official help channel
+:zathras.mo.us.irchighway.net 372 bob28 :-      #abuse        - to report abusive users
+:zathras.mo.us.irchighway.net 372 bob28 :-      #vhost        - for virtual host registration
+:zathras.mo.us.irchighway.net 372 bob28 :- 
+:zathras.mo.us.irchighway.net 372 bob28 :- Enjoy your stay!
+:zathras.mo.us.irchighway.net 376 bob28 :End of message of the day.
+:zathras.mo.us.irchighway.net 251 bob28 :There are 1048 users and 773 invisible on 21 servers
+:zathras.mo.us.irchighway.net 252 bob28 27 :operator(s) online
+:zathras.mo.us.irchighway.net 254 bob28 832 :channels formed
+:zathras.mo.us.irchighway.net 255 bob28 :I have 177 clients and 2 servers
+:zathras.mo.us.irchighway.net 265 bob28 :Current Local Users: 177  Max: 276
+:zathras.mo.us.irchighway.net 266 bob28 :Current Global Users: 1821  Max: 2312
+:zathras.mo.us.irchighway.net 396 bob28 ihw-tiqg42.sm.ptd.net :is now your displayed host
+:bob28!bob28@ihw-tiqg42.sm.ptd.net MODE bob28 +x
+:bob28!bob28@ihw-tiqg42.sm.ptd.net JOIN :#ebooks
+:zathras.mo.us.irchighway.net 332 bob28 #ebooks :NO TEXTBOOKS here - New books: !trainpacks or @Oatmeal -  @Search @searchook @find - FAQ at http://ebooks.byethost6.com  -Send new books to afaiktoit
+:zathras.mo.us.irchighway.net 333 bob28 #ebooks QuietSilence!QuietSilenc@ihw-ds2ipr.res.rr.com 1569761403
+:zathras.mo.us.irchighway.net 353 bob28 = #ebooks :Haywire @QuietSilence jn +Xon krogulew @SearchOok warl0ck laruldan &Asterisk_ olleman hotty Kaladin310 Jollygood joltman aluxendr jurisPru99 @LawdyServer elibelle billybob Kr4nklys Riocount freaky cyb3r5yd boomboxnation syrinx mbrat sherrrlock +kr10141 ripley iter Pepin MatrixBot oblomov rick_s raindrip Stick @Sophist-UK Help_PCS Herb_Tarlek cog47 LKawierna zkxs_h9k madcat jjabrams +dny238 pkluivert ReimuHakurei Wulvaine caveat_emptor stux +Pondering42 
+:zathras.mo.us.irchighway.net 353 bob28 = #ebooks :kavarein Mercanon clearmoon247 Hak @Rashkae Megamannen g0nzo Mercury lig4ever SilentAnime beepboopbop artholomew esqueletodedino Vice75 xlx @guy pkirc hechatuser1144 Erehr boku9 Koolaid53 ashbreeze +ps2 holoirc1 Kami Pro_ Gul2|2 Sokar TunaSushi randombook swampfeotus Paladin flak JustOneMore Anuday007 phreadstoner Rando309345987324 sphenxes blackweapon2 adampalli yvrbs Limerick dsafwe3gaew BlazinTy yancy mnemonicj nr pkwaffle @tiggers63 day_ danmak limon 
+:zathras.mo.us.irchighway.net 353 bob28 = #ebooks :crayon archieE neilk Malinux ersten Cynsye w1cked_truth Dave_Lister +jjaomni trayson3 pastagod94 Jean-Claude +DV8 URb8Yn7Q3zCtDcXaGPcu MrJimEd0754 asmodaeus tio2 jack Mitch sbobsqpants Reader idyl aeroraptor bookbote60fb65ac9 JenkinsAbu beccas302 carolineooo evilhawk Omega jpttoo notstux Trainpacks Little_Love KaffiMoon p2posu maasai podkilla Horla benb napoleonkk Arezit j0hny5 Indrik yaynon sewbefrog Narasinha ebooksplzthx bewretni nicklist WeThePeoples 
+:zathras.mo.us.irchighway.net 353 bob28 = #ebooks :JohnWayne g0del @DukeLupus duckeggsalad Less Danj Mitch_ JBFan KwasiT Venusenvy P-Rhodan m0nkeyC Cambumbo bkdlite Tominator kljhf &Mysterytrain Leckyman nachos DisplayError grgssecond sleepyb Hanii lysanderslair ultraanon Deslok Verbat SA90 BuffaloS0ldier Retto wibblewobble bruna alm123 Hueylene +dragnbreaker k Olivier__ potzschky taq_r phrygyda Manabi CocoaTea t3rror spiderguard Marienne DekaPink ShadowFox bookguy123 hi-man AzNsTyLe mcgoph12114 MrD 
+:zathras.mo.us.irchighway.net 353 bob28 = #ebooks :adamgilli thedesk G7b9 D3xt3r khalel mokokan axc97c_ebf muggles LobsterFifi briflix Cock_Goblin neonnitwit thelounge99 lotta AJR FluffBall steve_ Paladinz Gaof youngones82 cpomplin1111111111111111114 manjaro-kde5 fffrrrttt Crpf3s8 Costadom Peter_Pan altenchi DrGrinch +sniffn valibum MB4PL diego Hildy Glael sscout tunz tshepp spyhermi1 JustSomeDude warhol_ fietanre zonum rattenfaenger someonerandom b1scu1t lee7 +bsk shoogz tomc Virgil_is_king GALAHAL 
+:zathras.mo.us.irchighway.net 353 bob28 = #ebooks :viiiiiiincent Punzel Lester_Snickel Digamoo Drakkar Dexyel filifjonka dgill HOT3 Euphonium Orithisaz @Ook dredhammer_ fooguo zibbazang tinear mike kimchisard book12 MonkeyFace hirad ginman tubs2426 Quagmire dw berill alazyguy HumanGeek stravz @Search Socra seshata kuene spunkymunky Jeroen jonat stru Atiya itimpi Lusephur dazed768 raven1997 az3 @fruitloops TrainPacksLover1 evanb peterpan Timid yo +Rhys books5623_ Skwim bytor90 podipaiyyan thedonald1 
+:zathras.mo.us.irchighway.net 353 bob28 = #ebooks :firecap81 severedxties mushiki Mr_Caboose xweasel-org reverie__ Heisenberg luke Midnight_Candles ADVR sadfljkhgdfa mokaz Telmo redoct reader_nfdf slayersutts71 kMc ultra9kariya [MYCROFT] rumpcho MrGoodkat mibby Joejje Jimbeazy Optiprism cecilc filostyktos coltaine976 MarkyBoy456 booksrcool Worn_Socks +phoomphy imateapot mlh333 Striges Buddha841a GeekGurl gregbert panda555 aethyrion yuitimothy elalala__ +shytot bcbear86 superkuh android77095 Astra 
+:zathras.mo.us.irchighway.net 353 bob28 = #ebooks :lyndanna badbit tooe Munashe shadow236 Zippity Ragnarok kebabdealer pie juanitobanana tecterz Mrskelltin__ malevolence pjc jasmg jloarm egettr hdanniel hundreAd mel_t nnnnn doom_ster bardamuu West Hoerie mlathe peter santetjan axc97c_ebl redlob NoUMe Arkeus Dvard r34 Frogstarr_ Fred nerdgasam snakeeeeer leotaku Fwrty_ groggy mm00rs12 candyonetoo laaaaaalaaaaa TrevorHope rahimnathwani ppooiiuuyy Speedy9me Blue-Jaypeg Bonilla bleaky wasddsaw onetwoonetwo 
+:zathras.mo.us.irchighway.net 353 bob28 = #ebooks :neptunewaves w80 solanthan ronnnn theparadox StarFox dalignefeg krys felco Jolfe eskydc Redeye2 GRAMPUS luciusquintus ti55ot shmirgel atua s3gfaul7 ShelleFran Sausages W4TCHD0GE ymera FameWolf _alex notjohnny567 AndroUser trashfire lydgate huff3r qball_222 ddog dsfs heynow bob28 riclo40 @Oatmeal EvStarr BarGuy PlexServer__ majkus goltman r0ck0 Jefren Phill Adept SpankleBankle elect swaggigirl yuzzel stalled RichRos ascension scajanus Artificial ashlyn 
+:zathras.mo.us.irchighway.net 353 bob28 = #ebooks :peregreen Batzi devoncolt44 yffuhjnyrfgevsdrtjyuik Bomfunk phantomaudio10 Trib natsubi Shaitan DMM1 shaharrssd +MusicWench larrydmister horcity Tides GennyWren phusion frank1776f zhondo spraynard Blayde fickleberry treonomapatatra _ashbreeze_ way2late asad ChronicProcrastinator cikgo DopedAngel shiva Laby bookreader panorain snow Ryllharu Buddha841 daw johnuss lolmac lepik Funkwheat mydudewhat ashfire Erisian KannOx Klora Frost999 pp35 bg77fdsu 
+:zathras.mo.us.irchighway.net 353 bob28 = #ebooks :jamestedfs carvellane soygirl Bombadil setsas1 blank Jambo fenris1961 rajufarhan2414 t64 trup bubbs GrayWolf ExEsPi bolthorn slugafishanoodlea &afaiktoit Mega_ Testststst wpauli CountessTess75 mrtekn0 mundus2018 callie1 jasonstorm cubex erj3i2h8s td00 AssDragon buhug spqr666 gravity iamoblvn brenop__ Sngltskr WarmW rebel4477 Friss vanyelgh grr Tore AndroUser2 wallstop7 dekekja Lord_of_Life nemmy esoul JaK bceg interrobong Sursar Bookwyrm xoppaw 
+:zathras.mo.us.irchighway.net 353 bob28 = #ebooks :gnormsaging oiusjaljsf AnarchoiD CarltonBanks JB JoeBloogs nanoflower Witt Rotech bellaboo TheSpoonIsACake formula894 oreja55 BourzRoss &DajaBot kinopu Foguete Andy rails +Bookimp 
+:zathras.mo.us.irchighway.net 366 bob28 #ebooks :End of /NAMES list.
+:ChanServ!services@services.irchighway.net NOTICE bob28 :[#ebooks] [#ebooks] Welcome to #ebooks. Read the channel topic for current information!
+:Andy!Andy@ihw-k39t7c.cable.rogers.com PRIVMSG #ebooks :@search shelby mahurin
+:yffuhjnyrfgevsdrtjyuik!yffuhjnyrf@ihw-ec5glm.dip0.t-ipconnect.de PRIVMSG #ebooks :!Horla Brian McClellan - [Powder Mage] - Hope's End (epub).epub
+:Astra!Astra@ihw-uq4.od9.102.82.IP PRIVMSG #ebooks :!Ook Practice Makes Perfect -Complete French All-In-one (2013) - Annie Heminway.epub
+:FluffBall!FluffBall@ihw-uul.n8i.173.72.IP PRIVMSG #ebooks :!Astra Robert Ludlum - [Covert-ONE 01] - The Hades Factor - Gayle Lynds (retail) (epub).epub
+:adamgilli!adamgilli@ihw-7rnl2d.dip0.t-ipconnect.de QUIT :Ping timeout: 121 seconds
+:StarFox!StarFox@ihw-r281kt.ma.charter.com PRIVMSG #ebooks :!DukeLupus Deepak Chopra - Buddha (mobi).zip ::INFO:: 365.54KB
+:DV8!HandyAndy@ihw-39fkft.ip-164-132-173.eu PRIVMSG #ebooks :09,0614,06± 08,06Type:09,06 @DV8 08,06For My List Of:09,06 185,635 08,06Files 14,06± 08,06Slots:09,06 4/4 14,06± 08,06Queued:09,06 0 14,06± 08,06Speed:09,06 0cps 14,06± 08,06Next: 09,06NOW 14,06± 08,06Served:09,06 150,415 14,06± 08,06List: 09,06Oct 18th 14,06± 08,06Search: 09,06ON 14,06± 08,06Mode: 09,06Servers Priority 14,06±
+:DV8!HandyAndy@ihw-39fkft.ip-164-132-173.eu PRIVMSG #ebooks :SLOTS 4 4 NOW 0 999 0 185635 352515274824 1 1571404800 980549 OmenServe v2.73
+:JoeBloogs!joebloogs@ihw-rg1dtv.ftth.web.africa PRIVMSG #ebooks :!DukeLupus Andrew Rose - The Woman Before Wallis- Prince Edward, the Parisian Courtesan, and the Perfect Murder.epub
+:Pro_!Pro@ihw-606q76.33cb.4sil.01c0.2601.IP QUIT :Ping timeout: 121 seconds
+:Sophist-UK!Sophist@ihw-kgeab4.rev.vodafone.pt PRIVMSG #ebooks :!dragnbreaker Freeman, R Austin - Dr Thorndyke 01 - The Red Thumb Mark (v5.0).epub
+:Andy!Andy@ihw-k39t7c.cable.rogers.com PRIVMSG #ebooks :!Horla Shelby Mahurin - Serpent & Dove (epub).epub
+:adampalli!adamgilli@ihw-as5.0dn.19.134.IP QUIT :Ping timeout: 121 seconds
+:nanoflower!shawn@ihw-e34.rac.197.209.IP PRIVMSG #ebooks :!Pondering42 C J Cherryh - [Fortress 01] - Fortress in the Eye of Time (retail) (epub).rar ::INFO:: 1.09MB
+:Sophist-UK!Sophist@ihw-kgeab4.rev.vodafone.pt PRIVMSG #ebooks :!dragnbreaker Freeman, R Austin - Dr Thorndyke 02 - The Eye Of Osiris (v5.0).epub
+:book12!IceChat9@ihw-6vf.67k.205.91.IP PRIVMSG #ebooks :@search Stephane Kirkland
+:natsubi!natsubi@ihw-59jmcg.abo.bbox.fr PRIVMSG #ebooks :!Horla Pierre Rosanvallon - Notre histoire intellectuelle et politique (1968-2018) [FR].epub
+:Sophist-UK!Sophist@ihw-kgeab4.rev.vodafone.pt PRIVMSG #ebooks :!dragnbreaker Freeman, R Austin - Dr Thorndyke 03 - The Mystery Of 31 New Inn (v5.0).epub
+:Oatmeal!Oatmeal@ihw-4q5hcb.dyn.suddenlink.net NOTICE bob28 :04,00 Request Accepted 14,0012,00 File: 04,00Andy Weir - The Martian (epub).rar12,00 14,0012,00 Queue Position: 04,0010 14,0012,00 Allowed: 04,001 12,00of04,00 30 14,00 12,00Min CPS: 04,0050 14,0004,00 OmenServe v2.73 14,00
+:Skwim!Skwim@ihw-c5m.abo.92.172.IP QUIT :Quit: Leaving
+:Astra!Astra@ihw-uq4.od9.102.82.IP PRIVMSG #ebooks :!Ook Practice Makes Perfect -French Sentence Builder (2009) - Eliane Kurbegov.pdf
+:Oatmeal!Oatmeal@ihw-4q5hcb.dyn.suddenlink.net NOTICE bob28 :DCC Send Andy Weir - The Martian (epub).rar (173.80.26.71)
+:Oatmeal!Oatmeal@ihw-4q5hcb.dyn.suddenlink.net PRIVMSG bob28 :DCC SEND "Andy Weir - The Martian (epub).rar" 2907707975 3089 352447
+:harrypott!harrypott@ihw-b8p86j.ca.comcast.net JOIN :#ebooks
+:Salim_Anis!Salim_Anis@ihw-fl5.ddn.107.41.IP JOIN :#ebooks
+:yffuhjnyrfgevsdrtjyuik!yffuhjnyrf@ihw-ec5glm.dip0.t-ipconnect.de PRIVMSG #ebooks :!Oatmeal Brian McClellan - [Powder Mage] - The Girl of Hrusch Avenue (epub).rar 
+:baglady!bag_lady@ihw-449.c7v.239.173.IP JOIN :#ebooks
+:FluffBall!FluffBall@ihw-uul.n8i.173.72.IP PRIVMSG #ebooks :!Astra Robert Ludlum - [Covert-ONE 02] - The Cassandra Compact - Philip Shelby (retail) (epub).epub
+:ifans5000!cliff@ihw-b93.c82.238.89.IP JOIN :#ebooks
+:Search!Search@ihw-4q5hcb.dyn.suddenlink.net NOTICE bob28 :1,9<<SearchBot>> Your search for "12,9hugh howey shift1,9" has been accepted. Searching...
+:Search!Search@ihw-4q5hcb.dyn.suddenlink.net NOTICE bob28 :1,9<<SearchBot>> Your search for "12,9hugh howey shift1,9" returned 57 matches. Sending results to you as12 SearchBot_results_for_ hugh howey shift.txt.zip1,9. Search took 1.38 seconds.
+:badbit!badbit@ihw-m8qujn.dyn.telnor.net PRIVMSG #ebooks :!phoomphy Ehrman, Bart - Lost Scriptures; Books that did not make it into the New Testament (2003).pdf     ::INFO:: 1.95 MiB
+:Astra!Astra@ihw-uq4.od9.102.82.IP PRIVMSG #ebooks :!Ook Practice Makes Perfect -French Vocabulary (2008) - Eliane Kurbegov.pdf
+:LawdyServer!LawdyServe@ihw-vr8.lfa.253.85.IP PRIVMSG #ebooks :07,0008,00 01,00Type:07,00 @LawdyServer 01,00For My List Of:07,00 748,080 01,00Files 08,00 01,00Slots:07,00 0/5 08,00 01,00Queued:07,00 6 08,00 01,00Speed:07,00 1,458,771cps 08,00 01,00Next: 07,000m 08,00 01,00Served:07,00 92,350 08,00 01,00List: 07,00Oct 17th 08,00 01,00Search: 07,00ON 08,00 01,00Mode: 07,00Normal 08,00
+:Search!Search@ihw-4q5hcb.dyn.suddenlink.net NOTICE bob28 :DCC Send SearchBot_results_for_ hugh howey shift.txt.zip (173.80.26.71)
+:Search!Search@ihw-4q5hcb.dyn.suddenlink.net PRIVMSG bob28 :DCC SEND SearchBot_results_for__hugh_howey_shift.txt.zip 2907707975 4487 1140
+:dw!dw@ihw-f8q678.plus.com PRIVMSG #ebooks :!Oatmeal Liz Flanagan - Legends of the Sky (Retail) (epub).rar 
+:yffuhjnyrfgevsdrtjyuik!yffuhjnyrf@ihw-ec5glm.dip0.t-ipconnect.de PRIVMSG #ebooks :!Oatmeal Brian McClellan - [Powder Mage] - Hope's End (epub).rar
+:LawdyServer!LawdyServe@ihw-vr8.lfa.253.85.IP PRIVMSG #ebooks :SLOTS 5 0 0m 6 999 1458771 748080 2219100020736 0 1571263483 679915 OmenServe v2.73
+:Sophist-UK!Sophist@ihw-kgeab4.rev.vodafone.pt PRIVMSG #ebooks :!dragnbreaker Freeman, R Austin - Dr Thorndyke 01 - The Red Thumb Mark (v5.0).epub
+:FluffBall!FluffBall@ihw-uul.n8i.173.72.IP PRIVMSG #ebooks :!Astra Robert Ludlum - [Covert-ONE 03] - The Paris Option - Gayle Lynds (retail) (epub).epub
+:carolineooo!carolineooo@ihw-fl752s.optusnet.com.au QUIT :Ping timeout: 121 seconds
+:Oatmeal!Oatmeal@ihw-4q5hcb.dyn.suddenlink.net NOTICE bob28 :04,00 Request Accepted 14,0012,00 File: 04,00Hugh Howey - [Silo 06] - First Shift- Legacy (epub).rar12,00 14,0012,00 Queue Position: 04,005 14,0012,00 Allowed: 04,001 12,00of04,00 30 14,00 12,00Min CPS: 04,0050 14,0004,00 OmenServe v2.73 14,00
+:Salim_Anis!Salim_Anis@ihw-fl5.ddn.107.41.IP PRIVMSG #ebooks :@search Harry Potter And The Sorcerer's Stone
+:nanoflower!shawn@ihw-e34.rac.197.209.IP PRIVMSG #ebooks :!Pondering42 Robert B Parker - [Jesse Stone 15] - Debt to Pay - Reed Farrel Coleman (retail) (epub).rar ::INFO:: 684.47KB
+:FluffBall!FluffBall@ihw-uul.n8i.173.72.IP PRIVMSG #ebooks :!Astra Robert Ludlum - [Covert-ONE 04] - The Altman Code - Gayle Lynds (retail) (epub).epub
+:yffuhjnyrfgevsdrtjyuik!yffuhjnyrf@ihw-ec5glm.dip0.t-ipconnect.de PRIVMSG #ebooks :!Oatmeal Brian McClellan - [Powder Mage] - Forsworn (epub).rar 
+:dw!dw@ihw-f8q678.plus.com PRIVMSG #ebooks :!Oatmeal Lois Murphy - Soon (Retail) (epub).rar 
+:Salim_Anis!Salim_Anis@ihw-fl5.ddn.107.41.IP PRIVMSG #ebooks :@search Harry Potter And The Sorcerer's Stone
+:Sausages!Sausages@ihw-ublena.range109-150.btcentralplus.com PRIVMSG #ebooks :!Pondering42 Ursula K. le Guin  - The Books of Earthsea- The Complete Illustrated Edition - (epub).rar
+:Sophist-UK!Sophist@ihw-kgeab4.rev.vodafone.pt PRIVMSG #ebooks :!dragnbreaker Freeman, R Austin - Dr Thorndyke 04 - A Silent Witness (v5.0).epub
+:natsubi!natsubi@ihw-59jmcg.abo.bbox.fr PART #ebooks
+:Astra!Astra@ihw-uq4.od9.102.82.IP PRIVMSG #ebooks :!Ook Reading French in the Arts and Sciences (1987) - Edward Stack.pdf
+:Salim_Anis!Salim_Anis@ihw-fl5.ddn.107.41.IP PRIVMSG #ebooks :@search Harry Potter And The Sorcerer's Stone
+:Search!Search@ihw-4q5hcb.dyn.suddenlink.net KICK #ebooks Salim_Anis :"Search Flood"
+:D3xt3r!madqueenda@ihw-dg0.p6p.235.105.IP PRIVMSG #ebooks :@search The Chase Thoma
+:yffuhjnyrfgevsdrtjyuik!yffuhjnyrf@ihw-ec5glm.dip0.t-ipconnect.de PRIVMSG #ebooks :!Oatmeal Brian McClellan - [Powder Mage] - Murder at the Kinnen Hotel (epub).rar
+:Xon!Xon@ihw-orq9qf.iinet.net.au PRIVMSG #ebooks :5[BWI] 10Type @Xon-new10 to get the list of 4,40510 files (610.21 GB). 10Updated on 610-21-2019 02:37:28 10Total Sent(channel): 1,488,315 10(61971.87 GB10)
+:Oatmeal!Oatmeal@ihw-4q5hcb.dyn.suddenlink.net NOTICE bob28 :DCC Send Hugh Howey - [Silo 06] - First Shift- Legacy (epub).rar (173.80.26.71)
+:Oatmeal!Oatmeal@ihw-4q5hcb.dyn.suddenlink.net PRIVMSG bob28 :DCC SEND "Hugh Howey - [Silo 06] - First Shift- Legacy (epub).rar" 2907707975 3041 243754
+:Sophist-UK!Sophist@ihw-kgeab4.rev.vodafone.pt PRIVMSG #ebooks :!dragnbreaker Freeman, R Austin - Dr Thorndyke 05 - The Great Portrait Mystery (v5.0).epub
+:yffuhjnyrfgevsdrtjyuik!yffuhjnyrf@ihw-ec5glm.dip0.t-ipconnect.de PRIVMSG #ebooks :!Oatmeal Brian McClellan - [Powder Mage] - The Face in the Window (v5.0) (epub).rar 
+:DukeLupus!DukeLupus@this.is.the.end PRIVMSG #ebooks :07,1514,15� 10,15Type:07,15 @DukeLupus 10,15For My List Of:07,15 653,444 10,15Files 14,15� 10,15Slots:07,15 12/12 14,15� 10,15Queued:07,15 0 14,15� 10,15Speed:07,15 0cps 14,15� 10,15Next: 07,15NOW 14,15� 10,15Served:07,15 207,935 14,15� 10,15List: 07,15Oct 12th 14,15� 10,15Search: 07,15ON 14,15� 10,15Mode: 07,15Normal 14,15�
+:D3xt3r!madqueenda@ihw-dg0.p6p.235.105.IP PRIVMSG #ebooks :@search The Chase Jesse J. Thoma
+:timshaw!timshaw@ihw-7nuffd.range86-184.btcentralplus.com JOIN :#ebooks
+:nanoflower!shawn@ihw-e34.rac.197.209.IP PRIVMSG #ebooks :!DV8 Alex Carreras - [The Boys of Banana Court 01-03] - Exposed; Forbidden; Deception [MM] (epub).rar ::INFO:: 525.7KB
+:DukeLupus!DukeLupus@this.is.the.end PRIVMSG #ebooks :SLOTS 12 12 NOW 0 999 0 653444 767716558013 0 1570910220 692766 OmenServe v2.73
+:FluffBall!FluffBall@ihw-uul.n8i.173.72.IP PRIVMSG #ebooks :!Astra Robert Ludlum - [Covert-ONE 05] - The Lazarus Vendetta - Patrick Larkin (retail) (epub).epub
+:Sausages!Sausages@ihw-ublena.range109-150.btcentralplus.com PRIVMSG #ebooks :!phoomphy Le Guin, Ursula - Earthsea Cycle, Bk 1 - A Wizard of Earthsea (1968).epub
+:Dvard!Dvard@ihw-2ju.m5h.178.79.IP PRIVMSG #ebooks :!Oatmeal Trish Morey - [One Night With Consequences 46] - Consequence of the Greek's Revenge (retail)(epub).rar
+:D3xt3r!madqueenda@ihw-dg0.p6p.235.105.IP PRIVMSG #ebooks :!Oatmeal Jesse J Thoma - The Chase [Bold Strokes FF] (retail) (epub).rar  ::INFO:: 354.8KB
+:bsk!abc@ihw-4v0.lnc.92.200.IP PRIVMSG #ebooks :04,0014,00 12,00Type:04,00 @bsk 12,00For My List Of:04,00 621,644 12,00Files 14,00 12,00Slots:04,00 6/6 14,00 12,00Queued:04,00 0 14,00 12,00Speed:04,00 0cps 14,00 12,00Next: 04,00NOW 14,00 12,00Served:04,00 6,762 14,00 12,00List: 04,00Oct 6th 14,00 12,00Search: 04,00ON 14,00 12,00Mode: 04,00Normal 14,00
+:timshaw!timshaw@ihw-7nuffd.range86-184.btcentralplus.com PRIVMSG #ebooks :@search 19th country
+:bsk!abc@ihw-4v0.lnc.92.200.IP PRIVMSG #ebooks :SLOTS 6 6 NOW 0 999 0 621644 493715495273 0 1570424155 247264 OmenServe v2.73
+:ifans5000!cliff@ihw-b93.c82.238.89.IP PRIVMSG #ebooks :@search Peter James - The secrets of Cold Hill

@@ -52,7 +52,7 @@ func (i *Conn) SendMessage(message string) {
 }
 
 // JoinChannel joins the channel given by channel
-// Note that you must explicitly join a channel before you can start sending messages
+// NOTE: You must explicitly join a channel before you can start sending messages
 func (i *Conn) JoinChannel(channel string) {
 	i.channel = channel
 	_, err := i.irc.Write([]byte("JOIN #" + channel + "\r\n"))

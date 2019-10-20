@@ -3,7 +3,8 @@ const MessageTypes = {
   CONNECT: 1,
   SEARCH: 2,
   DOWNLOAD: 3,
-  SERVERS: 4
+  SERVERS: 4,
+  WAIT: 5
 }
 
 // Message router returns new state objects
@@ -20,8 +21,15 @@ function messageRouter(message) {
       console.log("ERROR")
       console.log(message.details)
       break
+    case MessageTypes.WAIT:
+      console.log("WAIT")
+      return { status: message.status }
     case MessageTypes.CONNECT:
       console.log("CONNECT")
+      // Need to show a loading indicator for 30 seconds before the user can search anything
+      // setInterval(() => {
+        // 
+      // }, message.wait)
       return { connectionState: message.status }
     case MessageTypes.SEARCH:
       return { items: message.books, loading: false }
@@ -35,6 +43,7 @@ function messageRouter(message) {
   }
 }
 
+// saveByteArray creates a link and download popup for the returned file
 function saveByteArray(fileName, byte) {
   var link = document.createElement('a');
   link.href = `data:application/octet-stream;base64,${byte}`
