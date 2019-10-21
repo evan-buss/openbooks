@@ -5,12 +5,14 @@ import './Table.css';
 import { MessageTypes } from '../messages';
 
 class Table extends React.Component {
-  downloadCallback = (dlString) => {
+  downloadCallback = (downloadString) => {
+    console.log("DOWNLOAD CALLBACK")
+    console.log(downloadString);
     if (this.props.socket != null) {
       this.props.socket.send(JSON.stringify({
         type: MessageTypes.DOWNLOAD,
         payload: {
-          book: dlString
+          book: downloadString
         }
       }))
     }

@@ -3,7 +3,6 @@ package server
 import (
 	"encoding/json"
 	"errors"
-	"io/ioutil"
 	"log"
 
 	"github.com/evan-buss/openbooks/core"
@@ -20,6 +19,7 @@ const (
 	DOWNLOAD
 	SERVERS
 	WAIT
+	IRCERROR
 )
 
 // Request is the generic wrapper for all received messages.
@@ -75,8 +75,8 @@ type BookDetail struct {
 	Server string `json:"server"`
 	Author string `json:"author"`
 	Title  string `json:"title"`
-	Size   string `json:"size"`
 	Format string `json:"format"`
+	Size   string `json:"size"`
 	Full   string `json:"full"`
 }
 
@@ -91,7 +91,7 @@ type ServersResponse struct {
 
 // DownloadRequest is a request for a specific book string
 type DownloadRequest struct {
-	Book string `json:"download"`
+	Book string `json:"book"`
 }
 
 // DownloadResponse is a response with a book file
@@ -101,10 +101,17 @@ type DownloadResponse struct {
 	File        []byte `json:"file"`
 }
 
-// WaitResponse is sent when the server has successfully recieved a
+// WaitResponse is sent when the server has successfully received a
 // message but nothing is available yet. Such as searching, we don't
-// have an exact timeframe for when it will complete.
+// have an exact time frame for when it will complete.
 type WaitResponse struct {
+	MessageType int    `json:"type"`
+	Status      string `json:"status"`
+}
+
+// IrcErrorResponse is sent when some internal IRC response means
+// that the request cannot be completed as planned
+type IrcErrorResponse struct {
 	MessageType int    `json:"type"`
 	Status      string `json:"status"`
 }
@@ -128,7 +135,7 @@ func messageRouter(message Request) (interface{}, error) {
 	case SERVERS:
 		obj = new(ServersRequest)
 	default:
-		return nil, errors.New("Invalid message type")
+		return nil, errors.New("invalid message type")
 	}
 
 	err := json.Unmarshal(message.Payload, &obj)
@@ -153,15 +160,16 @@ func (c ConnectionRequest) handle() (interface{}, error) {
 
 // Search for the given book.
 func (s SearchRequest) handle() (interface{}, error) {
-	log.Println("Recieved SearchRequest for: " + s.Query)
+	log.Println("Received SearchRequest for: " + s.Query)
 	core.SearchBook(IRC, s.Query)
 	// Need to return something, but this is asynchronous...
 	return WaitResponse{
 		MessageType: WAIT,
-		Status:      "Search request sent to IRC server",
+		Status:      "Search request sent",
 	}, nil
 }
 
+// TODO: Implement server parsing functionality
 func (s ServersRequest) handle() (interface{}, error) {
 	log.Println("Received ServersRequest")
 	return ServersResponse{
@@ -170,18 +178,13 @@ func (s ServersRequest) handle() (interface{}, error) {
 }
 
 func (d DownloadRequest) handle() (interface{}, error) {
-	log.Println("Recieved DownloadRequest")
-	fileName := "blood.mobi"
-	// fileName := "cover.jpg"
-	dat, err := ioutil.ReadFile(fileName)
-	if err != nil {
-		return nil, err
-	}
+	log.Println("Received DownloadRequest")
+	log.Println(d.Book)
+	core.DownloadBook(IRC, d.Book)
 
 	// fmt.Println(d)
-	return DownloadResponse{
-		MessageType: DOWNLOAD,
-		Name:        fileName,
-		File:        dat,
+	return WaitResponse{
+		MessageType: WAIT,
+		Status:      "Download request received",
 	}, nil
 }

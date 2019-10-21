@@ -32,15 +32,22 @@ type Conn struct {
 }
 
 // NewDownload parses the string and downloads the file
-func NewDownload(text string, isBook bool, doneChan chan<- string) {
+func NewDownload(text string, isBook bool, isCli bool, doneChan chan<- string) {
+	pathSep := string(os.PathSeparator)
 	dcc := Conn{}
 
-	downloadDir, err := os.UserHomeDir()
-	if err != nil {
-		log.Fatal("Erorr: ", err)
-	}
+	var err error
+	downloadDir := os.TempDir() + pathSep
 
-	downloadDir += string(os.PathSeparator) + "Downloads" + string(os.PathSeparator)
+	if isCli {
+		downloadDir, err = os.UserHomeDir()
+
+		if err != nil {
+			log.Fatal("Erorr: ", err)
+		}
+
+		downloadDir += pathSep + "Downloads" + pathSep
+	}
 
 	// Parse DCC string for important bits
 	if isBook {
