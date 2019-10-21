@@ -1,10 +1,10 @@
 package server
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
-	"os"
-	"strings"
+	"path/filepath"
 
 	"github.com/evan-buss/openbooks/dcc"
 )
@@ -20,6 +20,7 @@ func (h Handler) DownloadSearchResults(text string) {
 	go dcc.NewDownload(text, false, false, searchDownloaded)
 	// Retrieve the file's location
 	fileLocation := <-searchDownloaded
+	fmt.Println(fileLocation)
 	WS.WriteJSON(SearchResponse{
 		MessageType: SEARCH,
 		Books:       ParseSearchFile(fileLocation),
@@ -34,8 +35,10 @@ func (h Handler) DownloadBookFile(text string) {
 	// Wait until the download finishes and get the location
 	fileLocation := <-bookDownloaded
 
-	idx := strings.LastIndex(fileLocation, string(os.PathSeparator))
-	fileName := fileLocation[idx+1:]
+	fileName := filepath.Base(fileLocation)
+
+	fmt.Println(fileLocation)
+	fmt.Println(fileName)
 
 	data, err := ioutil.ReadFile(fileLocation)
 	if err != nil {

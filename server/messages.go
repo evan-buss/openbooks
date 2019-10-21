@@ -148,8 +148,13 @@ func messageRouter(message Request) (interface{}, error) {
 // Sends a connection response object or a connection error object
 func (c ConnectionRequest) handle() (interface{}, error) {
 	log.Println("CONNECTION REQUEST. STARTING IRC")
-	core.Join(IRC)
-	go core.ReadDaemon(IRC, Handler{})
+	if !IRC.IsConnected() {
+		log.Println("not connected so connecting :)")
+		core.Join(IRC)
+		go core.ReadDaemon(IRC, Handler{})
+	} else {
+		log.Println("already connected brother")
+	}
 
 	return ConnectionResponse{
 		MessageType: CONNECT,

@@ -3,11 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "antd": "^3.24.2",
     "prop-types": "^15.7.2",
     "react": "^16.10.2",
     "react-dom": "^16.10.2",
-    "react-scripts": "3.2.0",
-    "react-spinners": "^0.6.1"
+    "react-highlight-words": "^0.16.0",
+    "react-scripts": "3.2.0"
   },
   "scripts": {
     "start": "react-scripts start",

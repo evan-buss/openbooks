@@ -1,11 +1,24 @@
-✔ Files should be saved to the user's download directory @done(19-05-17 17:58)
+WEB UI
+- Improve styling
+  - UI library or styled components or style modules
+
+- Add a more robust table. Enable filtering, searching, and sorting
+
+- Make sure we delete the files in the temp directory after sending them
+  - Might save the search results file and allow users to select a previous search
+
+- Use popup notifications instead of a simple h1 at the top
 
 
-Bugs:
-  ☐ Intial search results zip file doesn't use the given name but the entire line
-    The user never sees this because the inner file is extracted and the zip deleted
-    Probably has something to do with regex but I cannot figure it out. In tests
-      it is working fine...
-  ✔ Download Book Files are surrounded with double quotes ("") @done(19-05-17 17:58)
-    The regular expression had to be updated to account for strings that may or
-      may not contain quotes.
+- I am leaning towards using ANT design. It seems to have a bunch of well-made components with minimal need of customization
+
+- Clean up and review core go code. I am sure there are some things that can be simplified and refactored.
+
+- Refactor a bunch of code both in this project and my others that use manual path processing
+ - the "path" library is AMAZING
+
+- Write some tests for things simple things like utilities
+
+- Things no longer have to live inside the go path!! I put projects anywhere wowee
+
+- Fix the connection so that everytime the browser refreshes you shouldn't have to wait and the IRC connection should not be restarted.
