@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"encoding/binary"
 	"errors"
-	"fmt"
 	"log"
 	"net"
 	"os"
@@ -33,21 +32,22 @@ type Conn struct {
 }
 
 // NewDownload parses the string and downloads the file
-func NewDownload(text string, isBook bool, doneChan chan<- bool) {
+func NewDownload(text string, isBook bool, isCli bool, doneChan chan<- string) {
+	pathSep := string(os.PathSeparator)
 	dcc := Conn{}
 
-	downloadDir, err := os.UserHomeDir()
-	if err != nil {
-		log.Fatal("Erorr: ", err)
+	var err error
+	downloadDir := os.TempDir() + pathSep
+
+	if isCli {
+		downloadDir, err = os.UserHomeDir()
+
+		if err != nil {
+			log.Fatal("Erorr: ", err)
+		}
+
+		downloadDir += pathSep + "Downloads" + pathSep
 	}
-
-	downloadDir += string(os.PathSeparator) + "Downloads" + string(os.PathSeparator)
-	defer fmt.Println("File has been downloaded to " + downloadDir)
-
-	defer func() {
-		// Send message to continue listening when finished downloading
-		doneChan <- true
-	}()
 
 	// Parse DCC string for important bits
 	if isBook {
@@ -93,10 +93,10 @@ func NewDownload(text string, isBook bool, doneChan chan<- bool) {
 		zipfile.Write(bytes[:n])
 		received += n
 	}
-
+	fName := zipfile.Name()
 	// For each file in the archive, save the data to a new file (extract)
 	err = archiver.Walk(downloadDir+dcc.filename, func(f archiver.File) error {
-		fName := f.Name()
+		fName = f.Name()
 
 		file, err := os.Create(downloadDir + fName)
 		defer file.Close()
@@ -120,6 +120,9 @@ func NewDownload(text string, isBook bool, doneChan chan<- bool) {
 		}
 		return nil
 	})
+
+	// Pass the channel the location of the newly download file
+	doneChan <- downloadDir + fName
 }
 
 // ParseSearch parses the important data from a search results string

@@ -1,0 +1,22 @@
+#item {
+  color: black;
+  padding: 15px;
+}
+
+td > button {
+  cursor: pointer;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  color: #09d3ac;
+  font-weight: bold;
+  border: 2px solid #F4F5F8;
+  background-color: white;
+}
+
+td > button:hover {
+  color: white;
+  background-color: #09d3ac;
+  border: 2px solid #F4F5F8;
+  border: 2px solid hsl(0, 0%, 90%);
+}
