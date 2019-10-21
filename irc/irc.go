@@ -78,3 +78,7 @@ func (i *Conn) GetMessage() (text string) {
 	}
 	return
 }
+
+func (i *Conn) IsConnected() bool {
+	return i.irc != nil
+}

@@ -1,10 +1,13 @@
 import React from 'react';
 import './App.css';
-import Countdown from './components/Countdown'
 import Search from './components/Search';
-import Table from './components/Table';
+import BookTable from './components/BookTable';
 import {messageRouter, MessageTypes} from "./messages"
-import GridLoader from 'react-spinners/GridLoader'
+import {Divider, Layout, notification, Result, Typography} from 'antd';
+// import fakeItems from "./dummyData";
+
+const {Header, Sider, Content} = Layout;
+const {Title} = Typography;
 
 class App extends React.Component {
     constructor(props) {
@@ -24,30 +27,55 @@ class App extends React.Component {
 
     loadingCallback = (bool) => {
         this.setState({loading: bool})
-    }
+    };
 
     componentDidMount() {
+        // this.setState({
+        //     items: fakeItems.books
+        // });
+
         let socket = new WebSocket("ws://127.0.0.1:8080/ws");
 
         socket.onopen = () => {
             console.log("Successfully Connected");
             this.setState({
                 socket: socket
-            })
+            });
 
             this.state.socket.send(JSON.stringify({
                 type: MessageTypes.CONNECT,
                 payload: {
                     name: "bot"
                 }
-            }))
+            }));
+
+            notification.open({
+                key: "timer",
+                type: "info",
+                message: "Please wait before searching",
+                description: this.state.timeLeft + " seconds",
+                duration: 0
+            });
 
             let downloadTimer = setInterval(() => {
                 this.setState((state, props) => {
                     return {timeLeft: state.timeLeft -= 1}
-                })
+                });
+                notification.open({
+                    key: "timer",
+                    type: "info",
+                    message: "Please wait before searching",
+                    description: this.state.timeLeft + " seconds",
+                    duration: 0
+                });
                 if (this.state.timeLeft <= 0) {
                     clearInterval(downloadTimer);
+                    notification.open({
+                        key: "timer",
+                        type: "success",
+                        message: "Server is ready",
+                        description: "Enter a search query to get started"
+                    });
                 }
             }, 1000);
         };
@@ -71,23 +99,30 @@ class App extends React.Component {
         }
     }
 
+    style = {textAlign: "center", color: "white", marginBottom: 0, marginTop: "5px"};
+    sidebarStyle = {marginTop: "15px"};
+
     render() {
         return (
-            <div className="app-body">
-                <div id="app-container">
-                    <h1>{this.state.status}</h1>
-                    <Search socket={this.state.socket}
-                            loadingCallback={this.loadingCallback}/>
-                    {this.state.timeLeft > 0 && <Countdown time={this.state.timeLeft}/>}
-                    {this.state.loading && <GridLoader
-                        color="#09d3ac"
-                        css={
-                            `size: 100;`
-                        }
-                    />}
-                    {this.state.items.length > 0 && <Table items={this.state.items} socket={this.state.socket} />}
-                </div>
-            </div>
+            <Layout className="full-size">
+                <Sider>
+                    <Title level={3} style={{...this.style, ...this.sidebarStyle}}>Recent Searches</Title>
+                    <Divider/>
+                </Sider>
+                <Layout>
+                    <Header><Title style={this.style}>OpenBooks</Title></Header>
+                    <Content>
+                        <div className="app-body">
+                            <Search socket={this.state.socket} timeLeft={this.state.timeLeft}
+                                    loadingCallback={this.loadingCallback}/>
+                            {this.state.loading && <Result title={"Loading your results. Please wait."}/>}
+                            {this.state.items.length > 0 && !this.state.loading ?
+                                (<BookTable items={this.state.items} socket={this.state.socket}/>) : (
+                                    <Result title={"Search a book to get started"}/>)}
+                        </div>
+                    </Content>
+                </Layout>
+            </Layout>
         );
     }
 }

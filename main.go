@@ -37,7 +37,6 @@ func main() {
 		// If there is a space split it and take the first word
 		userName = strings.Split(userName, " ")[0]
 	}
-	// log.Fatal("Please supply a single word username. Cannot use " + userName)
 
 	irc := irc.New(userName, userName)
 	irc.Logging = logIRC

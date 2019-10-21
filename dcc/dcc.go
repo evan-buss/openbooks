@@ -22,7 +22,7 @@ import (
 //  - The actual book file itself. You get the download string from the search
 //    results, enter it, then the book is sent to you.
 
-// Conn rerepesents a DCC connection to a server
+// Conn represents a DCC connection to a server
 type Conn struct {
 	dcc      net.Conn
 	filename string
@@ -31,6 +31,7 @@ type Conn struct {
 	size     int
 }
 
+// TODO: Refactor this function. It is kind of messy as is. I should use the filepath utilities instead of manually handling paths
 // NewDownload parses the string and downloads the file
 func NewDownload(text string, isBook bool, isCli bool, doneChan chan<- string) {
 	pathSep := string(os.PathSeparator)
@@ -43,7 +44,7 @@ func NewDownload(text string, isBook bool, isCli bool, doneChan chan<- string) {
 		downloadDir, err = os.UserHomeDir()
 
 		if err != nil {
-			log.Fatal("Erorr: ", err)
+			log.Fatal("Home Dir Error: ", err)
 		}
 
 		downloadDir += pathSep + "Downloads" + pathSep
@@ -98,7 +99,7 @@ func NewDownload(text string, isBook bool, isCli bool, doneChan chan<- string) {
 	err = archiver.Walk(downloadDir+dcc.filename, func(f archiver.File) error {
 		fName = f.Name()
 
-		file, err := os.Create(downloadDir + fName)
+		file, err := os.OpenFile(downloadDir+fName, os.O_CREATE|os.O_RDWR, 0644)
 		defer file.Close()
 		if err != nil {
 			log.Println("Error Creating TXT: " + fName)
@@ -131,7 +132,7 @@ func (dcc *Conn) ParseSearch(text string) error {
 	groups := re.FindStringSubmatch(text)
 
 	if len(groups) == 0 {
-		return errors.New("No match in string")
+		return errors.New("no match in string")
 	}
 
 	dcc.filename = groups[1]
@@ -147,7 +148,7 @@ func (dcc *Conn) ParseBook(text string) error {
 	groups := re.FindStringSubmatch(text)
 
 	if len(groups) == 0 {
-		return errors.New("No match in string")
+		return errors.New("no match in string")
 	}
 
 	dcc.filename = groups[1]

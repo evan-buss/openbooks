@@ -10,6 +10,8 @@
 *.so
 *.dylib
 
+openbooks.exe
+
 # Test binary, built with `go test -c`
 *.test
 
