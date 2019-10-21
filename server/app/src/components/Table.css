@@ -1,0 +1,27 @@
+#container {
+  width: 100%;
+}
+
+h1 {
+  font-size: 2rem;
+}
+
+table {
+  border-collapse: separate;
+  border-spacing: 0;
+  background-color: white;
+  font-size: 20px;
+  width: 100%;
+  text-align: center;
+  border-radius: 16px;
+}
+
+th {
+  color: black;
+  padding: 15px;
+  border-bottom: 1px solid #f2f5f7;
+}
+
+tr > td {
+  padding: 10px;
+}

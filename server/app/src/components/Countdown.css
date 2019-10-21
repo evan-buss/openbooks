@@ -1,0 +1,15 @@
+#countdown {
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+    align-items: center;
+}
+
+h2, h1{
+    margin: 0;
+    padding: 0
+}
+
+h1 {
+    color: hsl(0, 0%, 60%);
+}
