@@ -2,8 +2,11 @@ package main
 
 import (
 	"flag"
+	"os"
+	"os/signal"
 	"os/user"
 	"strings"
+	"syscall"
 
 	"github.com/evan-buss/openbooks/cli"
 	"github.com/evan-buss/openbooks/irc"
@@ -39,10 +42,17 @@ func main() {
 	irc := irc.New(userName, userName)
 	irc.Logging = logIRC
 
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-c
+		irc.Disconnect()
+		os.Exit(1)
+	}()
+
 	if cliMode {
 		cli.Start(irc)
-		return
+	} else {
+		server.Start(irc, webPort)
 	}
-
-	server.Start(irc, webPort)
 }

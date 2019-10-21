@@ -13,7 +13,7 @@ type Handler struct{}
 // and sends user a response message
 func (h Handler) DownloadSearchResults(text string) {
 	fileLocation := make(chan string)
-	go dcc.NewDownload(text, false, fileLocation)
+	go dcc.NewDownload(text, false, true, fileLocation)
 	fmt.Println(<-fileLocation)
 	// We wait until the search results have been downloaed then show the
 	// menu once again
@@ -24,7 +24,7 @@ func (h Handler) DownloadSearchResults(text string) {
 // a user a response message
 func (h Handler) DownloadBookFile(text string) {
 	fileLocation := make(chan string)
-	go dcc.NewDownload(text, true, fileLocation)
+	go dcc.NewDownload(text, true, true, fileLocation)
 	fmt.Println(<-fileLocation)
 	// We wait until the book has been downloaded then show the menu once again
 	userInput(Reader, IRC)

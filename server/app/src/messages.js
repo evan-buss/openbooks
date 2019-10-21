@@ -4,7 +4,8 @@ const MessageTypes = {
   SEARCH: 2,
   DOWNLOAD: 3,
   SERVERS: 4,
-  WAIT: 5
+  WAIT: 5,
+  IRCERROR: 6
 }
 
 // Message router returns new state objects
@@ -21,21 +22,31 @@ function messageRouter(message) {
       console.log("ERROR")
       console.log(message.details)
       break
+    case MessageTypes.IRCERROR:
+      console.log("IRC ERROR")
+      return {
+        loading: false,
+        status: message.status
+      }
     case MessageTypes.WAIT:
       console.log("WAIT")
       return { status: message.status }
     case MessageTypes.CONNECT:
       console.log("CONNECT")
-      // Need to show a loading indicator for 30 seconds before the user can search anything
-      // setInterval(() => {
-        // 
-      // }, message.wait)
       return { connectionState: message.status }
     case MessageTypes.SEARCH:
-      return { items: message.books, loading: false }
+      return {
+        items: message.books.sort((a, b) => {
+          if (a.server < b.server) { return -1 }
+          if (a.server > b.server) { return 1 }
+          return 0
+        }),
+        loading: false,
+        status: "Search Results Received"
+      }
     case MessageTypes.DOWNLOAD:
       saveByteArray(message.name, message.file)
-      return { loading: false };
+      return { loading: false, status: "File Downloaded" };
     case MessageTypes.SERVERS:
       break
     default:
