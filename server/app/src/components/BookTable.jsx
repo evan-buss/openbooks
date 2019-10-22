@@ -3,6 +3,7 @@ import React from 'react';
 import {Button, Icon, Input, Table, Typography} from 'antd';
 import Highlighter from 'react-highlight-words';
 import {MessageTypes} from "../messages";
+import PropTypes from 'prop-types';
 
 const {Title} = Typography;
 
@@ -15,7 +16,7 @@ class BookTable extends React.Component {
             searchText: '',
         };
 
-
+        // Create a key for each item using the index
         this.props.items.forEach((item, index) => {
             item.key = index;
         })
@@ -140,76 +141,30 @@ class BookTable extends React.Component {
                 key: 'download',
                 width: "5%",
                 render: (text, record) => {
-                    return <Button onClick={() => this.handleDownload(record.full)}>Download</Button>
+                    return this.props.disabled ? (
+                        <Button disabled>Download</Button>
+                    ) : (
+                        <Button onClick={() => this.handleDownload(record.full)}>Download</Button>
+                    )
                 }
+
             }
         ];
         return (
-            <div style={this.tableStyle}>
-                <Title>Search Results</Title>
-                <Table columns={columns} dataSource={this.props.items}
-                       pagination={{position: "top", defaultPageSize: 10}}/>
-            </div>
+            <Table title={() => <Title>Search Results</Title>}
+                   style={this.tableStyle}
+                   columns={columns}
+                   dataSource={this.props.items}
+                   pagination={{position: "bottom", defaultPageSize: 10}}
+            />
         )
     }
 }
 
-
-// import PropTypes from 'prop-types'
-// import Item from './Item';
-// import './BookTable.css';
-// import { MessageTypes } from '../messages';
-
-// class Table extends React.Component {
-//   downloadCallback = (downloadString) => {
-//     console.log("DOWNLOAD CALLBACK")
-//     console.log(downloadString);
-//     if (this.props.socket != null) {
-//       this.props.socket.send(JSON.stringify({
-//         type: MessageTypes.DOWNLOAD,
-//         payload: {
-//           book: downloadString
-//         }
-//       }))
-//     }
-//   }
-//
-//   render() {
-//     return (
-//       <div id="container">
-//         <h1>Search Results</h1>
-//         {this.props.items.length > 0 ? (
-//           <table>
-//             <thead>
-//               <tr>
-//                 <th>Server</th>
-//                 <th>Title</th>
-//                 <th>Author</th>
-//                 <th>Format</th>
-//                 <th>Size</th>
-//                 <th>Download</th>
-//               </tr>
-//             </thead>
-//             <tbody>
-//               {this.props.items.map((item) =>
-//                 <Item key={item.title + item.size + item.server}
-//                   data={item}
-//                   callback={this.downloadCallback} />
-//               )}
-//             </tbody>
-//           </table>
-//         ) : (
-//             <h2>Search a book to view the results.</h2>
-//           )
-//         }
-//       </div>
-//     )
-//   }
-// }
-//
-// Table.propTypes = {
-//   items: PropTypes.arrayOf(PropTypes.object).isRequired,
-//   socket: PropTypes.object
-// }
+Table.propTypes = {
+    items: PropTypes.arrayOf(PropTypes.object),
+    socket: PropTypes.object,
+    disabled: PropTypes.bool
+};
 
 export default BookTable

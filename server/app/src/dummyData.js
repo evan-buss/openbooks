@@ -1,3 +1,21 @@
+import {MessageTypes} from "./messages";
+
+const recentSearches = [
+    "anthony kiedis",
+    "kurt vonnegut",
+    "dune frank herbert long title test"
+];
+
+
+const servers = {
+    "type": MessageTypes.SERVERS,
+    "servers": [
+        "LawdyServer",
+        "Oatmeal",
+        "Astra"
+    ]
+};
+
 const fakeItems = {
     "type": 2,
     "books": [{
@@ -311,4 +329,8 @@ const fakeItems = {
     }]
 };
 
-export default fakeItems;
+export {
+    recentSearches,
+    fakeItems,
+    servers
+}

@@ -13,7 +13,7 @@ const MessageTypes = {
 // Message router returns new state objects
 // It handles delegation of data to the App component
 // depending on the JSON message type
-function messageRouter(message) {
+function messageRouter(message, currentState) {
     if (message.error) {
         console.error("ERROR: ABORTING");
         sendNotification("error", "Error", message.details)
@@ -40,22 +40,18 @@ function messageRouter(message) {
             sendNotification("success", "Successfully Connected", message.status);
             break;
         case MessageTypes.SEARCH:
-            sendNotification("success", "Search Results Received", "Select a book to download or search again.");
+            sendNotification("success",
+                "Search Results Received",
+                "Select a book to download or search again.");
             return {
-                items: message.books.sort((a, b) => {
-                    if (a.server < b.server) {
-                        return -1
-                    }
-                    if (a.server > b.server) {
-                        return 1
-                    }
-                    return 0
-                }),
+                items: message.books,
+                searchResults: [...currentState.searchResults, message.books],
                 loading: false,
             };
         case MessageTypes.DOWNLOAD:
+            sendNotification("success", "Book File Received", "Press save on the dialog to download it");
             saveByteArray(message.name, message.file);
-            return {loading: false, status: "File Downloaded"};
+            return {loading: false};
         case MessageTypes.SERVERS:
             break;
         default:

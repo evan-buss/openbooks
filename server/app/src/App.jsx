@@ -1,13 +1,18 @@
 import React from 'react';
+import {messageRouter, MessageTypes} from "./messages"
+import {Layout, notification, Result, Typography} from 'antd';
+
 import './App.css';
 import Search from './components/Search';
 import BookTable from './components/BookTable';
-import {messageRouter, MessageTypes} from "./messages"
-import {Divider, Layout, notification, Result, Typography} from 'antd';
-// import fakeItems from "./dummyData";
+import ServerList from './components/ServerList';
+import RecentSearchList from './components/RecentSearchList';
+import {servers} from "./dummyData";
 
 const {Header, Sider, Content} = Layout;
 const {Title} = Typography;
+
+const titleStyle = {textAlign: "center", color: "white", marginBottom: 0, marginTop: "5px"};
 
 class App extends React.Component {
     constructor(props) {
@@ -15,9 +20,9 @@ class App extends React.Component {
 
         // NOTE: Set state via function if you need the existing state to calculate new state
         this.state = {
-            status: "",
-            searchString: "",
             items: [],
+            searchQueries: [], //Holds individual queries when the user clicks search button
+            searchResults: [], //Holds past search results.
             servers: [],
             socket: null,
             loading: false,
@@ -25,15 +30,23 @@ class App extends React.Component {
         }
     }
 
-    loadingCallback = (bool) => {
-        this.setState({loading: bool})
+    searchCallback = (loading, queryString) => {
+        this.setState((state, props) => {
+            return {
+                searchQueries: [...state.searchQueries, queryString],
+            }
+        });
+        this.setState({loading: true})
     };
 
     componentDidMount() {
-        // this.setState({
-        //     items: fakeItems.books
-        // });
+        this.setState({
+            // items: fakeItems.books,
+            // searches: recentSearches,
+            servers: servers.servers
+        });
 
+        //TODO: How do I pass a variable to this...
         let socket = new WebSocket("ws://127.0.0.1:8080/ws");
 
         socket.onopen = () => {
@@ -45,6 +58,7 @@ class App extends React.Component {
             this.state.socket.send(JSON.stringify({
                 type: MessageTypes.CONNECT,
                 payload: {
+                    //TODO: Make server use the connection name...
                     name: "bot"
                 }
             }));
@@ -95,30 +109,47 @@ class App extends React.Component {
         };
 
         socket.onmessage = message => {
-            this.setState(messageRouter(JSON.parse(message.data)))
+            this.setState((state, props) => messageRouter(JSON.parse(message.data), state))
         }
     }
 
-    style = {textAlign: "center", color: "white", marginBottom: 0, marginTop: "5px"};
-    sidebarStyle = {marginTop: "15px"};
+    sidebarStyle = {
+        paddingTop: "16px",
+        paddingLeft: "8px",
+    };
+
+    pastSearchHandler = (index) => {
+        this.setState((state, props) => {
+            return {
+                items: state.searchResults[index]
+            }
+        })
+    };
 
     render() {
         return (
             <Layout className="full-size">
-                <Sider>
-                    <Title level={3} style={{...this.style, ...this.sidebarStyle}}>Recent Searches</Title>
-                    <Divider/>
+                <Sider style={this.sidebarStyle}>
+                    <RecentSearchList searches={this.state.searchQueries} clickHandler={this.pastSearchHandler}/>
+                    <ServerList servers={this.state.servers}/>
                 </Sider>
                 <Layout>
-                    <Header><Title style={this.style}>OpenBooks</Title></Header>
+                    <Header><Title style={titleStyle}>OpenBooks</Title></Header>
                     <Content>
                         <div className="app-body">
-                            <Search socket={this.state.socket} timeLeft={this.state.timeLeft}
-                                    loadingCallback={this.loadingCallback}/>
+                            <Search socket={this.state.socket}
+                                    disabled={this.state.timeLeft !== 0 || this.state.loading}
+                                    searchCallback={this.searchCallback}/>
+                            {/*Show instructions if the user hasn't yet search for anything*/}
+                            {this.state.searchQueries.length === 0 && <Result title={"Search a book to get started"}/>}
+                            {/*Show loading indicator when waiting for server results*/}
                             {this.state.loading && <Result title={"Loading your results. Please wait."}/>}
-                            {this.state.items.length > 0 && !this.state.loading ?
-                                (<BookTable items={this.state.items} socket={this.state.socket}/>) : (
-                                    <Result title={"Search a book to get started"}/>)}
+                            {/*Show table when items are received and we aren't loading*/}
+                            {this.state.items.length > 0 &&
+                            <BookTable
+                                items={this.state.items}
+                                socket={this.state.socket}
+                                disabled={this.state.loading}/>}
                         </div>
                     </Content>
                 </Layout>

@@ -12,8 +12,7 @@ import (
 // Handler is the server implementation of the EventHandler interface.
 type Handler struct{}
 
-// DownloadSearchResults downloads the search results,
-// constructs a JSON response, and sends it over the websocket
+// DownloadSearchResults downloads from DCC server, parses data, and sends data to client
 func (h Handler) DownloadSearchResults(text string) {
 	searchDownloaded := make(chan string)
 	// Download the file and wait until it is completed
@@ -21,14 +20,16 @@ func (h Handler) DownloadSearchResults(text string) {
 	// Retrieve the file's location
 	fileLocation := <-searchDownloaded
 	fmt.Println(fileLocation)
-	WS.WriteJSON(SearchResponse{
+	err := WS.WriteJSON(SearchResponse{
 		MessageType: SEARCH,
 		Books:       ParseSearchFile(fileLocation),
 	})
+	if err != nil {
+		log.Println("Error Sending SearchResponse: ", err)
+	}
 }
 
-// DownloadBookFile downloads the search results, constructs
-// as JSON response, and sends it over the websocket
+// DownloadBookFile downloads the book file and sends it over the websocket
 func (h Handler) DownloadBookFile(text string) {
 	bookDownloaded := make(chan string)
 	go dcc.NewDownload(text, true, false, bookDownloaded)
@@ -52,43 +53,50 @@ func (h Handler) DownloadBookFile(text string) {
 		File:        data,
 	})
 	if err != nil {
-		log.Println(err)
+		log.Println("Error sending DownloadResponse: ", err)
 	}
 }
 
-// NoResults is called when the user searches for something that
-// is not available. The server sends an appropriate message to client
+// NoResults is called when the server returns that nothing was found for the query
 func (h Handler) NoResults() {
-	WS.WriteJSON(IrcErrorResponse{
+	err := WS.WriteJSON(IrcErrorResponse{
 		MessageType: IRCERROR,
 		Status:      "No results found for the query.",
 	})
+	if err != nil {
+		log.Println("Error sending IrcErrorResponse: ", err)
+	}
 }
 
-// BadServer is called when the user tries to download a file from a
-// server that is not available. The server sends an appropriate message
+// BadServer is called when the requested download fails because the server is not available
 func (h Handler) BadServer() {
-	WS.WriteJSON(IrcErrorResponse{
+	err := WS.WriteJSON(IrcErrorResponse{
 		MessageType: IRCERROR,
 		Status:      "Server is not available. Try another one.",
 	})
+	if err != nil {
+		log.Println("Error sending IrcServerResponse: ", err)
+	}
 }
 
-// SearchAccepted is called when the search has been accepted but the user
-// must wait in the queue for the search to be executed. Send client status
-//  update
+// SearchAccepted is called when the user's query is accepted into the search queue
 func (h Handler) SearchAccepted() {
-	WS.WriteJSON(WaitResponse{
+	err := WS.WriteJSON(WaitResponse{
 		MessageType: WAIT,
 		Status:      "Search Accepted into the Queue",
 	})
+	if err != nil {
+		log.Println("Error sending WaitResponse: ", err)
+	}
 }
 
-// MatchesFound is called when the search returns the number of results
-// found. Server sends the client a status update
+// MatchesFound is called when the server finds matches for the user's query
 func (h Handler) MatchesFound(num string) {
-	WS.WriteJSON(WaitResponse{
+	err := WS.WriteJSON(WaitResponse{
 		MessageType: WAIT,
 		Status:      "Found " + num + " results for your search",
 	})
+	if err != nil {
+		log.Println("Error sending WaitResponse: ", err)
+	}
 }
