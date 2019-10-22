@@ -22,55 +22,43 @@ const (
 	IRCERROR
 )
 
-// Request is the generic wrapper for all received messages.
-// It contains a message type and a generic payload of data.
-//
-// We first read the messageType to determine the payload structure
+// Request in a generic structure for all requests from the websocket client
 type Request struct {
 	RequestType int             `json:"type"`
 	Payload     json.RawMessage `json:"payload"`
 }
 
-// ErrorMessage is a generic error returned to the client
-// It contains the command type that was invalid as well as a hint string
-type ErrorMessage struct {
+// ErrorResponse is a response sent when something goes wrong (ie. bad JSON parse)
+type ErrorResponse struct {
 	Error   int    `json:"error"`
 	Details string `json:"details"`
 }
 
-// ConnectionRequest is called when the user wants to connect to the
-// download server. It can optionally define a custom username.
-// If the username is not specified, OpenBooks will use the system username
+// ConnectionRequest is a request to start the IRC server
 type ConnectionRequest struct {
 	Name string `json:"name"`
 }
 
-// ConnectionResponse defines the structure for a json response to a
-// ConnectionPayload
+// TODO: Make the client read from the Wait variable and set the timer accordingly
+// ConnectionResponse is a response sent upon successful connection to the IRC server
 type ConnectionResponse struct {
 	MessageType int    `json:"type"`
 	Status      string `json:"status"`
 	Wait        int    `json:"wait"`
 }
 
-// SearchRequest represents a user's search for a book
-//
-// We can abstract advanced features that aren't present in the IRC server or
-// terminal app. For example advanced querying.
+// SearchRequest is a request that sends a search request to the IRC server for a specific query
 type SearchRequest struct {
-	Query   string   `json:"query"`
-	Servers []string `json:"servers"`
-	Formats []string `json:"formats"`
+	Query string `json:"query"`
 }
 
-// SearchResponse defines the structure that will respond to a
-// SearchPayload
+// SearchResponse is a response that is sent containing BookDetails objects that matched the query
 type SearchResponse struct {
 	MessageType int          `json:"type"`
 	Books       []BookDetail `json:"books"`
 }
 
-// BookDetail is a single book response
+// BookDetail contains the details of a single Book found on the IRC server
 type BookDetail struct {
 	Server string `json:"server"`
 	Author string `json:"author"`
@@ -80,48 +68,46 @@ type BookDetail struct {
 	Full   string `json:"full"`
 }
 
-// ServersRequest is a request for available servers
+// ServersRequest is a request that lists available IRC servers
 type ServersRequest struct{}
 
-// ServersResponse is a response with a list of available servers
+// ServersResponse is a response that lists the IRC servers that are online and available
 type ServersResponse struct {
 	MessageType int      `json:"type"`
 	Servers     []string `json:"servers"`
 }
 
-// DownloadRequest is a request for a specific book string
+// DownloadRequest is a request to download a specific book from the IRC server
 type DownloadRequest struct {
 	Book string `json:"book"`
 }
 
-// DownloadResponse is a response with a book file
+// DownloadResponse is a response that sends the requested book to the client
 type DownloadResponse struct {
 	MessageType int    `json:"type"`
 	Name        string `json:"name"`
 	File        []byte `json:"file"`
 }
 
-// WaitResponse is sent when the server has successfully received a
-// message but nothing is available yet. Such as searching, we don't
-// have an exact time frame for when it will complete.
+// WaitResponse is a response that reports status updates to the client. IRC is asynchronous
+// and has an unbounded time-frame so we want to show the client things are happening
 type WaitResponse struct {
 	MessageType int    `json:"type"`
 	Status      string `json:"status"`
 }
 
-// IrcErrorResponse is sent when some internal IRC response means
-// that the request cannot be completed as planned
+// IrcErrorResponse is a response that indicates something went wrong on the IRC server's end
 type IrcErrorResponse struct {
 	MessageType int    `json:"type"`
 	Status      string `json:"status"`
 }
 
-// RequestHandler defines a generic message handler. All handlers should implement
-// the handle() method. The method either returns a JSON string or an error
+// RequestHandler defines a generic handle() method that is called when a specific request type is made
 type RequestHandler interface {
 	handle() (interface{}, error)
 }
 
+// messageRouter is used to parse the incoming request and respond appropriately
 func messageRouter(message Request) (interface{}, error) {
 	var obj RequestHandler
 
@@ -145,49 +131,56 @@ func messageRouter(message Request) (interface{}, error) {
 	return obj.handle()
 }
 
-// Sends a connection response object or a connection error object
+// handle ConnectionRequests and either connect to the server or do nothing
 func (c ConnectionRequest) handle() (interface{}, error) {
-	log.Println("CONNECTION REQUEST. STARTING IRC")
 	if !IRC.IsConnected() {
-		log.Println("not connected so connecting :)")
+		log.Println("Connecting to IRC")
 		core.Join(IRC)
 		go core.ReadDaemon(IRC, Handler{})
+		return ConnectionResponse{
+			MessageType: CONNECT,
+			Status:      "Connected",
+			Wait:        30,
+		}, nil
 	} else {
-		log.Println("already connected brother")
+		log.Println("You are already connected to the IRC server")
+		return ConnectionResponse{
+			MessageType: CONNECT,
+			Status:      "IRC server is already running",
+			Wait:        -1,
+		}, nil
 	}
-
-	return ConnectionResponse{
-		MessageType: CONNECT,
-		Status:      "Connected",
-		Wait:        30,
-	}, nil
 }
 
-// Search for the given book.
+// handle SearchRequests and send the query to the IRC server
 func (s SearchRequest) handle() (interface{}, error) {
 	log.Println("Received SearchRequest for: " + s.Query)
+
 	core.SearchBook(IRC, s.Query)
-	// Need to return something, but this is asynchronous...
+
+	// Update client that request was sent
 	return WaitResponse{
 		MessageType: WAIT,
 		Status:      "Search request sent",
 	}, nil
 }
 
-// TODO: Implement server parsing functionality
+// handle ServerRequests by sending the currently available book servers
 func (s ServersRequest) handle() (interface{}, error) {
 	log.Println("Received ServersRequest")
-	return ServersResponse{
+
+	//TODO: Implement server listing and parsing.
+	return WaitResponse{
 		MessageType: SERVERS,
+		Status:      "Retrieving available book servers",
 	}, nil
 }
 
+// handle DownloadRequests by sending the request to the book server
 func (d DownloadRequest) handle() (interface{}, error) {
-	log.Println("Received DownloadRequest")
-	log.Println(d.Book)
+	log.Println("Received DownloadRequest: ", d.Book)
 	core.DownloadBook(IRC, d.Book)
 
-	// fmt.Println(d)
 	return WaitResponse{
 		MessageType: WAIT,
 		Status:      "Download request received",

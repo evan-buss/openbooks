@@ -41,7 +41,7 @@ func ReadDaemon(irc *irc.Conn, handler EventHandler) {
 	var err error
 
 	if irc.Logging {
-		f, err = os.OpenFile("log.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		f, err = os.OpenFile("irc_log.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 		defer f.Close()
 		f.WriteString("\n==================== NEW LOG ======================\n")
 

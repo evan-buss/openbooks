@@ -1,24 +1,29 @@
 WEB UI
-- Improve styling
-  - UI library or styled components or style modules
-
-- Add a more robust table. Enable filtering, searching, and sorting
-
 - Make sure we delete the files in the temp directory after sending them
   - Might save the search results file and allow users to select a previous search
 
-- Use popup notifications instead of a simple h1 at the top
-
-
-- I am leaning towards using ANT design. It seems to have a bunch of well-made components with minimal need of customization
-
 - Clean up and review core go code. I am sure there are some things that can be simplified and refactored.
 
-- Refactor a bunch of code both in this project and my others that use manual path processing
- - the "path" library is AMAZING
+- Rewrite / refactor dcc parsing. Current implementation is messy and doesn't use builtin path utilities
 
 - Write some tests for things simple things like utilities
 
-- Things no longer have to live inside the go path!! I put projects anywhere wowee
+- Look into go logging. Learn how to change the logger output before release.
 
-- Fix the connection so that everytime the browser refreshes you shouldn't have to wait and the IRC connection should not be restarted.
+- Disable download buttons until the download is completed. Users should be able to overload the server with requests.
+
+- Look into mutex locking on the reader and the ws connection. Not sure if this is the cause of errors/bugs
+
+
+REACH:
+- Improve parsing accuracy with "per-server" parsing functions
+   - Each one adapted to the common format for that server
+   - Would require studying the format of the server with multiple search files..
+   - Something to do in the future
+
+FEATURES
+ - Store references to recently downloaded search results. Users should be able to click any of them and populate the table again
+ - Show the currently active file servers in the sidebar
+   - Indicate in the table which servers are online and which aren't
+     - If the server is not online either indicate to the user when they choose to download or just hide them in the table.
+   - Not sure if I want to do the checking server side or client side. The server would filter the results based on the active servers.
