@@ -2,11 +2,12 @@ package server
 
 import (
 	"encoding/json"
-	"errors"
-	"log"
 
 	"github.com/evan-buss/openbooks/core"
 )
+
+// Messages defines the client and server messages that are passed between
+// the websocket / website server and the client (website)
 
 // ERROR represents some sort of error outside of specific handlers
 // such as parsing requests
@@ -39,7 +40,6 @@ type ConnectionRequest struct {
 	Name string `json:"name"`
 }
 
-// TODO: Make the client read from the Wait variable and set the timer accordingly
 // ConnectionResponse is a response sent upon successful connection to the IRC server
 type ConnectionResponse struct {
 	MessageType int    `json:"type"`
@@ -54,18 +54,8 @@ type SearchRequest struct {
 
 // SearchResponse is a response that is sent containing BookDetails objects that matched the query
 type SearchResponse struct {
-	MessageType int          `json:"type"`
-	Books       []BookDetail `json:"books"`
-}
-
-// BookDetail contains the details of a single Book found on the IRC server
-type BookDetail struct {
-	Server string `json:"server"`
-	Author string `json:"author"`
-	Title  string `json:"title"`
-	Format string `json:"format"`
-	Size   string `json:"size"`
-	Full   string `json:"full"`
+	MessageType int               `json:"type"`
+	Books       []core.BookDetail `json:"books"`
 }
 
 // ServersRequest is a request that lists available IRC servers
@@ -100,90 +90,4 @@ type WaitResponse struct {
 type IrcErrorResponse struct {
 	MessageType int    `json:"type"`
 	Status      string `json:"status"`
-}
-
-// RequestHandler defines a generic handle() method that is called when a specific request type is made
-type RequestHandler interface {
-	handle() (interface{}, error)
-}
-
-// messageRouter is used to parse the incoming request and respond appropriately
-func messageRouter(message Request) (interface{}, error) {
-	var obj RequestHandler
-
-	switch message.RequestType {
-	case CONNECT:
-		obj = new(ConnectionRequest)
-	case SEARCH:
-		obj = new(SearchRequest)
-	case DOWNLOAD:
-		obj = new(DownloadRequest)
-	case SERVERS:
-		obj = new(ServersRequest)
-	default:
-		return nil, errors.New("invalid message type")
-	}
-
-	err := json.Unmarshal(message.Payload, &obj)
-	if err != nil {
-		return nil, err
-	}
-	return obj.handle()
-}
-
-// handle ConnectionRequests and either connect to the server or do nothing
-func (c ConnectionRequest) handle() (interface{}, error) {
-	if !IRC.IsConnected() {
-		log.Println("Connecting to IRC")
-		core.Join(IRC)
-		go core.ReadDaemon(IRC, Handler{})
-		return ConnectionResponse{
-			MessageType: CONNECT,
-			Status:      "IRC Server Requires 30 second wait period",
-			Wait:        30,
-		}, nil
-	} else {
-		log.Println("You are already connected to the IRC server")
-		return ConnectionResponse{
-			MessageType: CONNECT,
-			Status:      "IRC Server Ready",
-			Wait:        0,
-		}, nil
-	}
-}
-
-// handle SearchRequests and send the query to the IRC server
-func (s SearchRequest) handle() (interface{}, error) {
-	log.Println("Received SearchRequest for: " + s.Query)
-
-	core.SearchBook(IRC, s.Query)
-
-	// Update client that request was sent
-	return WaitResponse{
-		MessageType: WAIT,
-		Status:      "Search request sent",
-	}, nil
-}
-
-// handle ServerRequests by sending the currently available book servers
-func (s ServersRequest) handle() (interface{}, error) {
-	log.Println("Received ServersRequest")
-	core.GetUsers(IRC)
-
-	//TODO: Implement server listing and parsing.
-	return WaitResponse{
-		MessageType: SERVERS,
-		Status:      "Retrieving available book servers",
-	}, nil
-}
-
-// handle DownloadRequests by sending the request to the book server
-func (d DownloadRequest) handle() (interface{}, error) {
-	log.Println("Received DownloadRequest: ", d.Book)
-	core.DownloadBook(IRC, d.Book)
-
-	return WaitResponse{
-		MessageType: WAIT,
-		Status:      "Download request received",
-	}, nil
 }

@@ -7,7 +7,6 @@ import Search from './components/Search';
 import BookTable from './components/BookTable';
 import ServerList from './components/ServerList';
 import RecentSearchList from './components/RecentSearchList';
-import {recentSearches, servers} from "./dummyData";
 
 const {Header, Sider, Content} = Layout;
 const {Title} = Typography;
@@ -39,11 +38,11 @@ class App extends React.Component {
 
   componentDidMount() {
     // Dummy data for testing
-    this.setState({
-      // items: fakeItems.books,
-      // searches: recentSearches,
-      servers: servers.servers
-    });
+    // this.setState({
+    //   // items: fakeItems.books,
+    //   // searches: recentSearches,
+    //   servers: servers.servers
+    // });
 
     //TODO: How do I pass a variable to this...
     let socket = new WebSocket("ws://127.0.0.1:8080/ws");
@@ -83,9 +82,18 @@ class App extends React.Component {
       if (response.type === MessageTypes.CONNECT) {
         sendNotification("success", "Successfully Connected", response.status);
         this.setState({timeLeft: response.wait});
-        countdownTimer(response.wait,(time) => {
-          this.setState({timeLeft: time})
-        });
+        if (response.wait !== 0) {
+          countdownTimer(response.wait, (time) => {
+            this.setState({timeLeft: time})
+          });
+        } else {
+          this.state.socket.send(JSON.stringify({
+            type: MessageTypes.SERVERS,
+            payload: {
+              data: ""
+            }
+          }))
+        }
       } else {
         this.setState((state) => messageRouter(JSON.parse(message.data), state))
       }
@@ -122,7 +130,8 @@ class App extends React.Component {
               {/*Show instructions if the user hasn't yet search for anything*/}
               {this.state.searchQueries.length === 0 && <Result title={"Search a book to get started"}/>}
               {/*Show loading indicator when waiting for server results*/}
-              {this.state.loading && <Result title={"Loading your results. Please wait."}/>}
+              {(this.state.loading && this.state.items.length > 0) &&
+              <Result title={"Loading your results. Please wait."}/>}
               {/*Show table when items are received and we aren't loading*/}
               {this.state.items.length > 0 &&
               <BookTable

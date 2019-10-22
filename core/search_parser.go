@@ -1,4 +1,4 @@
-package server
+package core
 
 import (
 	"bufio"
@@ -18,6 +18,16 @@ var fileTypes = [...]string{
 	"cdr",
 	"rar",
 	"zip",
+}
+
+// BookDetail contains the details of a single Book found on the IRC server
+type BookDetail struct {
+	Server string `json:"server"`
+	Author string `json:"author"`
+	Title  string `json:"title"`
+	Format string `json:"format"`
+	Size   string `json:"size"`
+	Full   string `json:"full"`
 }
 
 // ParseSearchFile converts a single search file into an array of BookDetail
@@ -48,6 +58,7 @@ func ParseSearchFile(filePath string) []BookDetail {
 	return books
 }
 
+// Parse line extracts data from a single line
 func parseLine(line string) (BookDetail, error) {
 
 	//First check if it follows the correct format. Some servers don't include file info...
