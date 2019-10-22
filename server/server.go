@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"sync"
 
 	"github.com/evan-buss/openbooks/irc"
 	"github.com/gobuffalo/packr/v2"
@@ -15,15 +16,18 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
-// IRC is a global variable to access the current IRC connection
-var IRC *irc.Conn
+// ircConn is a global variable to access the current IRC connection
+var ircConn *irc.Conn
 
-// WS is a global variable to access the current Websocket Connection
-var WS *websocket.Conn
+// wsConn is a global variable to access the current Websocket Connection
+var wsConn *websocket.Conn
+
+// mutex ensures that only a single thread is writing to wsConn
+var mutex sync.Mutex
 
 // Start instantiates the web server and opens the browser
 func Start(irc *irc.Conn, port int) {
-	IRC = irc
+	ircConn = irc
 
 	// Access the SPA bundled in the binary
 	box := packr.New("ReactApp", "./app/build")
@@ -49,7 +53,7 @@ func wsHandler(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	WS = ws // Set global WS variable
+	wsConn = ws // Set global WS variable
 
 	log.Println("Client connected: " + req.RemoteAddr)
 	ws.SetCloseHandler(func(code int, text string) error {
@@ -67,38 +71,27 @@ func reader(conn *websocket.Conn) {
 		err := conn.ReadJSON(&message)
 		if err != nil {
 			log.Println(err)
-			err := conn.WriteJSON(ErrorResponse{
+			writeJSON(ErrorResponse{
 				Error:   ERROR,
 				Details: err.Error(),
 			})
-			if err != nil {
-				log.Println("Error sending error JSON:", err)
-			}
 			return
 		}
-
-		go asyncResponse(conn, message)
+		go messageRouter(message)
 	}
 }
 
-// asyncResponse handles the given JSON messages via the messageRouter or sends and error
-func asyncResponse(conn *websocket.Conn, message Request) {
-	result, err := messageRouter(message)
+// A wrapper for websocket.WriteJSON that handles errors implicitly
+func writeJSON(obj interface{}) {
+	mutex.Lock()
+	err := wsConn.WriteJSON(obj)
 	if err != nil {
-		log.Println(err)
-		// Write the error to the socket if bad
-		err := conn.WriteJSON(ErrorResponse{
-			Error:   message.RequestType,
-			Details: err.Error(),
-		})
-		if err != nil {
-			log.Println("asyncResponse error: ", err)
-		}
-		return
+		log.Println("Error writing JSON to websocket: ", err)
 	}
-
-	if err := conn.WriteJSON(result); err != nil {
-		log.Println(err)
-		return
-	}
+	mutex.Unlock()
 }
+
+// writeJSON(ServersResponse{
+// 	MessageType: SERVERS,
+// 	Servers:     core.Servers.Servers,
+// })

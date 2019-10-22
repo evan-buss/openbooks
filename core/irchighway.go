@@ -6,8 +6,7 @@ import (
 	"github.com/evan-buss/openbooks/irc"
 )
 
-// Wrapper around the IRC connection with irc.irchighway.net specific
-// BOT commands
+// Specific irc.irchighway.net commands
 
 // Join connects to the irc.irchighway.net server and joins the #ebooks channel
 func Join(irc *irc.Conn) {
@@ -29,5 +28,7 @@ func DownloadBook(irc *irc.Conn, book string) {
 }
 
 func GetUsers(irc *irc.Conn) {
+	//Send the request after a delay to ensure we are actuall in the channel
+	time.Sleep(time.Second*5)
 	irc.GetUsers("ebooks")
 }

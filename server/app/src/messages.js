@@ -30,7 +30,7 @@ export function messageRouter(message, currentState) {
       currentState.searchQueries.pop();
       return {loading: false, searchQueries: currentState.searchQueries};
     case MessageTypes.WAIT:
-      sendNotification("info", message.status, "Please wait. Your request is being processed");
+      sendNotification("info", message.status, "Please wait. Your request is being processed", 10);
       break;
     case MessageTypes.SEARCH:
       sendNotification("success",
@@ -46,7 +46,7 @@ export function messageRouter(message, currentState) {
       saveByteArray(message.name, message.file);
       return {loading: false};
     case MessageTypes.SERVERS:
-      break;
+      return {servers: message.servers};
     default:
       console.error("Unknown Server Message")
   }
@@ -85,9 +85,10 @@ function saveByteArray(fileName, byte) {
   link.click();
 };
 
-export function sendNotification(type, message, description) {
+export function sendNotification(type, message, description, duration = 4.5) {
   notification[type]({
-    message: message,
-    description: description
+    message,
+    description,
+    duration
   })
 }

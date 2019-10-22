@@ -22,10 +22,10 @@ func TestSearchParse(t *testing.T) {
 			":Search!Search@ihw-4q5hcb.dyn.suddenlink.net PRIVMSG evan_bot :DCC SEND SearchBot_results_for__stephen_king_the_stand.txt.zip 2907707975 4342 1116", "SearchBot_results_for__stephen_king_the_stand.txt.zip", "173.80.26.71", "4342", 1116},
 	}
 
-	dcc := new(Conn)
+	dcc := new(Data)
 	for _, table := range tables {
 
-		dcc.ParseSearch(table.search)
+		dcc.ParseDCC(table.search)
 		fmt.Printf(dcc.filename)
 
 		if dcc.filename != table.filename {
