@@ -27,3 +27,6 @@ FEATURES
    - Indicate in the table which servers are online and which aren't
      - If the server is not online either indicate to the user when they choose to download or just hide them in the table.
    - Not sure if I want to do the checking server side or client side. The server would filter the results based on the active servers.
+
+
+Exit / Shutdown button on the we interface...

@@ -30,11 +30,9 @@ const (
 )
 
 // ReadDaemon is designed to be launched as a goroutine. Listens for
-//  specific messages and responds accordingly
+// specific messages and dispatches appropriate handler functions
 // Params: irc - IRC connection
-//  			 statusC - boolean channel returns true when the download has finished
-// 				 stateC - boolean channel recieves messages from user menu
-// 									(true = book download, false = search results download)
+//				 handler - domain specific handler that responds to IRC events
 func ReadDaemon(irc *irc.Conn, handler EventHandler) {
 
 	var f *os.File
@@ -50,6 +48,8 @@ func ReadDaemon(irc *irc.Conn, handler EventHandler) {
 		}
 	}
 
+	//var users string
+
 	for {
 		text := irc.GetMessage()
 
@@ -59,7 +59,6 @@ func ReadDaemon(irc *irc.Conn, handler EventHandler) {
 
 		if strings.Contains(text, sendMessage) {
 			// Respond to Direct Client-to-Client downloads
-
 			if strings.Contains(text, "_results_for") {
 				fmt.Println("SEARCH RESULTS")
 				go handler.DownloadSearchResults(text)

@@ -27,3 +27,7 @@ func SearchBook(irc *irc.Conn, query string) {
 func DownloadBook(irc *irc.Conn, book string) {
 	irc.SendMessage(book)
 }
+
+func GetUsers(irc *irc.Conn) {
+	irc.GetUsers("ebooks")
+}
