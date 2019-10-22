@@ -1,81 +1,93 @@
 import {notification} from 'antd'
 
-const MessageTypes = {
-    ERROR: 0,
-    CONNECT: 1,
-    SEARCH: 2,
-    DOWNLOAD: 3,
-    SERVERS: 4,
-    WAIT: 5,
-    IRCERROR: 6
+export const MessageTypes = {
+  ERROR: 0,
+  CONNECT: 1,
+  SEARCH: 2,
+  DOWNLOAD: 3,
+  SERVERS: 4,
+  WAIT: 5,
+  IRCERROR: 6
 }
 
 // Message router returns new state objects
 // It handles delegation of data to the App component
 // depending on the JSON message type
-function messageRouter(message, currentState) {
-    if (message.error) {
-        console.error("ERROR: ABORTING");
-        sendNotification("error", "Error", message.details)
-        return
-    }
+export function messageRouter(message, currentState) {
+  if (message.error) {
+    console.error("ERROR: ABORTING");
+    sendNotification("error", "Error", message.details)
+    return
+  }
 
-    switch (message.type) {
-        case MessageTypes.ERROR:
-            console.log("ERROR");
-            console.log(message.details);
-            sendNotification("error", "Error Processing Request", message.details);
-            break;
-        case MessageTypes.IRCERROR:
-            console.log("IRC ERROR");
-            sendNotification("error", "Internal Book Server Error", message.status);
-            return {loading: false};
-        case MessageTypes.WAIT:
-            console.log("WAIT");
-            sendNotification("info", message.status, "Please wait. Your request is being processed");
-            break;
-        // return { status: message.status }
-        case MessageTypes.CONNECT:
-            console.log("CONNECT");
-            sendNotification("success", "Successfully Connected", message.status);
-            break;
-        case MessageTypes.SEARCH:
-            sendNotification("success",
-                "Search Results Received",
-                "Select a book to download or search again.");
-            return {
-                items: message.books,
-                searchResults: [...currentState.searchResults, message.books],
-                loading: false,
-            };
-        case MessageTypes.DOWNLOAD:
-            sendNotification("success", "Book File Received", "Press save on the dialog to download it");
-            saveByteArray(message.name, message.file);
-            return {loading: false};
-        case MessageTypes.SERVERS:
-            break;
-        default:
-            console.error("Unknown Server Message")
+  switch (message.type) {
+    case MessageTypes.ERROR:
+      sendNotification("error", "Error Processing Request", message.details);
+      currentState.searchQueries.pop();
+      return {loading: false, searchQueries: currentState.searchQueries};
+    case MessageTypes.IRCERROR:
+      sendNotification("error", "Internal Book Server Error", message.status);
+      currentState.searchQueries.pop();
+      return {loading: false, searchQueries: currentState.searchQueries};
+    case MessageTypes.WAIT:
+      sendNotification("info", message.status, "Please wait. Your request is being processed");
+      break;
+    case MessageTypes.SEARCH:
+      sendNotification("success",
+        "Search Results Received",
+        "Select a book to download or search again.");
+      return {
+        items: message.books,
+        searchResults: [...currentState.searchResults, message.books],
+        loading: false,
+      };
+    case MessageTypes.DOWNLOAD:
+      sendNotification("success", "Book File Received", "Press save on the dialog to download it");
+      saveByteArray(message.name, message.file);
+      return {loading: false};
+    case MessageTypes.SERVERS:
+      break;
+    default:
+      console.error("Unknown Server Message")
+  }
+}
+
+export function countdownTimer(wait, callback) {
+  let downloadTimer = setInterval(() => {
+    // Decrement the timeLeft each tick
+    wait--;
+    callback(wait);
+    notification.open({
+      key: "timer",
+      type: "info",
+      message: "Please wait before searching",
+      description: wait + " seconds",
+      duration: 0
+    });
+
+    if (wait <= 0) {
+      clearInterval(downloadTimer);
+      notification.open({
+        key: "timer",
+        type: "success",
+        message: "Server is ready",
+        description: "Enter a search query to get started"
+      });
     }
+  }, 1000);
 }
 
 // saveByteArray creates a link and download popup for the returned file
 function saveByteArray(fileName, byte) {
-    let link = document.createElement('a');
-    link.href = `data:application/octet-stream;base64,${byte}`;
-    link.download = fileName;
-    link.click();
+  let link = document.createElement('a');
+  link.href = `data:application/octet-stream;base64,${byte}`;
+  link.download = fileName;
+  link.click();
 };
 
-function sendNotification(type, message, description) {
-    notification[type]({
-        message: message,
-        description: description
-    })
-}
-
-export {
-    MessageTypes,
-    messageRouter,
-    sendNotification
+export function sendNotification(type, message, description) {
+  notification[type]({
+    message: message,
+    description: description
+  })
 }

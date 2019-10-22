@@ -79,6 +79,10 @@ func (i *Conn) GetMessage() (text string) {
 	return
 }
 
+func (i *Conn) GetUsers(channel string) {
+	i.irc.Write([]byte("NAMES #" + channel + "\r\n"))
+}
+
 func (i *Conn) IsConnected() bool {
 	return i.irc != nil
 }

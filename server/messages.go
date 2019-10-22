@@ -139,15 +139,15 @@ func (c ConnectionRequest) handle() (interface{}, error) {
 		go core.ReadDaemon(IRC, Handler{})
 		return ConnectionResponse{
 			MessageType: CONNECT,
-			Status:      "Connected",
+			Status:      "IRC Server Requires 30 second wait period",
 			Wait:        30,
 		}, nil
 	} else {
 		log.Println("You are already connected to the IRC server")
 		return ConnectionResponse{
 			MessageType: CONNECT,
-			Status:      "IRC server is already running",
-			Wait:        -1,
+			Status:      "IRC Server Ready",
+			Wait:        0,
 		}, nil
 	}
 }
@@ -168,6 +168,7 @@ func (s SearchRequest) handle() (interface{}, error) {
 // handle ServerRequests by sending the currently available book servers
 func (s ServersRequest) handle() (interface{}, error) {
 	log.Println("Received ServersRequest")
+	core.GetUsers(IRC)
 
 	//TODO: Implement server listing and parsing.
 	return WaitResponse{
