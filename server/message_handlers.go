@@ -89,14 +89,14 @@ func (d DownloadRequest) handle() {
 // handle ServerRequests by sending the currently available book servers
 func (s ServersRequest) handle() {
 	log.Println("Received ServersRequest")
-	writeJSON(WaitResponse{
-		MessageType: WAIT,
-		Status:      "Retrieving available book servers",
-	})
+	// writeJSON(WaitResponse{
+	// 	MessageType: WAIT,
+	// 	Status:      "Retrieving available book servers",
+	// })
 	servers := make(chan []string, 1)
 	go core.GetServers(servers)
 	results := <-servers
-	log.Println("DONE")
+	log.Println("Sending updated server list")
 
 	writeJSON(ServersResponse{
 		MessageType: SERVERS,

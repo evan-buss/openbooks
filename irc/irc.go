@@ -3,12 +3,11 @@ package irc
 import (
 	"log"
 	"net"
-	"strings"
 )
 
 // Conn represents an IRC connection to a server
 type Conn struct {
-	irc      net.Conn
+	net.Conn
 	channel  string
 	username string
 	realname string
@@ -32,60 +31,46 @@ func (i *Conn) Connect(address string) {
 	if err != nil {
 		log.Fatal("IRC Connection Error", err)
 	}
-	i.irc = conn
+	i.Conn = conn
 
-	user := "USER " + i.username + " " + i.username + " " + i.username + " :" + i.realname + "\r\n"
+	user := "USER " + i.username + " " + i.username + " " + i.username + " :" +
+		i.realname + "\r\n"
 	nick := "NICK " + i.username + "\r\n"
 
-	i.irc.Write([]byte(user))
-	i.irc.Write([]byte(nick))
+	i.Write([]byte(user))
+	i.Write([]byte(nick))
 }
 
 // Disconnect closes connection to the IRC server
 func (i *Conn) Disconnect() {
-	i.irc.Write([]byte("QUIT :Goodbye\r\n"))
+	i.Write([]byte("QUIT :Goodbye\r\n"))
 }
 
 // SendMessage sends the given message string to the connected IRC server
 func (i *Conn) SendMessage(message string) {
-	i.irc.Write([]byte("PRIVMSG #" + i.channel + " :" + message + "\r\n"))
+	i.Write([]byte("PRIVMSG #" + i.channel + " :" + message + "\r\n"))
 }
 
-// JoinChannel joins the channel given by channel
-// NOTE: You must explicitly join a channel before you can start sending messages
+// JoinChannel joins the channel given by channel string
 func (i *Conn) JoinChannel(channel string) {
 	i.channel = channel
-	_, err := i.irc.Write([]byte("JOIN #" + channel + "\r\n"))
+	_, err := i.Write([]byte("JOIN #" + channel + "\r\n"))
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
-// GetMessage listens to the IRC connection and returns any message found
-func (i *Conn) GetMessage() (text string) {
-	buf := make([]byte, 512)
-	n, err := i.irc.Read(buf)
-
-	if err != nil {
-		log.Println("Probably a connection error.")
-		log.Fatal("Get Message Error: ", err)
-	}
-
-	text = string(buf[:n])
-
-	if strings.Contains(text, "PING") {
-		log.Println("PINGED BY SERVER")
-		i.irc.Write([]byte("PONG :pingis\r\n"))
-	}
-	return
-}
-
 // GetUsers sends a NAMES request to the IRC server
 func (i *Conn) GetUsers(channel string) {
-	i.irc.Write([]byte("NAMES #" + channel + "\r\n"))
+	i.Write([]byte("NAMES #" + channel + "\r\n"))
+}
+
+// PONG sends a PONG message to the server, often used afte a PING request
+func (i *Conn) PONG(server string) {
+	i.Write([]byte("PONG " + server + "\r\n"))
 }
 
 // IsConnected returns true if the IRC connection is not null
 func (i *Conn) IsConnected() bool {
-	return i.irc != nil
+	return i.Conn != nil
 }

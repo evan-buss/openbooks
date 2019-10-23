@@ -1,6 +1,7 @@
 package core
 
 import (
+	"bufio"
 	"fmt"
 	"log"
 	"os"
@@ -23,6 +24,7 @@ type ReaderHandler interface {
 
 // Possible messages that are sent by the server. We respond accordingly
 const (
+	pingMessage       = "PING"
 	sendMessage       = "DCC SEND"
 	noticeMessage     = "NOTICE"
 	noResults         = "Sorry"
@@ -58,16 +60,20 @@ func ReadDaemon(irc *irc.Conn, handler ReaderHandler) {
 
 	// Keep a list of users. We want to accumulate all users and then call the handle users method
 	var users strings.Builder
-	for {
-		text := irc.GetMessage()
+	scanner := bufio.NewScanner(irc)
+
+	for scanner.Scan() {
+		text := scanner.Text()
+		if err := scanner.Err(); err != nil {
+			log.Println("Scanner errror: ", err)
+		}
 
 		if irc.Logging {
 			f.WriteString(text)
 		}
 
+		// Respond to Direct Client-to-Client downloads
 		if strings.Contains(text, sendMessage) {
-			log.Println(text)
-			// Respond to Direct Client-to-Client downloads
 			if strings.Contains(text, "_results_for") {
 				fmt.Println("SEARCH RESULTS")
 				go handler.DownloadSearchResults(text)
@@ -90,9 +96,11 @@ func ReadDaemon(irc *irc.Conn, handler ReaderHandler) {
 		} else if strings.Contains(text, userList) {
 			users.WriteString(text) // Accumulate the user list
 		} else if strings.Contains(text, endUserList) {
-			log.Println("recieved end of names list")
 			serverCache.ParseServers(users.String())
 			users.Reset()
+		} else if strings.Contains(text, pingMessage) {
+			log.Println("PING MESSAGE")
+			irc.PONG("irc.irchighway.net")
 		}
 	}
 }
