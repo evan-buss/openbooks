@@ -32,7 +32,11 @@ export default class RecentSearchList extends React.Component {
             <Menu.Item disabled={true}>No Recent Searches</Menu.Item>}
           {this.props.searches.length > 0 && this.props.searches.map((search, index) => {
             return (
-              <Menu.Item style={menuItemStyle} key={"" + index} onClick={() => this.props.clickHandler(index)}>
+              <Menu.Item
+                disabled={this.props.disabled}
+                style={menuItemStyle}
+                key={"" + index}
+                onClick={() => this.props.clickHandler(index)}>
                 <Icon type="file-search" />
                 <span>{search.length > 30 ? search.substring(0, 30) + "..." : search}</span>
               </Menu.Item>

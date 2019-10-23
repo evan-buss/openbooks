@@ -7,8 +7,6 @@ import Input from 'antd/es/input';
 import Highlighter from 'react-highlight-words';
 import PropTypes from 'prop-types';
 
-import { MessageTypes } from "../messages";
-
 export default class BookTable extends React.Component {
 
   constructor(props) {
@@ -25,6 +23,8 @@ export default class BookTable extends React.Component {
     })
   }
 
+  // My personal favorite servers. Can change over time. I have just 
+  // found these to be the most reliable and they are always my first choice
   recommendedServers = [
     "oatmeal",
     "pondering42"
@@ -107,15 +107,6 @@ export default class BookTable extends React.Component {
     return this.props.items
   }
 
-  handleDownload = (bookString) => {
-    this.props.socket && this.props.socket.send(JSON.stringify({
-      type: MessageTypes.DOWNLOAD,
-      payload: {
-        book: bookString
-      }
-    }))
-  };
-
   render() {
     const columns = [
       {
@@ -161,7 +152,7 @@ export default class BookTable extends React.Component {
           return this.props.disabled ? (
             <Button disabled>Download</Button>
           ) : (
-              <Button onClick={() => this.handleDownload(record.full)}>Download</Button>
+              <Button onClick={() => this.props.downloadCallback(record.full)}>Download</Button>
             )
         }
       }
@@ -204,6 +195,6 @@ const tableStyle = {
 
 Table.propTypes = {
   items: PropTypes.arrayOf(PropTypes.object),
-  socket: PropTypes.object,
+  downloadCallback: PropTypes.func,
   disabled: PropTypes.bool
 };

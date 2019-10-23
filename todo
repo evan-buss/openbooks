@@ -20,9 +20,8 @@ REACH:
 ✔ Reduce the number of notificatitons. It is very IN YOUR FACE for a new user @done(19-10-23 16:17)
   - I have moved some of the notifications to top messages that are a bit more unobtrusive
 - Update readme to describe both modes and how the project works.
-- Table doesn't seem to be going inactive when loading...
-  - There should be a loing indicator when use has clicked download as well
-  - Might be able to keep state in the table but it might get confusing with the global loading as well
+✔ Table doesn't seem to be going inactive when loading... @done(19-10-23 16:37)
+  ✔ There should be a loing indicator when use has clicked download as well @done(19-10-23 16:37)
 - Add results number to top of table 
 
 What I've learned today
