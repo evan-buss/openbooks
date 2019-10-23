@@ -1,5 +1,6 @@
 import {
-  notification
+  notification,
+  message as topMessage
 } from 'antd'
 
 export const MessageTypes = {
@@ -36,7 +37,7 @@ export function messageRouter(message, currentState) {
         loading: false, searchQueries: currentState.searchQueries
       };
     case MessageTypes.WAIT:
-      sendNotification("info", message.status, "Please wait. Your request is being processed", 6);
+      topMessage.loading(message.status, 3)
       break;
     case MessageTypes.SEARCH:
       sendNotification("success",
@@ -44,11 +45,14 @@ export function messageRouter(message, currentState) {
         "Select a book to download or search again.");
       return {
         items: message.books,
-          searchResults: [...currentState.searchResults, message.books],
-          loading: false,
+        searchResults: [...currentState.searchResults, message.books],
+        loading: false,
       };
     case MessageTypes.DOWNLOAD:
-      sendNotification("success", "Book File Received", "Press save on the dialog to download it");
+
+      // Alert the user that the file has downloaded
+      sendNotification("success", "Book File Received", message.name);
+      // Create download link and click it prompting the save dialog
       saveByteArray(message.name, message.file);
       return {
         loading: false

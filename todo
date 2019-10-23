@@ -8,7 +8,6 @@ WEB UI
 
 - Look into go logging. Learn how to change the logger output before release.
 
-
 REACH:
 - Improve parsing accuracy with "per-server" parsing functions
    - Each one adapted to the common format for that server
@@ -18,7 +17,8 @@ REACH:
 - Exit / Shutdown button on the web interface...
 - Make the table fit different screen sizes
 - Make sure to delete the proper files to reduce file system build up
-- Reduce the number of notificatitons. It is very IN YOUR FACE for a new user
+✔ Reduce the number of notificatitons. It is very IN YOUR FACE for a new user @done(19-10-23 16:17)
+  - I have moved some of the notifications to top messages that are a bit more unobtrusive
 - Update readme to describe both modes and how the project works.
 - Table doesn't seem to be going inactive when loading...
   - There should be a loing indicator when use has clicked download as well
