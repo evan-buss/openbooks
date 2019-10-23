@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/evan-buss/openbooks/irc"
 )
@@ -33,7 +34,7 @@ const (
 )
 
 // Servers contains the cache of available download servers.
-var Servers ServerCache
+var serverCache ServerCache
 
 // ReadDaemon is designed to be launched as a goroutine. Listens for
 // specific messages and dispatches appropriate handler functions
@@ -43,6 +44,7 @@ func ReadDaemon(irc *irc.Conn, handler ReaderHandler) {
 
 	var f *os.File
 	var err error
+	serverCache = ServerCache{Servers: []string{}, Time: time.Now()}
 
 	if irc.Logging {
 		f, err = os.OpenFile("irc_log.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
@@ -88,7 +90,8 @@ func ReadDaemon(irc *irc.Conn, handler ReaderHandler) {
 		} else if strings.Contains(text, userList) {
 			users.WriteString(text) // Accumulate the user list
 		} else if strings.Contains(text, endUserList) {
-			Servers.ParseServers(users.String())
+			log.Println("recieved end of names list")
+			serverCache.ParseServers(users.String())
 			users.Reset()
 		}
 	}

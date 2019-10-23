@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"log"
-	"time"
 
 	"github.com/evan-buss/openbooks/core"
 )
@@ -38,7 +37,7 @@ func messageRouter(message Request) {
 			Details: err.Error(),
 		})
 	}
-	go obj.handle()
+	obj.handle()
 }
 
 // handle ConnectionRequests and either connect to the server or do nothing
@@ -48,7 +47,6 @@ func (c ConnectionRequest) handle() {
 
 		core.Join(ircConn)
 		go core.ReadDaemon(ircConn, Handler{}) // Start the Read Daemon
-		go core.GetUsers(ircConn)              // Get a list of servers
 
 		writeJSON(ConnectionResponse{
 			MessageType: CONNECT,
@@ -91,22 +89,17 @@ func (d DownloadRequest) handle() {
 // handle ServerRequests by sending the currently available book servers
 func (s ServersRequest) handle() {
 	log.Println("Received ServersRequest")
+	writeJSON(WaitResponse{
+		MessageType: WAIT,
+		Status:      "Retrieving available book servers",
+	})
+	servers := make(chan []string, 1)
+	go core.GetServers(servers)
+	results := <-servers
+	log.Println("DONE")
 
-	oldCache := time.Now().Sub(core.Servers.Time) > time.Minute
-
-	if len(core.Servers.Servers) == 0 || oldCache {
-		log.Println("Retrieving serverlist")
-		core.GetUsers(ircConn)
-
-		writeJSON(WaitResponse{
-			MessageType: WAIT,
-			Status:      "Retrieving available book servers",
-		})
-		return
-	}
-	log.Println("using cached server list")
 	writeJSON(ServersResponse{
 		MessageType: SERVERS,
-		Servers:     core.Servers.Servers,
+		Servers:     results,
 	})
 }
