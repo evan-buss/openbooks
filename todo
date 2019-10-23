@@ -23,8 +23,6 @@ REACH:
 - Table doesn't seem to be going inactive when loading...
   - There should be a loing indicator when use has clicked download as well
   - Might be able to keep state in the table but it might get confusing with the global loading as well
-- Remove old logs
-   - book string log somewhere
 - Add results number to top of table 
 
 What I've learned today

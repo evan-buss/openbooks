@@ -57,7 +57,7 @@ func wsHandler(w http.ResponseWriter, req *http.Request) {
 
 	log.Println("Client connected: " + req.RemoteAddr)
 	ws.SetCloseHandler(func(code int, text string) error {
-		log.Println(ws.RemoteAddr().String())
+		log.Println("Close Handler: " + ws.RemoteAddr().String())
 		return nil
 	})
 

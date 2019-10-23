@@ -43,19 +43,16 @@ func messageRouter(message Request) {
 // handle ConnectionRequests and either connect to the server or do nothing
 func (c ConnectionRequest) handle() {
 	if !ircConn.IsConnected() {
-		log.Println("Connecting to IRC")
-
 		core.Join(ircConn)
 		go core.ReadDaemon(ircConn, Handler{}) // Start the Read Daemon
 
 		writeJSON(ConnectionResponse{
 			MessageType: CONNECT,
-			Status:      "OpenBooks requires a 30 seconds wait period",
+			Status:      "You must wait 30 seconds before searching",
 			Wait:        30,
 		})
 		return
 	}
-	log.Println("You are already connected to the IRC server")
 	writeJSON(ConnectionResponse{
 		MessageType: CONNECT,
 		Status:      "IRC Server Ready",
@@ -65,8 +62,6 @@ func (c ConnectionRequest) handle() {
 
 // handle SearchRequests and send the query to the book server
 func (s SearchRequest) handle() {
-	log.Println("Received SearchRequest for: " + s.Query)
-
 	core.SearchBook(ircConn, s.Query)
 
 	writeJSON(WaitResponse{
@@ -77,7 +72,6 @@ func (s SearchRequest) handle() {
 
 // handle DownloadRequests by sending the request to the book server
 func (d DownloadRequest) handle() {
-	log.Println("Received DownloadRequest: ", d.Book)
 	core.DownloadBook(ircConn, d.Book)
 
 	writeJSON(WaitResponse{
@@ -88,15 +82,9 @@ func (d DownloadRequest) handle() {
 
 // handle ServerRequests by sending the currently available book servers
 func (s ServersRequest) handle() {
-	log.Println("Received ServersRequest")
-	// writeJSON(WaitResponse{
-	// 	MessageType: WAIT,
-	// 	Status:      "Retrieving available book servers",
-	// })
 	servers := make(chan []string, 1)
 	go core.GetServers(servers)
 	results := <-servers
-	log.Println("Sending updated server list")
 
 	writeJSON(ServersResponse{
 		MessageType: SERVERS,
