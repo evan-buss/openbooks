@@ -13,7 +13,7 @@ import PlaceHolder from './components/PlaceHolder';
 
 import { countdownTimer, messageRouter, MessageTypes, sendNotification } from "./messages"
 
-// import { fakeItems } from "./dummyData";
+// import { fakeItems, recentSearches } from "./dummyData";
 
 
 const { Header, Content, Sider } = Layout;
@@ -37,8 +37,8 @@ export default class App extends React.Component {
   componentDidMount() {
     // Dummy data for testing
     // this.setState({
-    // items: fakeItems.books,
-    // searches: recentSearches,
+    //   items: fakeItems.books,
+    //   searchQueries: recentSearches,
     // servers: servers.servers
     // });
 

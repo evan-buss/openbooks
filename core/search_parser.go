@@ -52,6 +52,8 @@ func ParseSearchFile(filePath string) []BookDetail {
 		counter++
 	}
 
+	file.Close()
+
 	sort.Slice(books, func(i, j int) bool { return books[i].Server < books[j].Server })
 
 	return books

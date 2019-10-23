@@ -16,12 +16,9 @@ REACH:
 
 - Exit / Shutdown button on the web interface...
 - Make the table fit different screen sizes
-- Make sure to delete the proper files to reduce file system build up
 ✔ Reduce the number of notificatitons. It is very IN YOUR FACE for a new user @done(19-10-23 16:17)
   - I have moved some of the notifications to top messages that are a bit more unobtrusive
 - Update readme to describe both modes and how the project works.
-✔ Table doesn't seem to be going inactive when loading... @done(19-10-23 16:37)
-  ✔ There should be a loing indicator when use has clicked download as well @done(19-10-23 16:37)
 - Add results number to top of table 
 
 What I've learned today

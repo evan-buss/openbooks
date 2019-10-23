@@ -26,7 +26,7 @@ export default class RecentSearchList extends React.Component {
           selectedKeys={"" + this.props.selected}
           mode="inline"
           theme="dark"
-          style={{ width: "240px" }}
+          style={{ width: "220px" }}
         >
           {this.props.searches.length === 0 &&
             <Menu.Item disabled={true}>No Recent Searches</Menu.Item>}
@@ -38,7 +38,7 @@ export default class RecentSearchList extends React.Component {
                 key={"" + index}
                 onClick={() => this.props.clickHandler(index)}>
                 <Icon type="file-search" />
-                <span>{search.length > 30 ? search.substring(0, 30) + "..." : search}</span>
+                <span>{search}</span>
               </Menu.Item>
             );
           })}
