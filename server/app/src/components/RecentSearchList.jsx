@@ -9,7 +9,8 @@ const {Title} = Typography;
 
 
 const titleStyle = {
-  color: "white"
+  color: "white",
+  textAlign: "center"
 };
 
 export default class RecentSearchList extends React.Component {

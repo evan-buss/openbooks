@@ -1,4 +1,6 @@
-import {notification} from 'antd'
+import {
+  notification
+} from 'antd'
 
 export const MessageTypes = {
   ERROR: 0,
@@ -24,13 +26,17 @@ export function messageRouter(message, currentState) {
     case MessageTypes.ERROR:
       sendNotification("error", "Error Processing Request", message.details);
       currentState.searchQueries.pop();
-      return {loading: false, searchQueries: currentState.searchQueries};
+      return {
+        loading: false, searchQueries: currentState.searchQueries
+      };
     case MessageTypes.IRCERROR:
       sendNotification("error", "Internal Book Server Error", message.status);
       currentState.searchQueries.pop();
-      return {loading: false, searchQueries: currentState.searchQueries};
+      return {
+        loading: false, searchQueries: currentState.searchQueries
+      };
     case MessageTypes.WAIT:
-      sendNotification("info", message.status, "Please wait. Your request is being processed", 10);
+      sendNotification("info", message.status, "Please wait. Your request is being processed", 6);
       break;
     case MessageTypes.SEARCH:
       sendNotification("success",
@@ -38,15 +44,20 @@ export function messageRouter(message, currentState) {
         "Select a book to download or search again.");
       return {
         items: message.books,
-        searchResults: [...currentState.searchResults, message.books],
-        loading: false,
+          searchResults: [...currentState.searchResults, message.books],
+          loading: false,
       };
     case MessageTypes.DOWNLOAD:
       sendNotification("success", "Book File Received", "Press save on the dialog to download it");
       saveByteArray(message.name, message.file);
-      return {loading: false};
+      return {
+        loading: false
+      };
     case MessageTypes.SERVERS:
-      return {servers: message.servers};
+      sendNotification("success", "Book Server List Updated", "Only download books from active servers.")
+      return {
+        servers: message.servers
+      };
     default:
       console.error("Unknown Server Message")
   }

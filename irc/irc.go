@@ -74,15 +74,18 @@ func (i *Conn) GetMessage() (text string) {
 	text = string(buf[:n])
 
 	if strings.Contains(text, "PING") {
+		log.Println("PINGED BY SERVER")
 		i.irc.Write([]byte("PONG :pingis\r\n"))
 	}
 	return
 }
 
+// GetUsers sends a NAMES request to the IRC server
 func (i *Conn) GetUsers(channel string) {
 	i.irc.Write([]byte("NAMES #" + channel + "\r\n"))
 }
 
+// IsConnected returns true if the IRC connection is not null
 func (i *Conn) IsConnected() bool {
 	return i.irc != nil
 }
