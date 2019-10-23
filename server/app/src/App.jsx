@@ -10,9 +10,10 @@ import ServerList from './components/ServerList';
 import RecentSearchList from './components/RecentSearchList';
 import PlaceHolder from './components/PlaceHolder';
 
+
 import { countdownTimer, messageRouter, MessageTypes, sendNotification } from "./messages"
 
-import { fakeItems } from "./dummyData";
+// import { fakeItems } from "./dummyData";
 
 
 const { Header, Content, Sider } = Layout;
@@ -23,24 +24,23 @@ export default class App extends React.Component {
     super(props);
     this.state = {
       items: [],
-      searchQueries: ["this is a very long string title"], //Holds individual queries when the user clicks search button
+      searchQueries: [], //Holds individual queries when the user clicks search button
       searchResults: [], //Holds past search results.
       servers: [],
       socket: null,
       loading: false,
       timeLeft: 30,
-      selected: 0
-      // selected: -1
+      selected: -1
     }
   }
 
   componentDidMount() {
     // Dummy data for testing
-    this.setState({
-      items: fakeItems.books,
-      // searches: recentSearches,
-      // servers: servers.servers
-    });
+    // this.setState({
+    // items: fakeItems.books,
+    // searches: recentSearches,
+    // servers: servers.servers
+    // });
 
     //TODO: How do I pass a variable to this...
     let socket = new WebSocket("ws://127.0.0.1:8080/ws");
@@ -92,7 +92,6 @@ export default class App extends React.Component {
     }
   }
 
-
   searchCallback = (queryString) => {
     this.setState((state) => {
       return {
@@ -113,7 +112,6 @@ export default class App extends React.Component {
       ))
   };
 
-
   pastSearchHandler = (index) => {
     this.setState((state) => {
       return {
@@ -124,7 +122,6 @@ export default class App extends React.Component {
   };
 
   reloadServersHandler = () => {
-    console.log("reload")
     this.state.socket != null && this.state.socket.send(JSON.stringify({
       type: MessageTypes.SERVERS,
       payload: {}
