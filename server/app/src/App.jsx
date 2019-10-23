@@ -100,6 +100,16 @@ export default class App extends React.Component {
         loading: true
       }
     });
+
+    this.state.socket != null &&
+      this.state.socket.send(JSON.stringify(
+        {
+          type: MessageTypes.SEARCH,
+          payload: {
+            query: queryString
+          }
+        }
+      ))
   };
 
 
@@ -136,8 +146,7 @@ export default class App extends React.Component {
             <Title style={titleStyle}>OpenBooks</Title>
           </Header>
           <Content style={contentStyle}>
-            <Search socket={this.state.socket}
-              disabled={this.state.timeLeft > 0 || this.state.loading}
+            <Search disabled={this.state.timeLeft > 0 || this.state.loading}
               searchCallback={this.searchCallback} />
             {/*Show instructions if the user hasn't yet search for anything*/}
             {this.state.searchQueries.length === 0 &&

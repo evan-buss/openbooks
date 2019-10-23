@@ -48,6 +48,5 @@ const inputStyle = {
 
 Search.propTypes = {
     searchCallback: PropTypes.func,
-    socket: PropTypes.object,
     disabled: PropTypes.bool
 };

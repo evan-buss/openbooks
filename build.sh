@@ -1,3 +1,6 @@
+cd server/app
+npm run build
+cd ../..
 packr2
 env GOOS=windows GOARCH=amd64 go build -o build/OpenBooks_WIN.exe
 env GOOS=darwin GOARCH=amd64 go build -o build/OpenBooks_MAC
