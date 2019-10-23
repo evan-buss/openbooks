@@ -4,15 +4,9 @@ WEB UI
 
 - Clean up and review core go code. I am sure there are some things that can be simplified and refactored.
 
-- Rewrite / refactor dcc parsing. Current implementation is messy and doesn't use builtin path utilities
-
 - Write some tests for things simple things like utilities
 
 - Look into go logging. Learn how to change the logger output before release.
-
-- Disable download buttons until the download is completed. Users should be able to overload the server with requests.
-
-- Look into mutex locking on the reader and the ws connection. Not sure if this is the cause of errors/bugs
 
 
 REACH:
@@ -21,12 +15,15 @@ REACH:
    - Would require studying the format of the server with multiple search files..
    - Something to do in the future
 
-FEATURES
- - Store references to recently downloaded search results. Users should be able to click any of them and populate the table again
- - Show the currently active file servers in the sidebar
-   - Indicate in the table which servers are online and which aren't
-     - If the server is not online either indicate to the user when they choose to download or just hide them in the table.
-   - Not sure if I want to do the checking server side or client side. The server would filter the results based on the active servers.
+- Exit / Shutdown button on the web interface...
+- Custom favicon
+- Make the table fit different screen sizes
+- Make sure to delete the proper files to reduce file system build up
+- Reduce the number of notificatitons. It is very IN YOUR FACE for a new user
+- Update readme to describe both modes and how the project works.
 
 
-Exit / Shutdown button on the we interface...
+What I've learned today
+  Always use the utility library if avaiablable
+    Not worth it to roll your own reader / writer just use bufio
+    Go channels are very cool. It is easy to have an immensely multi-threaded application

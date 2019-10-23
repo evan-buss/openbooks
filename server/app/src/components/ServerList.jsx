@@ -1,37 +1,25 @@
 import React from 'react';
-import Typography from 'antd/es/typography'
+import Title from 'antd/es/typography/Title'
 import Icon from 'antd/es/icon';
 import List from 'antd/es/list';
 import Spin from 'antd/es/spin';
+import Tooltip from 'antd/es/tooltip';
 import PropTypes from 'prop-types'
-
-const { Title } = Typography;
-
-const listStyle = {
-  overflow: 'auto',
-  height: '100vh',
-  position: 'fixed',
-  width: "220px",
-  paddingTop: "16px",
-  paddingRight: "8px",
-  backgroundColor: "#001529",
-  right: 0,
-};
-
-const spinStyle = {
-  display: "flex",
-  flexFlow: "row nowrap",
-  justifyContent: "center",
-  alignItems: "center",
-  marginTop: "80px"
-};
 
 export default class ServerList extends React.Component {
   render() {
     const { servers } = this.props;
     return (
-      <div style={listStyle}>
-        <Title level={3} style={{ color: "white", textAlign: "center" }}>Online Servers</Title>
+      <div>
+        <Tooltip placement="right" title="Click to refresh">
+          <Title
+            level={3}
+            style={titleStyle}
+            onClick={this.props.reloadCallback}>
+            Online Servers
+          </Title>
+        </Tooltip>
+
 
         {servers.length !== 0 ? (<List
           size="small"
@@ -55,6 +43,20 @@ export default class ServerList extends React.Component {
 
     )
   }
+}
+
+const spinStyle = {
+  display: "flex",
+  flexFlow: "row nowrap",
+  justifyContent: "center",
+  alignItems: "center",
+  marginTop: 80
+};
+
+const titleStyle = {
+  color: "white",
+  paddingLeft: 8,
+  cursor: "pointer"
 }
 
 ServerList.propTypes = {
