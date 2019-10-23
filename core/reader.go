@@ -99,7 +99,6 @@ func ReadDaemon(irc *irc.Conn, handler ReaderHandler) {
 			serverCache.ParseServers(users.String())
 			users.Reset()
 		} else if strings.Contains(text, pingMessage) {
-			log.Println("PING MESSAGE")
 			irc.PONG("irc.irchighway.net")
 		}
 	}
