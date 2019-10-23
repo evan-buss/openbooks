@@ -92,6 +92,7 @@ export default class App extends React.Component {
     }
   }
 
+  // This is called when the enters a search query
   searchCallback = (queryString) => {
     this.setState((state) => {
       return {
@@ -112,7 +113,8 @@ export default class App extends React.Component {
       ))
   };
 
-  pastSearchHandler = (index) => {
+  // This is called when a user clicks an item in the search history sidebar
+  loadPastSearchHandler = (index) => {
     this.setState((state) => {
       return {
         items: state.searchResults[index],
@@ -121,6 +123,7 @@ export default class App extends React.Component {
     })
   };
 
+  // This is called when the user clicks on the reload servers button
   reloadServersHandler = () => {
     this.state.socket != null && this.state.socket.send(JSON.stringify({
       type: MessageTypes.SERVERS,
@@ -128,14 +131,29 @@ export default class App extends React.Component {
     }))
   }
 
+  // This is called when the user clicks a download link on a book
+  bookDownloadHandler = (bookString) => {
+    if (this.state.socket != null) {
+      this.state.socket.send(JSON.stringify({
+        type: MessageTypes.DOWNLOAD,
+        payload: {
+          book: bookString
+        }
+      }))
+
+      this.setState({ loading: true })
+    }
+  }
+
   render() {
     return (
       <Layout>
         <Sider width={240} style={siderStyle}>
           <RecentSearchList
+            disabled={this.state.loading}
             searches={this.state.searchQueries}
             selected={this.state.selected}
-            clickHandler={this.pastSearchHandler}
+            clickHandler={this.loadPastSearchHandler}
           />
           <ServerList servers={this.state.servers} reloadCallback={this.reloadServersHandler} />
         </Sider>
@@ -158,6 +176,7 @@ export default class App extends React.Component {
                 items={this.state.items}
                 socket={this.state.socket}
                 disabled={this.state.loading}
+                downloadCallback={this.bookDownloadHandler}
               />}
           </Content>
         </Layout>
