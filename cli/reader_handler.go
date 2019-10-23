@@ -13,10 +13,8 @@ type Handler struct{}
 // and sends user a response message
 func (h Handler) DownloadSearchResults(text string) {
 	fileLocation := make(chan string)
-	go dcc.NewDownload(text, false, true, fileLocation)
-	fmt.Println(<-fileLocation)
-	// We wait until the search results have been downloaed then show the
-	// menu once again
+	go dcc.NewDownload(text, true, fileLocation)
+	fmt.Println("Results location: " + <-fileLocation)
 	userInput(Reader, IRC)
 }
 
@@ -24,11 +22,9 @@ func (h Handler) DownloadSearchResults(text string) {
 // a user a response message
 func (h Handler) DownloadBookFile(text string) {
 	fileLocation := make(chan string)
-	go dcc.NewDownload(text, true, true, fileLocation)
-	fmt.Println(<-fileLocation)
-	// We wait until the book has been downloaded then show the menu once again
+	go dcc.NewDownload(text, true, fileLocation)
+	fmt.Println("File location: " + <-fileLocation)
 	userInput(Reader, IRC)
-	// doneChan <- true
 }
 
 // NoResults is called when the user searches for something that

@@ -30,30 +30,31 @@ type Data struct {
 	size     int
 }
 
-// NewDownload parses the string and downloads the file
-func NewDownload(text string, isBook bool, isCli bool, doneChan chan<- string) {
+// NewDownload parses the DCC SEND string and downloads the file
+func NewDownload(text string, isCli bool, doneChan chan<- string) {
 	dcc := Data{}
-
 	err := dcc.ParseDCC(text)
 	if err != nil {
 		log.Fatal("ParseDCC Error: ", err)
 	}
 
-	var directory string
-
 	if isCli {
-		directory, err = os.UserHomeDir()
+		homeDir, err := os.UserHomeDir()
 		if err != nil {
 			log.Println(err)
 		}
-		directory = filepath.Join(directory, "Downloads")
+		dcc.filename = filepath.Join(homeDir, "Downloads", dcc.filename)
 	} else {
-		directory = os.TempDir()
+		dcc.filename = filepath.Join(os.TempDir(), dcc.filename)
 	}
 
-	fullPath := filepath.Join(directory, dcc.filename)
+	downloadDCC(dcc, doneChan)
+}
 
-	file, err := os.OpenFile(fullPath, os.O_CREATE|os.O_WRONLY, 0644)
+// downloadDCC downloads the data contained in the Data object
+func downloadDCC(dcc Data, doneChan chan<- string) {
+
+	file, err := os.OpenFile(dcc.filename, os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -65,6 +66,8 @@ func NewDownload(text string, isBook bool, isCli bool, doneChan chan<- string) {
 	defer conn.Close()
 
 	// Download the file
+	// NOTE: I tried the io.Copy utility but it EASILY took about 100x
+	// the amount of time as the manual method... Not sure why (windows)
 	received := 0
 	bytes := make([]byte, 1024)
 	for received < dcc.size {
@@ -79,14 +82,13 @@ func NewDownload(text string, isBook bool, isCli bool, doneChan chan<- string) {
 		received += n
 	}
 
-	var newPath string
-	ext := filepath.Ext(fullPath)
-	if ext == ".rar" || ext == ".zip" {
-		zipPath := fullPath // Save the zip file path and keep it unchanged
-		defer os.Remove(zipPath)
+	file.Close()
 
-		err = archiver.Walk(fullPath, func(f archiver.File) error {
-			newPath = filepath.Join(filepath.Dir(fullPath), f.Name())
+	var newPath string
+	ext := filepath.Ext(dcc.filename)
+	if ext == ".rar" || ext == ".zip" {
+		err = archiver.Walk(dcc.filename, func(f archiver.File) error {
+			newPath = filepath.Join(filepath.Dir(dcc.filename), f.Name())
 
 			out, err := os.OpenFile(newPath, os.O_CREATE|os.O_RDWR, 0644)
 			if err != nil {
@@ -109,13 +111,19 @@ func NewDownload(text string, isBook bool, isCli bool, doneChan chan<- string) {
 			log.Println(err)
 		}
 	}
-	if newPath != "" { //If we extracted a file, update the output path
-		fullPath = newPath
+
+	if newPath != "" { // If we extracted a file, send that file and remove the zip file
+		doneChan <- newPath
+		err = os.Remove(dcc.filename)
+		if err != nil {
+			log.Println("remove error", err)
+		}
+	} else {
+		doneChan <- dcc.filename
 	}
-	doneChan <- fullPath
 }
 
-// ParseDCC parses the important data of a book download string
+// ParseDCC parses the important data of a DCC SEND string
 func (dcc *Data) ParseDCC(text string) error {
 	re := regexp.MustCompile(`DCC SEND "?(.+[^"])"?\s(\d+)\s+(\d+)\s+(\d+)\s*`)
 	groups := re.FindStringSubmatch(text)

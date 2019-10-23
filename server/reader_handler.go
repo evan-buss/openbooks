@@ -1,13 +1,12 @@
 package server
 
 import (
-	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
 	"path/filepath"
 
 	"github.com/evan-buss/openbooks/core"
-
 	"github.com/evan-buss/openbooks/dcc"
 )
 
@@ -18,31 +17,29 @@ type Handler struct{}
 func (h Handler) DownloadSearchResults(text string) {
 	searchDownloaded := make(chan string)
 	// Download the file and wait until it is completed
-	go dcc.NewDownload(text, false, false, searchDownloaded)
+	go dcc.NewDownload(text, false, searchDownloaded)
 	// Retrieve the file's location
 	fileLocation := <-searchDownloaded
-	fmt.Println(fileLocation)
 	writeJSON(SearchResponse{
 		MessageType: SEARCH,
 		Books:       core.ParseSearchFile(fileLocation),
 	})
+
+	err := os.Remove(fileLocation)
+	if err != nil {
+		log.Println("Couldn't remove search file", err)
+	}
 }
 
 // DownloadBookFile downloads the book file and sends it over the websocket
 func (h Handler) DownloadBookFile(text string) {
 	bookDownloaded := make(chan string)
-	go dcc.NewDownload(text, true, false, bookDownloaded)
-	// Wait until the download finishes and get the location
+	go dcc.NewDownload(text, false, bookDownloaded)
 	fileLocation := <-bookDownloaded
-
 	fileName := filepath.Base(fileLocation)
-
-	fmt.Println(fileLocation)
-	fmt.Println(fileName)
 
 	data, err := ioutil.ReadFile(fileLocation)
 	if err != nil {
-		// TODO: Send an error message to the client
 		log.Println("Error reading data from " + fileLocation)
 	}
 
@@ -51,6 +48,11 @@ func (h Handler) DownloadBookFile(text string) {
 		Name:        fileName,
 		File:        data,
 	})
+
+	err = os.Remove(fileLocation)
+	if err != nil {
+		log.Println("Couldn't remove book file", err)
+	}
 }
 
 // NoResults is called when the server returns that nothing was found for the query

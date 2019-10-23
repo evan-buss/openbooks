@@ -2,7 +2,6 @@ package core
 
 import (
 	"bufio"
-	"fmt"
 	"log"
 	"os"
 	"strings"
@@ -41,7 +40,7 @@ var serverCache ServerCache
 // ReadDaemon is designed to be launched as a goroutine. Listens for
 // specific messages and dispatches appropriate handler functions
 // Params: irc - IRC connection
-//				 handler - domain specific handler that responds to IRC events
+//         handler - domain specific handler that responds to IRC events
 func ReadDaemon(irc *irc.Conn, handler ReaderHandler) {
 
 	var f *os.File
@@ -75,10 +74,8 @@ func ReadDaemon(irc *irc.Conn, handler ReaderHandler) {
 		// Respond to Direct Client-to-Client downloads
 		if strings.Contains(text, sendMessage) {
 			if strings.Contains(text, "_results_for") {
-				fmt.Println("SEARCH RESULTS")
 				go handler.DownloadSearchResults(text)
 			} else {
-				fmt.Println("BOOK DOWNLOAD")
 				go handler.DownloadBookFile(text)
 			}
 		} else if strings.Contains(text, noticeMessage) {
