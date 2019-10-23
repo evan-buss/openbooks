@@ -21,7 +21,14 @@ REACH:
 - Make sure to delete the proper files to reduce file system build up
 - Reduce the number of notificatitons. It is very IN YOUR FACE for a new user
 - Update readme to describe both modes and how the project works.
-
+- Recent search width needs to be extended to match sider width
+- Center headerbar text relative to content body
+- Table doesn't seem to be going inactive when loading...
+  - There should be a loing indicator when use has clicked download as well
+  - Might be able to keep state in the table but it might get confusing with the global loading as well
+- Remove old logs
+   - book string log somewhere
+- Add results number to top of table 
 
 What I've learned today
   Always use the utility library if avaiablable

@@ -12,6 +12,7 @@
 
 openbooks.exe
 irc_log.txt
+build/
 
 # Test binary, built with `go test -c`
 *.test
