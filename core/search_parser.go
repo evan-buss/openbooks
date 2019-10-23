@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log"
 	"os"
+	"sort"
 	"strings"
 )
 
@@ -51,9 +52,7 @@ func ParseSearchFile(filePath string) []BookDetail {
 		counter++
 	}
 
-	//for _, book := range books {
-	//	fmt.Printf("%+v\n", book)
-	//}
+	sort.Slice(books, func(i, j int) bool { return books[i].Server < books[j].Server })
 
 	return books
 }
