@@ -11,6 +11,11 @@ const titleStyle = {
   paddingLeft: 8,
 };
 
+// Use material design menu item style
+const menuItemStyle = {
+  borderRadius: "0 25px 25px 0"
+}
+
 
 export default class RecentSearchList extends React.Component {
   render() {
@@ -21,15 +26,15 @@ export default class RecentSearchList extends React.Component {
           selectedKeys={"" + this.props.selected}
           mode="inline"
           theme="dark"
-          style={{ width: "220px" }}
+          style={{ width: "240px" }}
         >
           {this.props.searches.length === 0 &&
             <Menu.Item disabled={true}>No Recent Searches</Menu.Item>}
           {this.props.searches.length > 0 && this.props.searches.map((search, index) => {
             return (
-              <Menu.Item key={"" + index} onClick={() => this.props.clickHandler(index)}>
+              <Menu.Item style={menuItemStyle} key={"" + index} onClick={() => this.props.clickHandler(index)}>
                 <Icon type="file-search" />
-                <span>{search.length > 17 ? search.substring(0, 17) + "..." : search}</span>
+                <span>{search.length > 30 ? search.substring(0, 30) + "..." : search}</span>
               </Menu.Item>
             );
           })}
