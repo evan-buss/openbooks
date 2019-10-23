@@ -24,7 +24,6 @@ type ServerCache struct {
 // ParseServers parses the complete list of IRC users to get the elevates users which in
 // this case are the download servers
 func (s *ServerCache) ParseServers(data string) {
-	s.Time = time.Now()
 	servers := strings.Split(data, " ")
 	output := make([]string, 0)
 
@@ -37,6 +36,7 @@ func (s *ServerCache) ParseServers(data string) {
 	}
 	sort.Strings(output)
 	s.Servers = output
+	s.Time = time.Now()
 }
 
 // GetServers returns the IRC book servers that are online
