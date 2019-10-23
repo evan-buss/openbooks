@@ -177,7 +177,8 @@ const titleStyle = {
   textAlign: "center",
   color: "white",
   marginBottom: 0,
-  marginTop: 5
+  marginTop: 5,
+  marginLeft: 220
 };
 
 const contentStyle = {
