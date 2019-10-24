@@ -15,12 +15,15 @@ export default class BookTable extends React.Component {
     this.state = {
       searchText: '',
       onlyRecommended: false,
+      height: 0
     };
 
     // Create a key for each item using the index
     this.props.items.forEach((item, index) => {
       item.key = index;
     })
+
+    this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
   }
 
   // My personal favorite servers. Can change over time. I have just 
@@ -30,6 +33,38 @@ export default class BookTable extends React.Component {
     "pondering42"
   ];
 
+
+  componentWillMount() {
+    this.updateWindowDimensions();
+    window.addEventListener('resize', this.updateWindowDimensions);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('resize', this.updateWindowDimensions);
+  }
+
+  // Set the table size according to certain screen resolutions
+  updateWindowDimensions() {
+    let rows;
+    let height = window.innerHeight;
+    if (height >= 1300) {
+      rows = 18;
+    } else if (height >= 1100) {
+      rows = 16;
+    } else if (height >= 1000) {
+      rows = 14;
+    } else if (height >= 910) {
+      rows = 12;
+    } else if (height >= 800) {
+      rows = 10;
+    } else if (height >= 720) {
+      rows = 8;
+    } else {
+      rows = 6;
+    }
+    console.log(rows)
+    this.setState({ height: rows });
+  }
 
   getColumnSearchProps = dataIndex => ({
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
@@ -98,6 +133,7 @@ export default class BookTable extends React.Component {
     });
   }
 
+  // Modify the list of items based on the user's preferences
   getItems() {
     if (this.state.onlyRecommended) {
       return this.props.items.filter((item) => {
@@ -157,6 +193,9 @@ export default class BookTable extends React.Component {
         }
       }
     ];
+
+    const rows = this.state.height;
+
     return (
       <div style={containerStyle}>
         <Title style={titleStyle}>Search Results</Title>
@@ -172,7 +211,13 @@ export default class BookTable extends React.Component {
           columns={columns}
           dataSource={this.getItems()}
           loading={this.props.disabled}
-          pagination={{ position: "bottom", defaultPageSize: 12 }}
+
+          pagination={{
+            position: "bottom",
+            showSizeChanger: true,
+            defaultPageSize: rows,
+            pageSizeOptions: ['6', '8', '10', '12', '14', '16', '18', '20']
+          }}
         />
       </div>
     )

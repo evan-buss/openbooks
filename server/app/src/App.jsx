@@ -1,6 +1,6 @@
 import React from 'react';
 import Layout from 'antd/es/layout';
-import Typography from 'antd/es/typography';
+import Title from 'antd/es/typography/Title';
 import Spin from 'antd/es/spin';
 
 import './App.css';
@@ -13,11 +13,10 @@ import PlaceHolder from './components/PlaceHolder';
 
 import { countdownTimer, messageRouter, MessageTypes, sendNotification } from "./messages"
 
-// import { fakeItems, recentSearches } from "./dummyData";
+import { fakeItems, recentSearches } from "./dummyData";
 
 
 const { Header, Content, Sider } = Layout;
-const { Title } = Typography;
 
 export default class App extends React.Component {
   constructor(props) {
@@ -36,11 +35,11 @@ export default class App extends React.Component {
 
   componentDidMount() {
     // Dummy data for testing
-    // this.setState({
-    //   items: fakeItems.books,
-    //   searchQueries: recentSearches,
-    // servers: servers.servers
-    // });
+    this.setState({
+      items: fakeItems.books,
+      searchQueries: recentSearches,
+      // servers: servers.servers
+    });
 
     //TODO: How do I pass a variable to this...
     let socket = new WebSocket("ws://127.0.0.1:8080/ws");
