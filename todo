@@ -1,11 +1,5 @@
 WEB UI
-- Make sure we delete the files in the temp directory after sending them
-  - Might save the search results file and allow users to select a previous search
-
-- Clean up and review core go code. I am sure there are some things that can be simplified and refactored.
-
 - Write some tests for things simple things like utilities
-
 - Look into go logging. Learn how to change the logger output before release.
 
 REACH:
@@ -20,8 +14,3 @@ REACH:
   - I have moved some of the notifications to top messages that are a bit more unobtrusive
 - Update readme to describe both modes and how the project works.
 - Add results number to top of table 
-
-What I've learned today
-  Always use the utility library if avaiablable
-    Not worth it to roll your own reader / writer just use bufio
-    Go channels are very cool. It is easy to have an immensely multi-threaded application
