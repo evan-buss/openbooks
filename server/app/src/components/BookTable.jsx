@@ -211,9 +211,9 @@ export default class BookTable extends React.Component {
           columns={columns}
           dataSource={this.getItems()}
           loading={this.props.disabled}
-
           pagination={{
             position: "bottom",
+            showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} results`,
             showSizeChanger: true,
             defaultPageSize: rows,
             pageSizeOptions: ['6', '8', '10', '12', '14', '16', '18', '20']
