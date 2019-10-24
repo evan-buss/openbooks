@@ -7,5 +7,9 @@ REACH:
    - Each one adapted to the common format for that server
    - Would require studying the format of the server with multiple search files..
    - Something to do in the future
-- Exit / Shutdown button on the web interface...
+
+
 - Update readme to describe both modes and how the project works.
+- Possibly save recent searches to the browser's history.
+  - Data would be persisted across restarts...
+  - Would need to add an option in the menu to manually remove items
