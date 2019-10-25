@@ -49,14 +49,17 @@ func ReadDaemon(irc *irc.Conn, handler ReaderHandler) {
 	scanner := bufio.NewScanner(irc)
 
 	if irc.Logging {
-		logFile, err := os.OpenFile("irc_log.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		var err error
+		logFile, err = os.OpenFile("irc_log.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 		if err != nil {
-			panic(err)
+			log.Fatal("error opening log file", err)
 		}
 		defer logFile.Close()
 
-		logFile.WriteString("\n====================" +
-			" NEW LOG " + "======================\n")
+		_, err = logFile.WriteString("\n==================== NEW LOG ======================\n")
+		if err != nil {
+			log.Println(err)
+		}
 	}
 
 	for scanner.Scan() {
@@ -66,7 +69,10 @@ func ReadDaemon(irc *irc.Conn, handler ReaderHandler) {
 		}
 
 		if irc.Logging {
-			logFile.WriteString(text + "\n")
+			_, err := logFile.WriteString(text + "\n")
+			if err != nil {
+				log.Println(err)
+			}
 		}
 
 		// Respond to Direct Client-to-Client downloads
