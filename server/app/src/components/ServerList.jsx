@@ -20,7 +20,6 @@ export default class ServerList extends React.Component {
           </Title>
         </Tooltip>
 
-
         {servers.length !== 0 ? (<List
           size="small"
           itemLayout="horizontal"
@@ -45,6 +44,12 @@ export default class ServerList extends React.Component {
   }
 }
 
+const titleStyle = {
+  color: "white",
+  paddingLeft: 8,
+  cursor: "pointer"
+}
+
 const spinStyle = {
   display: "flex",
   flexFlow: "row nowrap",
@@ -53,11 +58,7 @@ const spinStyle = {
   marginTop: 80
 };
 
-const titleStyle = {
-  color: "white",
-  paddingLeft: 8,
-  cursor: "pointer"
-}
+
 
 ServerList.propTypes = {
   servers: PropTypes.arrayOf(PropTypes.string)

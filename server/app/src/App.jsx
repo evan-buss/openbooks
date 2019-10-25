@@ -13,7 +13,7 @@ import PlaceHolder from './components/PlaceHolder';
 
 import { countdownTimer, messageRouter, MessageTypes, sendNotification } from "./messages"
 
-// import { fakeItems, recentSearches } from "./dummyData";
+// import { servers, fakeItems, recentSearches } from "./dummyData";
 
 
 const { Header, Content, Sider } = Layout;
@@ -34,15 +34,14 @@ export default class App extends React.Component {
   }
 
   componentDidMount() {
-    // Dummy data for testing
+    // Dummy data for UI testing without backend
     // this.setState({
-    //   items: fakeItems.books,
-    //   searchQueries: recentSearches,
-    //   // servers: servers.servers
+    // items: fakeItems.books,
+    // searchQueries: recentSearches,
+    // servers: servers.servers
     // });
 
-    //TODO: How do I pass a variable to this...
-    let socket = new WebSocket("ws://127.0.0.1:8080/ws");
+    let socket = new WebSocket("ws://127.0.0.1:5228/ws");
 
     socket.onopen = () => {
       console.log("Successfully Connected");
@@ -147,7 +146,7 @@ export default class App extends React.Component {
   render() {
     return (
       <Layout>
-        <Sider width={240} style={siderStyle}>
+        <Sider width={240} className="sider-style">
           <RecentSearchList
             disabled={this.state.loading}
             searches={this.state.searchQueries}
@@ -207,14 +206,6 @@ const contentStyle = {
   alignItems: "center",
   fontSize: "calc(10px + 2vmin)",
   color: "white"
-}
-
-const siderStyle = {
-  overflow: 'auto',
-  height: '100vh',
-  position: 'fixed',
-  left: 0,
-  zIndex: 5
 }
 
 const spinnerStyle = {
