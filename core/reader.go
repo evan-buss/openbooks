@@ -43,23 +43,21 @@ var serverCache ServerCache
 //         handler - domain specific handler that responds to IRC events
 func ReadDaemon(irc *irc.Conn, handler ReaderHandler) {
 
-	var f *os.File
-	var err error
+	var logFile *os.File
 	serverCache = ServerCache{Servers: []string{}, Time: time.Now()}
+	var users strings.Builder // Accumulate list of users and then flush
+	scanner := bufio.NewScanner(irc)
 
 	if irc.Logging {
-		f, err = os.OpenFile("irc_log.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-		defer f.Close()
-		f.WriteString("\n==================== NEW LOG ======================\n")
-
+		logFile, err := os.OpenFile("irc_log.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 		if err != nil {
 			panic(err)
 		}
-	}
+		defer logFile.Close()
 
-	// Keep a list of users. We want to accumulate all users and then call the handle users method
-	var users strings.Builder
-	scanner := bufio.NewScanner(irc)
+		logFile.WriteString("\n====================" +
+			" NEW LOG " + "======================\n")
+	}
 
 	for scanner.Scan() {
 		text := scanner.Text()
@@ -68,7 +66,7 @@ func ReadDaemon(irc *irc.Conn, handler ReaderHandler) {
 		}
 
 		if irc.Logging {
-			f.WriteString(text)
+			logFile.WriteString(text + "\n")
 		}
 
 		// Respond to Direct Client-to-Client downloads
