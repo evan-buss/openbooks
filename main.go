@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"os"
 	"os/signal"
 	"os/user"
@@ -20,10 +21,10 @@ var userName string
 // Retrieve command line arguments and set appropriate variables
 func init() {
 	user, _ := user.Current()
-	userName = user.Name
-	flag.BoolVar(&logIRC, "log", false, "Save IRC logs")
+	userName = strings.Split(user.Name, " ")[0]
+	flag.BoolVar(&logIRC, "log", false, "Save IRC logs to irc_log.txt")
 	flag.BoolVar(&cliMode, "cli", false, "Launch OpenBooks in the terminal instead of the web UI")
-	flag.StringVar(&userName, "name", userName, "Use a name that differs from your account name.")
+	flag.StringVar(&userName, "name", userName, "Use a name that differs from your account name. One word only.")
 }
 
 // Determine what mode to run the application in (CLI or Web Server)
@@ -33,6 +34,7 @@ func main() {
 	// Username can be supplied via ARGS or found from the user's system name
 	if strings.Contains(userName, " ") {
 		// If there is a space split it and take the first word
+		fmt.Println("Using first word of entered username")
 		userName = strings.Split(userName, " ")[0]
 	}
 
