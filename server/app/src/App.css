@@ -1,1 +1,14 @@
 @import '~antd/dist/antd.css';
+
+
+.sider-style {
+  overflow: hidden;
+  height: 100vh;
+  position: fixed;
+  left: 0;
+  z-index: 5;
+}
+
+.sider-style:hover {
+  overflow: auto;
+}

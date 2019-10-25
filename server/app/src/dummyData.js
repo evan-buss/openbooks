@@ -1,4 +1,4 @@
-import {MessageTypes} from "./messages";
+import { MessageTypes } from "./messages";
 
 const recentSearches = [
     "anthony kiedis",
