@@ -3,7 +3,6 @@ package server
 import (
 	"log"
 	"net/http"
-	"strconv"
 	"sync"
 
 	"github.com/evan-buss/openbooks/irc"
@@ -26,7 +25,7 @@ var wsConn *websocket.Conn
 var mutex sync.Mutex
 
 // Start instantiates the web server and opens the browser
-func Start(irc *irc.Conn, port int) {
+func Start(irc *irc.Conn) {
 	ircConn = irc
 
 	// Access the SPA bundled in the binary
@@ -35,9 +34,9 @@ func Start(irc *irc.Conn, port int) {
 	http.Handle("/", http.FileServer(box))
 	http.HandleFunc("/ws", wsHandler)
 
-	openbrowser("http://localhost:" + strconv.Itoa(port) + "/")
+	openbrowser("http://localhost:5228" + "/")
 
-	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(port), nil))
+	log.Fatal(http.ListenAndServe(":5228", nil))
 }
 
 // wsHandler handles upgrading and connecting websocket requests

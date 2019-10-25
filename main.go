@@ -16,7 +16,6 @@ import (
 var logIRC bool
 var cliMode bool
 var userName string
-var webPort int
 
 // Retrieve command line arguments and set appropriate variables
 func init() {
@@ -25,7 +24,6 @@ func init() {
 	flag.BoolVar(&logIRC, "log", false, "Save IRC logs")
 	flag.BoolVar(&cliMode, "cli", false, "Launch OpenBooks in the terminal instead of the web UI")
 	flag.StringVar(&userName, "name", userName, "Use a name that differs from your account name.")
-	flag.IntVar(&webPort, "port", 8080, "Use a custom port for website server")
 }
 
 // Determine what mode to run the application in (CLI or Web Server)
@@ -52,6 +50,6 @@ func main() {
 	if cliMode {
 		cli.Start(conn)
 	} else {
-		server.Start(conn, webPort)
+		server.Start(conn)
 	}
 }
