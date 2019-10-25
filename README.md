@@ -1,6 +1,8 @@
 # openbooks
 Openbooks allows you to download ebooks from irc.irchighway.net quickly and easily.
 
+![home](https://raw.githubusercontent.com/evan-buss/openbooks/master/.github/home.png)
+![search results](https://raw.githubusercontent.com/evan-buss/openbooks/master/.github/search.png)
 ## Getting Started
 1. Download the latest release for your platform from the [releases page](https://github.com/evan-buss/openbooks/releases).
 2. Run the binary
