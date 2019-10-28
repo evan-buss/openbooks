@@ -43,9 +43,12 @@ export default class RecentSearchList extends React.Component {
                 onClick={() => this.props.clickHandler(index)}>
                 <div>
                   <Icon type="file-search" />
-                  <span>{search}</span>
+                  <span>{search.length > 15 ? search.substring(0, 15) + "..." : search}</span>
                 </div>
-                <Icon type="close" className="close-button" onClick={() => this.props.deleteHandler(search, index)}/>
+                {this.props.searches.length > 1 &&
+                  <Icon type="close"
+                    className="close-button"
+                    onClick={() => this.props.deleteHandler(search, index)} />}
               </Menu.Item>
             );
           })}
