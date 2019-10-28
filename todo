@@ -10,3 +10,5 @@ REACH:
 - Possibly save recent searches to the browser's history.
   - Data would be persisted across refreshes and restarts
   - Would need to add an option in the menu to manually remove items
+- Cache files with a service-worker
+  - Good learning experience as I've never done it before
