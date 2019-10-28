@@ -31,18 +31,20 @@ export default class App extends React.Component {
   }
 
   componentDidMount() {
-    if (window.localStorage.getItem("queries") !== null) {
+    let localQueries = JSON.parse(window.localStorage.getItem("queries"))
+    if (localQueries !== null && localQueries.length !== 0) {
       this.setState({
-        searchQueries: JSON.parse(window.localStorage.getItem("queries")),
+        searchQueries: localQueries,
         selected: 0
       })
     }
 
-    if (window.localStorage.getItem("results") !== null) {
-      let results = JSON.parse(window.localStorage.getItem("results"))
+    let localResults = JSON.parse(window.localStorage.getItem("results"));
+    console.log(localResults);
+    if (localResults !== null && localResults.length !== 0) {
       this.setState({
-        searchResults: results,
-        items: results[0]
+        searchResults: localResults,
+        items: localResults[0]
       })
     }
 
@@ -140,24 +142,14 @@ export default class App extends React.Component {
       state.searchQueries.splice(index, 1);
       state.searchResults.splice(index, 1);
       // Update the local storage data
-      window.localStorage.setItem("queries", state.searchQueries);
-      window.localStorage.setItem("results", state.searchResults);
-
-      // Set the state to the last item of the array if we are deleting the selected item
-      let selected;
-      if (state.selected === index) {
-        selected = state.searchQueries.length - 1;
-      }
-
-      if (state.searchQueries.length === 0) {
-        selected = -1;
-      }
+      window.localStorage.setItem("queries", JSON.stringify(state.searchQueries));
+      window.localStorage.setItem("results", JSON.stringify(state.searchResults));
 
       return {
         searchQueries: state.searchQueries,
         searchResults: state.searchResults,
-        selected: selected,
-        items: state.searchResults[selected]
+        selected: state.searchQueries.length - 1,
+        items: state.searchResults[state.searchQueries.length - 1]
       }
     });
   }
