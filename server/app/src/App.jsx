@@ -99,6 +99,7 @@ export default class App extends React.Component {
 
   // This is called when the enters a search query
   searchCallback = (queryString) => {
+    console.log("search callback");
     this.setState((state) => {
       let queries = [...state.searchQueries, queryString]
       window.localStorage.setItem("queries", JSON.stringify(queries))
@@ -122,6 +123,7 @@ export default class App extends React.Component {
 
   // This is called when a user clicks an item in the search history sidebar
   loadPastSearchHandler = (index) => {
+    console.log("past search handler")
     this.setState((state) => {
       return {
         items: state.searchResults[index],
@@ -131,25 +133,28 @@ export default class App extends React.Component {
   };
 
   // This is called when a user clicks the delete button on a search history item
-  deletePastSearchHandler = (item, index) => {
-    // Remove both the query and data from state
-    // Remove both the query and data from localstorage
-    // Set the current selected item to the last item in the list
-
-    console.log(index);
+  deletePastSearchHandler = (index) => {
     this.setState((state) => {
-      // Remove the item from both the queries and searchresults arrays
+      // Remove the item from both the query and searchresults lists
       state.searchQueries.splice(index, 1);
       state.searchResults.splice(index, 1);
+
       // Update the local storage data
       window.localStorage.setItem("queries", JSON.stringify(state.searchQueries));
       window.localStorage.setItem("results", JSON.stringify(state.searchResults));
+    
+      let selected = -1;
+      let items = [];
+      if (state.searchQueries.length > 0) { // Set active to first entry if list isn't empty
+        selected = 0;
+        items = state.searchResults[selected]
+      }
 
       return {
         searchQueries: state.searchQueries,
         searchResults: state.searchResults,
-        selected: state.searchQueries.length - 1,
-        items: state.searchResults[state.searchQueries.length - 1]
+        selected: selected,
+        items: items
       }
     });
   }
@@ -206,8 +211,7 @@ export default class App extends React.Component {
             {this.state.items.length > 0 &&
               <BookTable
                 items={this.state.items}
-                socket={this.state.socket}
-                disabled={this.state.loading}
+                disabled={this.state.loading || this.state.timeLeft > 0}
                 downloadCallback={this.bookDownloadHandler}
               />}
           </Content>

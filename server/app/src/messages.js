@@ -70,6 +70,7 @@ export function messageRouter(message, currentState) {
   }
 }
 
+// Show a persistant countdown timer notification for give "wait" period
 export function countdownTimer(wait, callback) {
   let downloadTimer = setInterval(() => {
     // Decrement the timeLeft each tick
