@@ -17,7 +17,7 @@ export const MessageTypes = {
 // It handles delegation of data to the App component
 // depending on the JSON message type
 export function messageRouter(message, currentState) {
-  if (message.error) {
+  if ('error' in message) {
     console.error("ERROR: ABORTING");
     sendNotification("error", "Error", message.details)
     return
@@ -27,12 +27,14 @@ export function messageRouter(message, currentState) {
     case MessageTypes.ERROR:
       sendNotification("error", "Error Processing Request", message.details);
       currentState.searchQueries.pop();
+      window.localStorage.setItem("queries", JSON.stringify(currentState.searchQueries));
       return {
         loading: false, searchQueries: currentState.searchQueries
       };
     case MessageTypes.IRCERROR:
       sendNotification("error", "Internal Book Server Error", message.status);
       currentState.searchQueries.pop();
+      window.localStorage.setItem("queries", JSON.stringify(currentState.searchQueries));
       return {
         loading: false, searchQueries: currentState.searchQueries
       };
@@ -43,6 +45,7 @@ export function messageRouter(message, currentState) {
       sendNotification("success",
         "Search Results Received",
         "Select a book to download or search again.");
+      window.localStorage.setItem("results", JSON.stringify([...currentState.searchResults, message.books]))
       return {
         items: message.books,
         searchResults: [...currentState.searchResults, message.books],
@@ -67,6 +70,7 @@ export function messageRouter(message, currentState) {
   }
 }
 
+// Show a persistant countdown timer notification for give "wait" period
 export function countdownTimer(wait, callback) {
   let downloadTimer = setInterval(() => {
     // Decrement the timeLeft each tick

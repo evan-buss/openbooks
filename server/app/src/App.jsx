@@ -13,9 +13,6 @@ import PlaceHolder from './components/PlaceHolder';
 
 import { countdownTimer, messageRouter, MessageTypes, sendNotification } from "./messages"
 
-// import { servers, fakeItems, recentSearches } from "./dummyData";
-
-
 const { Header, Content, Sider } = Layout;
 
 export default class App extends React.Component {
@@ -34,12 +31,22 @@ export default class App extends React.Component {
   }
 
   componentDidMount() {
-    // Dummy data for UI testing without backend
-    // this.setState({
-    // items: fakeItems.books,
-    // searchQueries: recentSearches,
-    // servers: servers.servers
-    // });
+    let localQueries = JSON.parse(window.localStorage.getItem("queries"))
+    if (localQueries !== null && localQueries.length !== 0) {
+      this.setState({
+        searchQueries: localQueries,
+        selected: 0
+      })
+    }
+
+    let localResults = JSON.parse(window.localStorage.getItem("results"));
+    console.log(localResults);
+    if (localResults !== null && localResults.length !== 0) {
+      this.setState({
+        searchResults: localResults,
+        items: localResults[0]
+      })
+    }
 
     let socket = new WebSocket("ws://127.0.0.1:5228/ws");
 
@@ -92,9 +99,12 @@ export default class App extends React.Component {
 
   // This is called when the enters a search query
   searchCallback = (queryString) => {
+    console.log("search callback");
     this.setState((state) => {
+      let queries = [...state.searchQueries, queryString]
+      window.localStorage.setItem("queries", JSON.stringify(queries))
       return {
-        searchQueries: [...state.searchQueries, queryString],
+        searchQueries: queries,
         selected: state.searchQueries.length,
         loading: true
       }
@@ -113,6 +123,7 @@ export default class App extends React.Component {
 
   // This is called when a user clicks an item in the search history sidebar
   loadPastSearchHandler = (index) => {
+    console.log("past search handler")
     this.setState((state) => {
       return {
         items: state.searchResults[index],
@@ -120,6 +131,33 @@ export default class App extends React.Component {
       }
     })
   };
+
+  // This is called when a user clicks the delete button on a search history item
+  deletePastSearchHandler = (index) => {
+    this.setState((state) => {
+      // Remove the item from both the query and searchresults lists
+      state.searchQueries.splice(index, 1);
+      state.searchResults.splice(index, 1);
+
+      // Update the local storage data
+      window.localStorage.setItem("queries", JSON.stringify(state.searchQueries));
+      window.localStorage.setItem("results", JSON.stringify(state.searchResults));
+    
+      let selected = -1;
+      let items = [];
+      if (state.searchQueries.length > 0) { // Set active to first entry if list isn't empty
+        selected = 0;
+        items = state.searchResults[selected]
+      }
+
+      return {
+        searchQueries: state.searchQueries,
+        searchResults: state.searchResults,
+        selected: selected,
+        items: items
+      }
+    });
+  }
 
   // This is called when the user clicks on the reload servers button
   reloadServersHandler = () => {
@@ -152,6 +190,7 @@ export default class App extends React.Component {
             searches={this.state.searchQueries}
             selected={this.state.selected}
             clickHandler={this.loadPastSearchHandler}
+            deleteHandler={this.deletePastSearchHandler}
           />
           <ServerList servers={this.state.servers} reloadCallback={this.reloadServersHandler} />
         </Sider>
@@ -172,8 +211,7 @@ export default class App extends React.Component {
             {this.state.items.length > 0 &&
               <BookTable
                 items={this.state.items}
-                socket={this.state.socket}
-                disabled={this.state.loading}
+                disabled={this.state.loading || this.state.timeLeft > 0}
                 downloadCallback={this.bookDownloadHandler}
               />}
           </Content>

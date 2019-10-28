@@ -2,11 +2,13 @@ WEB UI
 - Write some tests for things simple things like utilities
 - Look into go logging. Learn how to change the logger output
 
-REACH:
+If Willing:
 - Improve parsing accuracy with "per-server" parsing functions
    - Each one adapted to the common format for that server
    - Would require studying the format of the server with multiple search files..
    - Something to do in the future
-- Possibly save recent searches to the browser's history.
-  - Data would be persisted across refreshes and restarts
-  - Would need to add an option in the menu to manually remove items
+
+
+Future:
+  - Convert to new react syntax using hooks
+  - Clean up code with state management (redux)
