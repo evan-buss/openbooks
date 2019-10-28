@@ -6,6 +6,35 @@ const recentSearches = [
     "dune frank herbert long title test"
 ];
 
+export const recentResults = [
+    [
+        [{
+            "server": "anthony kiedis",
+            "author": "Kurt Vonnegut",
+            "title": "The Sirens of Titan (v5.0) (html)",
+            "format": "html",
+            "size": "151.8KB",
+            "full": "!LawdyServer Kurt Vonnegut - The Sirens of Titan (v5.0) (html).rar "
+        }],
+        [{
+            "server": "kurt vonnegut",
+            "author": "Kurt Vonnegut",
+            "title": "The Sirens of Titan (v5.0) (html)",
+            "format": "html",
+            "size": "151.8KB",
+            "full": "!LawdyServer Kurt Vonnegut - The Sirens of Titan (v5.0) (html).rar "
+        }],
+        [{
+            "server": "dune frank herbert",
+            "author": "Kurt Vonnegut",
+            "title": "The Sirens of Titan (v5.0) (html)",
+            "format": "html",
+            "size": "151.8KB",
+            "full": "!LawdyServer Kurt Vonnegut - The Sirens of Titan (v5.0) (html).rar "
+        }]
+    ]
+]
+
 
 const servers = {
     "type": MessageTypes.SERVERS,

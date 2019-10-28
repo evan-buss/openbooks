@@ -4,6 +4,7 @@ import Icon from "antd/es/icon";
 import PropTypes from 'prop-types';
 import Title from 'antd/es/typography/Title';
 
+import "../App.css"
 
 const titleStyle = {
   color: "white",
@@ -13,9 +14,12 @@ const titleStyle = {
 
 // Use material design menu item style
 const menuItemStyle = {
-  borderRadius: "0 25px 25px 0"
+  borderRadius: "0 25px 25px 0",
+  display: "flex",
+  flexFlow: "row nowrap",
+  justifyContent: "space-between",
+  alignItems: "center"
 }
-
 
 export default class RecentSearchList extends React.Component {
   render() {
@@ -37,8 +41,11 @@ export default class RecentSearchList extends React.Component {
                 style={menuItemStyle}
                 key={"" + index}
                 onClick={() => this.props.clickHandler(index)}>
-                <Icon type="file-search" />
-                <span>{search}</span>
+                <div>
+                  <Icon type="file-search" />
+                  <span>{search}</span>
+                </div>
+                <Icon type="close" className="close-button" onClick={() => this.props.deleteHandler(search, index)}/>
               </Menu.Item>
             );
           })}

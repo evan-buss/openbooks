@@ -12,3 +12,11 @@
 .sider-style:hover {
   overflow: auto;
 }
+
+.close-button {
+  color: white;
+}
+
+.close-button:hover {
+  color: red;
+}
