@@ -36,9 +36,7 @@ type ErrorResponse struct {
 }
 
 // ConnectionRequest is a request to start the IRC server
-type ConnectionRequest struct {
-	Name string `json:"name"`
-}
+type ConnectionRequest struct{}
 
 // ConnectionResponse is a response sent upon successful connection to the IRC server
 type ConnectionResponse struct {

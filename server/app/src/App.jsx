@@ -63,10 +63,7 @@ export default class App extends React.Component {
       // Send connection request once the socket opens
       this.state.socket.send(JSON.stringify({
         type: MessageTypes.CONNECT,
-        payload: {
-          //TODO: Make server use the connection name...
-          name: "bot"
-        }
+        payload: {}
       }));
     };
 

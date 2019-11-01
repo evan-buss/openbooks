@@ -15,19 +15,23 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
-// TODO: Maybe use a struct instead of global variables.
-// ircConn is a global variable to access the current IRC connection
-var ircConn *irc.Conn
+// Connection represents a connection to the websocket client and the irc server
+type Connection struct {
+	irc *irc.Conn
+	ws  *websocket.Conn
+	sync.Mutex
+}
 
-// wsConn is a global variable to access the current Websocket Connection
-var wsConn *websocket.Conn
-
-// mutex ensures that only a single thread is writing to wsConn
-var mutex sync.Mutex
+// Conn is the current connection between the browser
+// and server and server and irc channel
+var Conn Connection
 
 // Start instantiates the web server and opens the browser
 func Start(irc *irc.Conn, port string) {
-	ircConn = irc
+
+	Conn = Connection{
+		irc: irc,
+	}
 
 	// Access the SPA bundled in the binary
 	box := packr.New("ReactApp", "./app/build")
@@ -53,7 +57,7 @@ func wsHandler(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	wsConn = ws // Set global WS variable
+	Conn.ws = ws // Set global WS variable
 
 	log.Println("Client connected: " + req.RemoteAddr)
 	ws.SetCloseHandler(func(code int, text string) error {
@@ -84,10 +88,10 @@ func reader(conn *websocket.Conn) {
 // A wrapper for websocket.WriteJSON that ensures a single writer
 // and handles errors
 func writeJSON(obj interface{}) {
-	mutex.Lock()
-	err := wsConn.WriteJSON(obj)
+	Conn.Lock()
+	err := Conn.ws.WriteJSON(obj)
 	if err != nil {
 		log.Println("Error writing JSON to websocket: ", err)
 	}
-	mutex.Unlock()
+	Conn.Unlock()
 }
