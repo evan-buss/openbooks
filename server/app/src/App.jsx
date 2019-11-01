@@ -48,7 +48,11 @@ export default class App extends React.Component {
       })
     }
 
-    let socket = new WebSocket("ws://127.0.0.1:5228/ws");
+    let href = window.location.href;
+
+    let addr = `ws://${href.substring(href.indexOf("://") + 3)}ws`
+    console.log(addr)
+    let socket = new WebSocket(addr);
 
     socket.onopen = () => {
       console.log("Successfully Connected");
@@ -142,7 +146,7 @@ export default class App extends React.Component {
       // Update the local storage data
       window.localStorage.setItem("queries", JSON.stringify(state.searchQueries));
       window.localStorage.setItem("results", JSON.stringify(state.searchResults));
-    
+
       let selected = -1;
       let items = [];
       if (state.searchQueries.length > 0) { // Set active to first entry if list isn't empty

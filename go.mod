@@ -13,7 +13,7 @@ require (
 	github.com/rogpeppe/go-internal v1.5.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
-	golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550 // indirect
-	golang.org/x/sys v0.0.0-20191027211539-f8518d3b3627 // indirect
-	golang.org/x/tools v0.0.0-20191026034945-b2104f82a97d // indirect
+	golang.org/x/crypto v0.0.0-20191029031824-8986dd9e96cf // indirect
+	golang.org/x/sys v0.0.0-20191029155521-f43be2a4598c // indirect
+	golang.org/x/tools v0.0.0-20191101155306-5be387d313b4 // indirect
 )

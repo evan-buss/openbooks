@@ -15,6 +15,7 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
+// TODO: Maybe use a struct instead of global variables.
 // ircConn is a global variable to access the current IRC connection
 var ircConn *irc.Conn
 
@@ -25,7 +26,7 @@ var wsConn *websocket.Conn
 var mutex sync.Mutex
 
 // Start instantiates the web server and opens the browser
-func Start(irc *irc.Conn) {
+func Start(irc *irc.Conn, port string) {
 	ircConn = irc
 
 	// Access the SPA bundled in the binary
@@ -34,9 +35,9 @@ func Start(irc *irc.Conn) {
 	http.Handle("/", http.FileServer(box))
 	http.HandleFunc("/ws", wsHandler)
 
-	openbrowser("http://localhost:5228" + "/")
+	openbrowser("http://127.0.0.1:" + port + "/")
 
-	log.Fatal(http.ListenAndServe(":5228", nil))
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
 
 // wsHandler handles upgrading and connecting websocket requests
@@ -80,7 +81,8 @@ func reader(conn *websocket.Conn) {
 	}
 }
 
-// A wrapper for websocket.WriteJSON that handles errors implicitly
+// A wrapper for websocket.WriteJSON that ensures a single writer
+// and handles errors
 func writeJSON(obj interface{}) {
 	mutex.Lock()
 	err := wsConn.WriteJSON(obj)
@@ -89,8 +91,3 @@ func writeJSON(obj interface{}) {
 	}
 	mutex.Unlock()
 }
-
-// writeJSON(ServersResponse{
-// 	MessageType: SERVERS,
-// 	Servers:     core.Servers.Servers,
-// })
