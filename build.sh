@@ -1,3 +1,6 @@
+#!/bin/bash
+
+# Use this script to create production binaries for each platform
 cd server/app
 npm run build
 cd ../..
