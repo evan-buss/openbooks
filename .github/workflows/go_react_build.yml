@@ -37,7 +37,9 @@ jobs:
     
     - name: Install NPM dependencies and complete Go / React build
       run: |
-        alias packr2="$HOME/go/bin/packr2"
+        echo $GOBIN
+        echo $HOME
+        export PATH=$PATH:$HOME/go/bin
         cd server/app
         npm ci
         npm run integrate
