@@ -37,6 +37,7 @@ jobs:
     
     - name: Install NPM dependencies and complete Go / React build
       run: |
+        alias packr2="$HOME/go/bin/packr2"
         cd server/app
         npm ci
         npm run integrate
