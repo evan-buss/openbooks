@@ -48,9 +48,7 @@ export default class App extends React.Component {
       })
     }
 
-    let href = window.location.href;
-
-    let addr = `ws://${href.substring(href.indexOf("://") + 3)}ws`
+    let addr = `ws://${window.location.host}ws`
     console.log(addr)
     let socket = new WebSocket(addr);
 

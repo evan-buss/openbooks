@@ -11,5 +11,5 @@ If Willing:
 
 Future:
   - Convert to new React syntax using hooks
-  - Clean up code with state management (redux)
   - Allow mutiple web-socket connections at once. Probably use some sort of map.
+  - Rewrite websocket message handling logic to use event callbacks. 
