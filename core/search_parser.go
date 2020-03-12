@@ -9,6 +9,7 @@ import (
 	"strings"
 )
 
+// List of common file extensions
 var fileTypes = [...]string{
 	"epub",
 	"mobi",

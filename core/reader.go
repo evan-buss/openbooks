@@ -30,7 +30,7 @@ const (
 	serverUnavailable = "try another server"
 	searchAccepted    = "has been accepted"
 	numMatches        = "matches"
-	userList          = "353"
+	beginUserList     = "353"
 	endUserList       = "366"
 )
 
@@ -94,7 +94,7 @@ func ReadDaemon(irc *irc.Conn, handler ReaderHandler) {
 				end := strings.LastIndex(text, "matches") - 1
 				handler.MatchesFound(text[start:end])
 			}
-		} else if strings.Contains(text, userList) {
+		} else if strings.Contains(text, beginUserList) {
 			users.WriteString(text) // Accumulate the user list
 		} else if strings.Contains(text, endUserList) {
 			serverCache.ParseServers(users.String())

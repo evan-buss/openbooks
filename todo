@@ -1,15 +1,14 @@
-WEB UI
-- Write some tests for things simple things like utilities
-- Look into go logging. Learn how to change the logger output
+General:
+	- Write some tests for things simple things like utilities
+	- Look into logging. Learn how to change the logger output
 
 If Willing:
-- Improve parsing accuracy with "per-server" parsing functions
+☐ Improve parsing accuracy with "per-server" parsing functions
    - Each one adapted to the common format for that server
-   - Would require studying the format of the server with multiple search files..
-   - Something to do in the future
-
+   - Would require studying the format of the server with multiple search files
 
 Future:
-  - Convert to new React syntax using hooks
-  - Allow mutiple web-socket connections at once. Probably use some sort of map.
-  - Rewrite websocket message handling logic to use event callbacks. 
+  ☐ Convert to new React syntax using hooks
+  ☐ Convert to typescript.
+  ☐ Rewrite websocket message handling logic to use event callbacks. 
+  ☐ Reset table filters on new search
