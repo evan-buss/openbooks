@@ -1,0 +1,13 @@
+☐ Implement file download handling
+☐ Implement proper search bar
+☐ Load servers on load
+☐ Make servers clickable filters
+☐ Implement filters
+	☐ String search
+	☐ Format
+	☐ Server (by sidebar)
+☐ Hide the filter and grid before a search is completed.
+
+Improvements:
+	☐ More clean and straightforward message passing API, 
+	  the current one is badly designed and not uniform...

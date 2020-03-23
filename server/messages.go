@@ -11,11 +11,11 @@ import (
 
 // ERROR represents some sort of error outside of specific handlers
 // such as parsing requests
-const ERROR = 0
 
 // Available commands. These are sent via integers starting at 0
 const (
-	CONNECT = iota + 1
+	ERROR = iota
+	CONNECT
 	SEARCH
 	DOWNLOAD
 	SERVERS

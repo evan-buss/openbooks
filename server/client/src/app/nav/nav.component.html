@@ -1,0 +1,36 @@
+<mat-sidenav-container class="sidenav-container">
+	<mat-sidenav #drawer
+				 class="sidenav"
+				 fixedInViewport
+				 [attr.role]="(isHandset$ | async) ? 'dialog' : 'navigation'"
+				 [mode]="(isHandset$ | async) ? 'over' : 'side'"
+				 [opened]="(isHandset$ | async) === false">
+		<mat-toolbar fxLayout="row"
+					 fxLayoutAlign="space-between center">Servers
+			<button type="button"
+					aria-label="Toggle sidenav"
+					color="accent"
+					mat-icon-button
+					(click)="refreshServers()">
+				<mat-icon aria-label="server list refresh icon">refresh</mat-icon>
+			</button>
+		</mat-toolbar>
+		<mat-nav-list>
+			<a mat-list-item
+			   *ngFor="let item of serverStream | async as servers"
+			   href="#">{{item}}</a>
+		</mat-nav-list>
+	</mat-sidenav>
+	<mat-sidenav-content>
+		<mat-toolbar color="primary">
+			<button type="button"
+					aria-label="Toggle sidenav"
+					mat-icon-button
+					(click)="drawer.toggle()">
+				<mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
+			</button>
+			<span>OpenBooks</span>
+		</mat-toolbar>
+		<app-book-grid></app-book-grid>
+	</mat-sidenav-content>
+</mat-sidenav-container>
