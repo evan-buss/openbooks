@@ -3,9 +3,8 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { map, tap } from 'rxjs/operators';
 import { Observable, merge } from 'rxjs';
-import { BookServiceService } from '../book-service.service';
+import { BookService } from '../book-service.service';
 import { BookDetail } from '../messages';
-
 
 /**
  * Data source for the BookGrid view. This class should
@@ -17,7 +16,7 @@ export class BookGridDataSource extends DataSource<BookDetail> {
 	paginator: MatPaginator;
 	sort: MatSort;
 
-	constructor(private books: BookServiceService) {
+	constructor(private books: BookService) {
 		super();
 	}
 

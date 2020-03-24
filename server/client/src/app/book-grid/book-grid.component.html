@@ -1,12 +1,4 @@
 <div class="container">
-	<input type="text"
-		   [(ngModel)]="search"
-		   name=""
-		   id="">
-
-	<button mat-raised-button
-			(click)="searchBook()"
-			color="primary">Search</button>
 	<mat-expansion-panel class="full-width">
 		<mat-expansion-panel-header>
 			<mat-panel-title>
@@ -15,15 +7,9 @@
 		</mat-expansion-panel-header>
 
 		<mat-form-field>
-			<mat-label>First name</mat-label>
-			<input matInput>
-		</mat-form-field>
-
-		<mat-form-field>
-			<mat-label>Age</mat-label>
+			<mat-label>Filter Text</mat-label>
 			<input matInput
-				   type="number"
-				   min="1">
+				   type="text">
 		</mat-form-field>
 	</mat-expansion-panel>
 

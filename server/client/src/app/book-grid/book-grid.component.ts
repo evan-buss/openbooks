@@ -3,7 +3,7 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTable } from '@angular/material/table';
 import { BookGridDataSource, } from './book-grid-datasource';
-import { BookServiceService } from '../book-service.service';
+import { BookService } from '../book-service.service';
 import { BookDetail } from '../messages';
 
 @Component({
@@ -17,22 +17,20 @@ export class BookGridComponent implements AfterViewInit, OnInit {
 	@ViewChild(MatTable) table: MatTable<BookDetail>;
 	dataSource: BookGridDataSource;
 
-	search: string;
 
 	/** Columns displayed in the table. Columns IDs can be added, removed, or reordered. */
 	displayedColumns = ['server', 'author', 'title', 'format', 'size', 'full'];
 
 	// TODO: Use breakpoint observer to hide columns
-	constructor(private service: BookServiceService) {
-
-	}
-
-	searchBook() {
-		this.service.searchBook(this.search);
-	}
+	constructor(private service: BookService) { }
 
 	ngOnInit() {
 		this.dataSource = new BookGridDataSource(this.service);
+	}
+	applyFilter(val: string) {
+		val = val.trim().toLowerCase();
+		// TODO: Figure this shit out...
+		// this.dataSource.filter = filterValue;
 	}
 
 	ngAfterViewInit() {
@@ -40,6 +38,4 @@ export class BookGridComponent implements AfterViewInit, OnInit {
 		this.dataSource.paginator = this.paginator;
 		this.table.dataSource = this.dataSource;
 	}
-
-
 }

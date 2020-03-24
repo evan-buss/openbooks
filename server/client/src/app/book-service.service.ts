@@ -3,14 +3,15 @@ import { webSocket } from 'rxjs/webSocket';
 import { BookResponse, BookRequest, MessageTypes, ErrorResponse, SearchRequest, BookDetail } from './messages';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { delay } from 'rxjs/operators';
-var dummyData = require('src/assets/dummy.json');
+import { timeInterval } from 'rxjs/operators';
+
+const dummyData = require('src/assets/dummy.json');
 
 @Injectable({
 	providedIn: 'root'
 })
-export class BookServiceService {
-
+export class BookService {
+	public loading$ = new BehaviorSubject<boolean>(false);
 	private connection$ = webSocket("ws://localhost:5228/ws");
 	public servers$: BehaviorSubject<string[]> = new BehaviorSubject<string[]>(["Please Refresh"]);;
 	public searchResults$ = new BehaviorSubject<BookDetail[]>([]);
@@ -22,8 +23,8 @@ export class BookServiceService {
 			err => console.log("err: " + err),
 			() => this.sendNotification("Connection closed")
 		);
-		this.servers$.next(["test", "wtf"]);
 		this.connection$.next(<BookRequest>{ type: MessageTypes.CONNECT, payload: {} })
+		this.refreshServers();
 	}
 
 	public refreshServers(): void {
@@ -31,8 +32,12 @@ export class BookServiceService {
 	}
 
 	public searchBook(search: string) {
-		// this.searchResults$.next(dummyData);
-		this.connection$.next({ type: MessageTypes.SEARCH, payload: { query: search } });
+		this.loading$.next(true);
+		setTimeout(() => {
+			this.loading$.next(false);
+			this.searchResults$.next(dummyData);
+		}, 1500);
+		// this.connection$.next({ type: MessageTypes.SEARCH, payload: { query: search } });
 	}
 
 	private messageRouter(msg: any): void {
@@ -46,6 +51,7 @@ export class BookServiceService {
 				this.sendNotification("Welcome, connection established.");
 				break;
 			case MessageTypes.SEARCH:
+				this.loading$.next(false);
 				this.searchResults$.next(message.books as BookDetail[]);
 				this.sendNotification("Search results returned.")
 				break;

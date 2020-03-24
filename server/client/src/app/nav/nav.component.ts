@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
-import { BookServiceService } from '../book-service.service';
+import { BookService } from '../book-service.service';
 
 @Component({
 	selector: 'app-nav',
@@ -17,7 +17,6 @@ export class NavComponent {
 			shareReplay()
 		);
 
-
 	public get serverStream(): BehaviorSubject<string[]> {
 		return this.books.servers$;
 	}
@@ -26,5 +25,5 @@ export class NavComponent {
 		return this.books.refreshServers();
 	}
 
-	constructor(private breakpointObserver: BreakpointObserver, private books: BookServiceService) { }
+	constructor(private breakpointObserver: BreakpointObserver, public books: BookService) { }
 }

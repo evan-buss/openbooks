@@ -31,6 +31,10 @@
 			</button>
 			<span>OpenBooks</span>
 		</mat-toolbar>
-		<app-book-grid></app-book-grid>
+		<mat-progress-bar *ngIf="books.loading$ | async"
+						  mode="query"
+						  color="accent">
+		</mat-progress-bar>
+		<app-main-page></app-main-page>
 	</mat-sidenav-content>
 </mat-sidenav-container>
