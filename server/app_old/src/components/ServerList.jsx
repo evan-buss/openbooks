@@ -27,14 +27,16 @@ export default class ServerList extends React.Component {
 					dataSource={servers}
 					renderItem={item => (
 						<List.Item>
-							<Icon type="cloud-server"
-								style={{
-									paddingLeft: "20px",
-									color: "rgb(132, 240, 79)",
-									fontSize: "20px",
-									marginRight: "10px"
-								}} />
-							<span style={{ color: "white", fontWeight: "bold" }}>{item}</span>
+							<span>
+								<Icon type="cloud-server"
+									style={{
+										paddingLeft: "20px",
+										color: "rgb(132, 240, 79)",
+										fontSize: "20px",
+										marginRight: "10px"
+									}} />
+								<span style={{ color: "white", fontWeight: "bold" }}>{item}</span>
+							</span>
 						</List.Item>
 					)} />
 				) : (<Spin size="large" style={spinStyle} />)}
