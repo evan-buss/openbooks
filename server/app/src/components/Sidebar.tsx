@@ -11,16 +11,13 @@ const Sidebar: React.FC = () => {
     return (
         <>
             {/* Show / hide side pane */}
-            < IconButton height={38}
+            {/* < IconButton height={38}
                 icon={MoreIcon}
                 margin={16}
                 position="absolute"
                 onClick={() => setOpen(curr => !curr)} >
-            </IconButton >
-            <SideSheet position={Position.LEFT}
-                isShown={opened}
-                onCloseComplete={() => setOpen(false)}
-                width={300}>
+            </IconButton > */}
+            <Pane width={300}>
                 <Pane zIndex={1} flexShrink={0} elevation={0} backgroundColor="white">
                     <Pane padding={16} borderBottom="muted">
                         <Heading size={600}>OpenBooks</Heading>
@@ -51,7 +48,7 @@ const Sidebar: React.FC = () => {
                         <ServerList servers={['Hello', 'World']}></ServerList>
                         : <SearchHistory></SearchHistory>}
                 </SidebarContent>
-            </SideSheet>
+            </Pane>
         </>
     )
 }
