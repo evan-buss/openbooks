@@ -75,7 +75,7 @@ func (h Handler) BadServer() {
 func (h Handler) SearchAccepted() {
 	writeJSON(WaitResponse{
 		MessageType: WAIT,
-		Status:      "Search Accepted into the Queue",
+		Status:      "Search accepted into the queue",
 	})
 }
 

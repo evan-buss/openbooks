@@ -42,7 +42,12 @@ func messageRouter(message Request) {
 
 // handle ConnectionRequests and either connect to the server or do nothing
 func (c ConnectionRequest) handle() {
+
+	log.Println("Connection request received.")
+
 	if !Conn.irc.IsConnected() {
+		log.Println("Connecting to the IRC server.")
+
 		core.Join(Conn.irc)
 		go core.ReadDaemon(Conn.irc, Handler{}) // Start the Read Daemon
 
@@ -53,6 +58,8 @@ func (c ConnectionRequest) handle() {
 		})
 		return
 	}
+	log.Println("IRC server previously connected.")
+
 	writeJSON(ConnectionResponse{
 		MessageType: CONNECT,
 		Status:      "IRC Server Ready",

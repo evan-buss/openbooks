@@ -1,15 +1,14 @@
 import { Search } from "@styled-icons/feather/Search";
-import { Button, Pane, Text } from 'evergreen-ui';
+import { Badge, Pane, Spinner, Text } from 'evergreen-ui';
 import React from 'react';
 import { useHistory } from '../models/HistoryProvider';
 
 
 const SearchHistory: React.FC = () => {
-    const { history, addItem } = useHistory()!;
+    const { history } = useHistory()!;
 
     return (
         <>
-            <Button onClick={() => addItem({ query: "hello world", time: new Date().getTime() })}>Add</Button>
             {
                 history.map(item => (
                     <Pane border padding={6} elevation={1} margin={8} key={item.time} display="flex">
@@ -27,7 +26,12 @@ const SearchHistory: React.FC = () => {
                                 textOverflow="ellipsis">
                                 {item.query}
                             </Text>
-                            <Text color="muted" size={300}>{!item.results?.length ? 'In Progress' : item.results?.length + ' Results'}</Text>
+                            {!item.results?.length ?
+                                <Spinner size={24} /> :
+                                <Badge color="green" size={300}>
+                                    {item.results?.length + ' Results'}
+                                </Badge>
+                            }
                         </Pane>
                     </Pane>
                 ))

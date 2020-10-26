@@ -46,7 +46,7 @@ const Sidebar: React.FC = () => {
                         </Tablist>
                     </Pane>
                 </Pane>
-                <SidebarContent flex="1" overflowY="hidden" padding={8}>
+                <SidebarContent flex="1" scrollable={selectedIndex === 0} overflowY="hidden" padding={8}>
                     {selectedIndex === 0 ?
                         <ServerList servers={['Hello', 'World']}></ServerList>
                         : <SearchHistory></SearchHistory>}
@@ -57,9 +57,9 @@ const Sidebar: React.FC = () => {
 }
 
 
-const SidebarContent = styled(Pane)`
+const SidebarContent = styled(Pane) <{ scrollable: boolean }>`
     &:hover {
-        overflow-y: scroll;
+        overflow-y: ${props => props.scrollable ? 'scroll' : 'hidden'};
     }
 `
 

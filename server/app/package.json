@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@reduxjs/toolkit": "^1.4.0",
     "@rehooks/local-storage": "^2.4.0",
     "@testing-library/jest-dom": "^5.11.5",
     "@testing-library/react": "^11.1.0",
@@ -11,7 +12,6 @@
     "@types/node": "^12.19.1",
     "@types/react": "^16.9.53",
     "@types/react-dom": "^16.9.8",
-    "@types/styled-components": "^5.1.4",
     "evergreen-ui": "^5.1.2",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
@@ -44,5 +44,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@types/styled-components": "^5.1.4"
   }
 }
