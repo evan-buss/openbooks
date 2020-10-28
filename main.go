@@ -59,7 +59,7 @@ func main() {
 		programDir := filepath.Join(getProgramDir(), "downloadedEbooks")
 		if _, err := os.Stat("downloadedEbooks"); os.IsNotExist(err) {
 			err := os.RemoveAll(programDir)
-			fmt.Println("Directory already exists, EXTERMINATEEEE")
+			//fmt.Println("Directory already exists, EXTERMINATEEEE")
 			if err != nil {
 				panic(err)
 			}
@@ -68,7 +68,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-		fmt.Println("Starting server on port "+port)
+		fmt.Println("To access this go to: 127.0.0.1:"+port)
 		server.Start(conn, port)
 	}
 }

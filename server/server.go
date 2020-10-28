@@ -81,7 +81,7 @@ func wsHandler(w http.ResponseWriter, req *http.Request) {
 	log.Println(strconv.Itoa(numberOfConnections)+" clients are connected!")
 	if (numberOfConnections == 1 && timerForIrcDeath != nil){
 		timerForIrcDeath.Stop()
-		log.Println("The IRC connection timer has been stopped, yay!")
+		//log.Println("The IRC connection timer has been stopped, yay!")
 	}
 	reader(ws)
 }
@@ -95,9 +95,9 @@ func reader(conn *websocket.Conn) {
 			log.Println(err)
 			if (strings.Contains(err.Error(), "close") && strings.Contains(err.Error(), "websocket")){
 				numberOfConnections--
-				log.Println("Client disconnected! "+strconv.Itoa(numberOfConnections)+" remaining!")
+				//log.Println("Client disconnected! "+strconv.Itoa(numberOfConnections)+" remaining!")
 				if (numberOfConnections == 0){
-					log.Println("All clients disconnected, waiting for "+strconv.Itoa(timeTillDeath)+" seconds before closing irc connection :(")
+					//log.Println("All clients disconnected, waiting for "+strconv.Itoa(timeTillDeath)+" seconds before closing irc connection :(")
 					timerForIrcDeath = time.AfterFunc(time.Second * time.Duration(timeTillDeath), func() {
 						log.Println("Death.")
 						ircConn.ChangeState(false)
