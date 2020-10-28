@@ -65,7 +65,7 @@ func (i *Conn) GetUsers(channel string) {
 	i.Write([]byte("NAMES #" + channel + "\r\n"))
 }
 
-// PONG sends a PONG message to the server, often used afte a PING request
+// PONG sends a PONG message to the server, often used after a PING request
 func (i *Conn) PONG(server string) {
 	i.Write([]byte("PONG " + server + "\r\n"))
 }

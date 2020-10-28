@@ -1,16 +1,44 @@
+import { Dispatch } from "@reduxjs/toolkit";
 import { Search } from "@styled-icons/feather/Search";
-import { Badge, Pane, Spinner, Text } from 'evergreen-ui';
+import { Badge, Pane, Position, Spinner, Text, Tooltip } from 'evergreen-ui';
 import React from 'react';
-import { useHistory } from '../models/HistoryProvider';
+import { useDispatch, useSelector } from "react-redux";
+import { deleteHistoryItem, HistoryItem, selectHistory } from "../state/historySlice";
 
 
 const SearchHistory: React.FC = () => {
-    const { history } = useHistory()!;
+    const history = useSelector(selectHistory);
+    const dispatch = useDispatch();
 
+    return (
+        <>
+            {
+                history.length > 0 ?
+                    history.map((item: HistoryItem) => <HistoryCard key={item.timestamp.toString()} item={item} dispatch={dispatch} />)
+                    : <Pane display="flex" justifyContent="center">
+                        <Text marginX="auto" marginY={16} color="muted">History is a mystery.</Text>
+                    </Pane >
+            }
+        </>
+    );
+}
 
-    const historyList = () => {
-        history.map(item => (
-            <Pane border padding={6} elevation={1} margin={8} key={item.time} display="flex">
+type Props = {
+    item: HistoryItem;
+    dispatch: Dispatch<any>
+}
+
+const HistoryCard: React.FC<Props> = ({ item, dispatch }: Props) => {
+    return (
+        <Tooltip position={Position.RIGHT} content="Click to delete.">
+            <Pane
+                cursor="pointer"
+                onClick={() => dispatch(deleteHistoryItem(item.timestamp))}
+                border
+                padding={6}
+                elevation={1}
+                margin={8}
+                display="flex">
                 <Search size={24} title="search history icon" />
                 <Pane marginLeft={12}
                     display="flex"
@@ -33,21 +61,8 @@ const SearchHistory: React.FC = () => {
                     }
                 </Pane>
             </Pane>
-        ))
-    }
-
-
-    return (
-        <>
-            {
-                history.length > 0 ?
-                    historyList() :
-                    <Pane display="flex" justifyContent="center">
-                        <Text marginX="auto" color="muted">History is a mystery.</Text>
-                    </Pane>
-            }
-        </>
-    );
+        </Tooltip>
+    )
 }
 
 export default SearchHistory;

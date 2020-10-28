@@ -1,24 +1,16 @@
-import { Heading, IconButton, MoreIcon, Pane, Paragraph, Position, SideSheet, Tab, Tablist } from 'evergreen-ui';
+import { Heading, Pane, Paragraph, Tab, Tablist } from 'evergreen-ui';
 import React, { useState } from 'react';
 import styled from "styled-components";
 import SearchHistory from './SearchHistory';
 import ServerList from './ServerList';
 
 const Sidebar: React.FC = () => {
-    const [selectedIndex, setIndex] = useState(0);
-    const [opened, setOpen] = useState(false);
+    const [selectedIndex, setIndex] = useState(1);
 
     return (
         <>
-            {/* Show / hide side pane */}
-            {/* < IconButton height={38}
-                icon={MoreIcon}
-                margin={16}
-                position="absolute"
-                onClick={() => setOpen(curr => !curr)} >
-            </IconButton > */}
-            <Pane width={300}>
-                <Pane zIndex={1} flexShrink={0} elevation={0} backgroundColor="white">
+            <Pane minWidth={300}>
+                <Pane zIndex={1} flexShrink={0} elevation={0}>
                     <Pane padding={16} borderBottom="muted">
                         <Heading size={600}>OpenBooks</Heading>
                         <Paragraph size={400} color="muted">
@@ -33,20 +25,15 @@ const Sidebar: React.FC = () => {
                                         key={tab}
                                         flex={1}
                                         isSelected={selectedIndex === index}
-                                        onSelect={() => setIndex(index)}
-                                    >
+                                        onSelect={() => setIndex(index)}>
                                         {tab}
-                                    </Tab>
-                                )
-                            )}
-
+                                    </Tab>))
+                            }
                         </Tablist>
                     </Pane>
                 </Pane>
-                <SidebarContent flex="1" scrollable={selectedIndex === 0} overflowY="hidden" padding={8}>
-                    {selectedIndex === 0 ?
-                        <ServerList servers={['Hello', 'World']}></ServerList>
-                        : <SearchHistory></SearchHistory>}
+                <SidebarContent flex="1" scrollable={selectedIndex === 0 ? 1 : 0} overflowY="hidden" padding={8}>
+                    {selectedIndex === 0 ? <ServerList /> : <SearchHistory />}
                 </SidebarContent>
             </Pane>
         </>
@@ -55,6 +42,7 @@ const Sidebar: React.FC = () => {
 
 
 const SidebarContent = styled(Pane) <{ scrollable: boolean }>`
+    max-height: calc(100vh - 78px - 44px);
     &:hover {
         overflow-y: ${props => props.scrollable ? 'scroll' : 'hidden'};
     }

@@ -1,14 +1,22 @@
+import { updateServers } from "../state/serverSlice";
+// TODO: Figure out if this is bad...
+import { store } from "../state/store";
 import { BookRequest, BookResponse, MessageType } from "./messages";
+
 
 export class MessageHandler {
 
     private ws: WebSocket;
 
     constructor() {
-        this.ws = new WebSocket("ws://localhost:5228/ws");
+        const wsProtocol = window.location.protocol === "https:" ? "wss://" : "ws://";
+        const wsHost = process.env.NODE_ENV === "development" ? "localhost:5228" : window.location.host;
+
+        this.ws = new WebSocket(`${wsProtocol}${wsHost}/ws`);
         this.ws.onopen = () => this.onOpen();
         this.ws.onclose = () => this.onClose();
         this.ws.onmessage = (message) => this.route(message);
+        this.ws.onerror = (event) => console.error(event);
     }
 
     public route(msg: MessageEvent<any>): void {
@@ -31,6 +39,7 @@ export class MessageHandler {
                 break;
             case MessageType.SERVERS:
                 // this.servers$.next(response.servers);
+                store.dispatch(updateServers(response.servers))
                 break;
             case MessageType.WAIT:
                 console.log(response);
@@ -45,7 +54,10 @@ export class MessageHandler {
     private onOpen(): void {
         console.log("WebSocket connected.");
         this.ws.send(JSON.stringify({ type: MessageType.CONNECT, payload: {} } as BookRequest));
-        this.ws.send(JSON.stringify({ type: MessageType.SERVERS, payload: {} } as BookRequest));
+
+        setTimeout(() => {
+            this.ws.send(JSON.stringify({ type: MessageType.SERVERS, payload: {} } as BookRequest));
+        }, 5000);
     }
 
     private onClose(): void {

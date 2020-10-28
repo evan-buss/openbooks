@@ -33,6 +33,8 @@ func init() {
 func main() {
 	flag.Parse()
 
+	fmt.Println("TEST")
+
 	// Username can be supplied via ARGS or found from the user's system name
 	if strings.Contains(userName, " ") {
 		// If there is a space split it and take the first word
