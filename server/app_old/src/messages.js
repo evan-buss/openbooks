@@ -51,12 +51,13 @@ export function messageRouter(message, currentState) {
         searchResults: [...currentState.searchResults, message.books],
         loading: false,
       };
-    case MessageTypes.DOWNLOAD:
+    case MessageTypes.DOWNLOAD: //this is where we download it
 
       // Alert the user that the file has downloaded
       sendNotification("success", "Book File Received", message.name);
       // Create download link and click it prompting the save dialog
-      saveByteArray(message.name, message.file);
+      //saveByteArray(message.name);
+      saveFile(message.name);
       return {
         loading: false
       };
@@ -97,12 +98,19 @@ export function countdownTimer(wait, callback) {
 }
 
 // saveByteArray creates a link and download popup for the returned file
-function saveByteArray(fileName, byte) {
+function saveFile(fileName) {
+  let link = document.createElement('a');
+  link.href = window.location.protocol+`//${window.location.host}/attic/`+fileName
+  link.download = fileName;
+  link.click();
+};
+
+/*function saveByteArray(fileName, byte) {
   let link = document.createElement('a');
   link.href = `data:application/octet-stream;base64,${byte}`;
   link.download = fileName;
   link.click();
-};
+};*/
 
 export function sendNotification(type, message, description, duration = 4.5) {
   notification[type]({

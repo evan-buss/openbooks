@@ -11,11 +11,11 @@ import (
 
 // ERROR represents some sort of error outside of specific handlers
 // such as parsing requests
+const ERROR = 0
 
 // Available commands. These are sent via integers starting at 0
 const (
-	ERROR = iota
-	CONNECT
+	CONNECT = iota + 1
 	SEARCH
 	DOWNLOAD
 	SERVERS
@@ -36,7 +36,9 @@ type ErrorResponse struct {
 }
 
 // ConnectionRequest is a request to start the IRC server
-type ConnectionRequest struct{}
+type ConnectionRequest struct {
+	Name string `json:"name"`
+}
 
 // ConnectionResponse is a response sent upon successful connection to the IRC server
 type ConnectionResponse struct {
@@ -74,7 +76,7 @@ type DownloadRequest struct {
 type DownloadResponse struct {
 	MessageType int    `json:"type"`
 	Name        string `json:"name"`
-	File        []byte `json:"file"`
+	//File        string `json:"file"`
 }
 
 // WaitResponse is a response that reports status updates to the client. IRC is asynchronous

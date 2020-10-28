@@ -1,7 +1,7 @@
 package server
 
 import (
-	"io/ioutil"
+	//"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -36,23 +36,24 @@ func (h Handler) DownloadBookFile(text string) {
 	bookDownloaded := make(chan string)
 	go dcc.NewDownload(text, false, bookDownloaded)
 	fileLocation := <-bookDownloaded
+	log.Println(fileLocation)
 	fileName := filepath.Base(fileLocation)
 
-	data, err := ioutil.ReadFile(fileLocation)
+	/*data, err := ioutil.ReadFile(fileLocation)
 	if err != nil {
 		log.Println("Error reading data from " + fileLocation)
-	}
+	}*/
 
 	writeJSON(DownloadResponse{
 		MessageType: DOWNLOAD,
 		Name:        fileName,
-		File:        data,
+		//File:        fileLocation, //opportunity to allow customisation of folder name
 	})
 
-	err = os.Remove(fileLocation)
+	/*err = os.Remove(fileLocation)
 	if err != nil {
 		log.Println("Couldn't remove book file", err)
-	}
+	}*/
 }
 
 // NoResults is called when the server returns that nothing was found for the query

@@ -45,7 +45,7 @@ func NewDownload(text string, isCli bool, doneChan chan<- string) {
 		}
 		dcc.filename = filepath.Join(homeDir, "Downloads", dcc.filename)
 	} else {
-		dcc.filename = filepath.Join(os.TempDir(), dcc.filename)
+		dcc.filename = filepath.Join(getProgramDir(), "downloadedEbooks", dcc.filename) //setup this directory on first start
 	}
 
 	downloadDCC(dcc, doneChan)
@@ -94,7 +94,7 @@ func downloadDCC(dcc Data, doneChan chan<- string) {
 			if err != nil {
 				return err
 			}
-
+			//getProgramDir(), "downloadedEbooks"
 			_, err = io.Copy(out, f)
 			if err != nil {
 				return err
@@ -151,4 +151,12 @@ func stringToIP(nn string) string {
 	ip := make(net.IP, 4)
 	binary.BigEndian.PutUint32(ip, intIP)
 	return ip.String()
+}
+
+func getProgramDir() string{
+	ex, err := os.Executable()
+    if err != nil {
+        panic(err)
+    }
+    return(filepath.Dir(ex))
 }

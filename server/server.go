@@ -4,10 +4,17 @@ import (
 	"log"
 	"net/http"
 	"sync"
+	"fmt"
 
 	"github.com/evan-buss/openbooks/irc"
 	"github.com/gobuffalo/packr/v2"
 	"github.com/gorilla/websocket"
+
+	"strconv"
+	"strings"
+	"time"
+	"os"
+	"path/filepath"
 )
 
 var upgrader = websocket.Upgrader{
@@ -15,37 +22,37 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
-// Connection represents a connection to the websocket client and the irc server
-type Connection struct {
-	irc *irc.Conn
-	ws  *websocket.Conn
-	sync.Mutex
-}
-
-// Conn is the current connection between the browser
-// and server and server and irc channel
-var Conn Connection
+// TODO: Maybe use a struct instead of global variables.
+// ircConn is a global variable to access the current IRC connection
+var ircConn *irc.Conn
 
 //hacky method of seeing numberofconnections in order to close
 //irc session when not client is connected
 var numberOfConnections = 0
+
 var timerForIrcDeath *time.Timer
 var timeTillDeath = 120;
 
+// wsConn is a global variable to access the current Websocket Connection
+var wsConn *websocket.Conn
+
+// mutex ensures that only a single thread is writing to wsConn
+var mutex sync.Mutex
+
 // Start instantiates the web server and opens the browser
 func Start(irc *irc.Conn, port string) {
-
-	Conn = Connection{
-		irc: irc,
-	}
+	ircConn = irc
 
 	// Access the SPA bundled in the binary
 	box := packr.New("ReactApp", "./app/build")
+	ebookFolder := http.Dir(filepath.Join(getProgramDir(), "downloadedEbooks"))
 
 	http.Handle("/", http.FileServer(box))
+	http.Handle("/attic/", http.StripPrefix("/attic/", http.FileServer(ebookFolder))) //if stripprefix wasn't used the file server would try to find the book in $PROGRAMDIR/downloadedEbooks/attic
 	http.HandleFunc("/ws", wsHandler)
+	http.HandleFunc("/reset", resetIRC)
 
-	openbrowser("http://127.0.0.1:" + port + "/")
+	//openbrowser("http://127.0.0.1:" + port + "/")
 
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
@@ -63,14 +70,13 @@ func wsHandler(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	Conn.ws = ws // Set global WS variable
+	wsConn = ws // Set global WS variable
 
 	log.Println("Client connected: " + req.RemoteAddr)
 	ws.SetCloseHandler(func(code int, text string) error {
 		log.Println("Close Handler: " + ws.RemoteAddr().String())
 		return nil
 	})
-
 	numberOfConnections++
 	log.Println(strconv.Itoa(numberOfConnections)+" clients are connected!")
 	if (numberOfConnections == 1 && timerForIrcDeath != nil){
@@ -102,7 +108,6 @@ func reader(conn *websocket.Conn) {
 					//here is where we do the disconnecting jazz
 				}
 			}
-
 			writeJSON(ErrorResponse{
 				Error:   ERROR,
 				Details: err.Error(),
@@ -116,16 +121,25 @@ func reader(conn *websocket.Conn) {
 // A wrapper for websocket.WriteJSON that ensures a single writer
 // and handles errors
 func writeJSON(obj interface{}) {
-	Conn.Lock()
-	err := Conn.ws.WriteJSON(obj)
+	mutex.Lock()
+	err := wsConn.WriteJSON(obj)
 	if err != nil {
 		log.Println("Error writing JSON to websocket: ", err)
 	}
-	Conn.Unlock()
+	mutex.Unlock()
 }
 
 func resetIRC(w http.ResponseWriter, r *http.Request){
 	fmt.Fprintf(w, "Disconnecting from irc server")
 	ircConn.ChangeState(false)
 	ircConn.Disconnect()
+}
+
+func getProgramDir() string{
+	ex, err := os.Executable()
+    if err != nil {
+        panic(err)
+	}
+	//fmt.Println("The program dir is: "+filepath.Dir(ex))
+    return(filepath.Dir(ex))
 }

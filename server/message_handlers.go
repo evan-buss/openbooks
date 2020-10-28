@@ -42,9 +42,9 @@ func messageRouter(message Request) {
 
 // handle ConnectionRequests and either connect to the server or do nothing
 func (c ConnectionRequest) handle() {
-	if !Conn.irc.IsConnected() {
-		core.Join(Conn.irc)
-		go core.ReadDaemon(Conn.irc, Handler{}) // Start the Read Daemon
+	if !ircConn.IsConnected() {
+		core.Join(ircConn)
+		go core.ReadDaemon(ircConn, Handler{}) // Start the Read Daemon
 
 		writeJSON(ConnectionResponse{
 			MessageType: CONNECT,
@@ -62,7 +62,7 @@ func (c ConnectionRequest) handle() {
 
 // handle SearchRequests and send the query to the book server
 func (s SearchRequest) handle() {
-	core.SearchBook(Conn.irc, s.Query)
+	core.SearchBook(ircConn, s.Query)
 
 	writeJSON(WaitResponse{
 		MessageType: WAIT,
@@ -72,7 +72,7 @@ func (s SearchRequest) handle() {
 
 // handle DownloadRequests by sending the request to the book server
 func (d DownloadRequest) handle() {
-	core.DownloadBook(Conn.irc, d.Book)
+	core.DownloadBook(ircConn, d.Book)
 
 	writeJSON(WaitResponse{
 		MessageType: WAIT,

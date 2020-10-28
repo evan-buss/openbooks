@@ -8,6 +8,7 @@ import (
 	"os/user"
 	"strings"
 	"syscall"
+	"path/filepath"
 
 	"github.com/evan-buss/openbooks/cli"
 	"github.com/evan-buss/openbooks/irc"
@@ -18,6 +19,7 @@ var logIRC bool
 var cliMode bool
 var userName string
 var port string
+var programDir string
 
 // Retrieve command line arguments and set appropriate variables
 func init() {
@@ -54,6 +56,28 @@ func main() {
 	if cliMode {
 		cli.Start(conn)
 	} else {
+		programDir := filepath.Join(getProgramDir(), "downloadedEbooks")
+		if _, err := os.Stat("downloadedEbooks"); os.IsNotExist(err) {
+			err := os.RemoveAll(programDir)
+			fmt.Println("Directory already exists, EXTERMINATEEEE")
+			if err != nil {
+				panic(err)
+			}
+	}
+	err := os.Mkdir(programDir,0777)
+	if err != nil {
+		panic(err)
+	}
+		fmt.Println("Starting server on port "+port)
 		server.Start(conn, port)
 	}
+}
+
+func getProgramDir() string{
+	ex, err := os.Executable()
+    if err != nil {
+        panic(err)
+	}
+	//fmt.Println("The program dir is: "+filepath.Dir(ex))
+    return(filepath.Dir(ex))
 }
