@@ -26,6 +26,12 @@ type Connection struct {
 // and server and server and irc channel
 var Conn Connection
 
+//hacky method of seeing numberofconnections in order to close
+//irc session when not client is connected
+var numberOfConnections = 0
+var timerForIrcDeath *time.Timer
+var timeTillDeath = 120;
+
 // Start instantiates the web server and opens the browser
 func Start(irc *irc.Conn, port string) {
 
@@ -65,6 +71,12 @@ func wsHandler(w http.ResponseWriter, req *http.Request) {
 		return nil
 	})
 
+	numberOfConnections++
+	log.Println(strconv.Itoa(numberOfConnections)+" clients are connected!")
+	if (numberOfConnections == 1 && timerForIrcDeath != nil){
+		timerForIrcDeath.Stop()
+		log.Println("The IRC connection timer has been stopped, yay!")
+	}
 	reader(ws)
 }
 
@@ -75,6 +87,22 @@ func reader(conn *websocket.Conn) {
 		err := conn.ReadJSON(&message)
 		if err != nil {
 			log.Println(err)
+			if (strings.Contains(err.Error(), "close") && strings.Contains(err.Error(), "websocket")){
+				numberOfConnections--
+				log.Println("Client disconnected! "+strconv.Itoa(numberOfConnections)+" remaining!")
+				if (numberOfConnections == 0){
+					log.Println("All clients disconnected, waiting for "+strconv.Itoa(timeTillDeath)+" seconds before closing irc connection :(")
+					timerForIrcDeath = time.AfterFunc(time.Second * time.Duration(timeTillDeath), func() {
+						log.Println("Death.")
+						ircConn.ChangeState(false)
+						ircConn.Disconnect()
+					})
+					//timerForIrcDeath
+					//ircCon.changeState(false)
+					//here is where we do the disconnecting jazz
+				}
+			}
+
 			writeJSON(ErrorResponse{
 				Error:   ERROR,
 				Details: err.Error(),
@@ -94,4 +122,10 @@ func writeJSON(obj interface{}) {
 		log.Println("Error writing JSON to websocket: ", err)
 	}
 	Conn.Unlock()
+}
+
+func resetIRC(w http.ResponseWriter, r *http.Request){
+	fmt.Fprintf(w, "Disconnecting from irc server")
+	ircConn.ChangeState(false)
+	ircConn.Disconnect()
 }

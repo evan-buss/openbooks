@@ -48,8 +48,8 @@ func (c ConnectionRequest) handle() {
 
 		writeJSON(ConnectionResponse{
 			MessageType: CONNECT,
-			Status:      "You must wait 30 seconds before searching",
-			Wait:        30,
+			Status:      "Reconnected to the IRC server",
+			Wait:        0,
 		})
 		return
 	}

@@ -12,6 +12,7 @@ type Conn struct {
 	username string
 	realname string
 	Logging  bool
+	amiCon	 bool
 }
 
 // New creates a new IRC connection to the server using the supplied username and realname
@@ -20,6 +21,7 @@ func New(username, realname string) *Conn {
 	irc.channel = ""
 	irc.username = username
 	irc.realname = realname
+	irc.amiCon = false
 
 	return &irc
 }
@@ -39,11 +41,14 @@ func (i *Conn) Connect(address string) {
 
 	i.Write([]byte(user))
 	i.Write([]byte(nick))
+	i.amiCon = true
 }
 
 // Disconnect closes connection to the IRC server
 func (i *Conn) Disconnect() {
+	fmt.Println("Disconnecting irc session...")
 	i.Write([]byte("QUIT :Goodbye\r\n"))
+	i.amiCon = false
 }
 
 // SendMessage sends the given message string to the connected IRC server
@@ -73,4 +78,8 @@ func (i *Conn) PONG(server string) {
 // IsConnected returns true if the IRC connection is not null
 func (i *Conn) IsConnected() bool {
 	return i.Conn != nil
+}
+
+func (i *Conn) ChangeState(state bool){
+	i.amiCon = state
 }
