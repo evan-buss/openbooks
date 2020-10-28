@@ -49,7 +49,14 @@ export default class App extends React.Component {
 		}
 
 		// let addr = `ws://${window.location.host}ws`
-		let addr = `ws://localhost:5228/ws`
+		if (window.location.protocol == 'https:') {
+			var addr = `wss://${window.location.host}/ws`
+			console.log("Using https!");
+		  }
+		  else {
+			var addr = `ws://${window.location.host}/ws`
+			console.log("Using http!");
+		  }
 		console.log(addr)
 		let socket = new WebSocket(addr);
 
