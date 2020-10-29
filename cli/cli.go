@@ -32,10 +32,10 @@ func Start(irc *irc.Conn) {
 
 	fmt.Println("Connection established...")
 
-	for i := 30; i > 0; i-- {
+	/*for i := 30; i > 0; i-- {
 		fmt.Print("\rServer rules mandate a " + strconv.Itoa(i) + " second wait period   ")
 		time.Sleep(time.Second)
-	}
+	}*/
 
 	fmt.Print("\r")
 
