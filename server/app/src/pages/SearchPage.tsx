@@ -1,24 +1,13 @@
 import { Button, Pane, SearchInput } from 'evergreen-ui';
-import React, { FormEvent, useEffect, useRef, useState } from 'react';
+import React, { FormEvent, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import SearchResults from '../components/SearchResults';
-import { MessageHandler } from '../models/MessageHandler';
 import { addHistoryItem } from '../state/historySlice';
 
 const SearchPage: React.FC = () => {
     const dispatch = useDispatch();
     const [searchQuery, setSearchQuery] = useState("");
-
-    const handler = useRef<MessageHandler | undefined>(undefined);
-
-    useEffect(() => {
-        handler.current = new MessageHandler();
-
-        return () => {
-            handler.current!.dispose();
-        };
-    }, []);
 
     const searchHandler = (event: FormEvent) => {
         event.preventDefault()

@@ -1,11 +1,16 @@
+import useLocalStorage from '@rehooks/local-storage';
 import { Heading, Pane, Paragraph, Tab, Tablist } from 'evergreen-ui';
-import React, { useState } from 'react';
+import React from 'react';
 import styled from "styled-components";
 import SearchHistory from './SearchHistory';
 import ServerList from './ServerList';
 
+const SidebarContent = styled(Pane)`
+    max-height: calc(100vh - 78px - 44px);
+`;
+
 const Sidebar: React.FC = () => {
-    const [selectedIndex, setIndex] = useState(1);
+    const [selectedIndex, setIndex] = useLocalStorage("index", 0);
 
     return (
         <>
@@ -19,7 +24,7 @@ const Sidebar: React.FC = () => {
                     </Pane>
                     <Pane display="flex" padding={8}>
                         <Tablist display="flex" flex={1} justifyContent="space-between">
-                            {['Online Servers', 'Search History'].map(
+                            {['Search History', 'Online Servers'].map(
                                 (tab, index) => (
                                     <Tab
                                         key={tab}
@@ -32,20 +37,12 @@ const Sidebar: React.FC = () => {
                         </Tablist>
                     </Pane>
                 </Pane>
-                <SidebarContent flex="1" scrollable={selectedIndex === 0 ? 1 : 0} overflowY="hidden" padding={8}>
-                    {selectedIndex === 0 ? <ServerList /> : <SearchHistory />}
+                <SidebarContent flex="1" overflowY={selectedIndex === 0 ? 'hidden' : 'scroll'} padding={8}>
+                    {selectedIndex === 0 ? <SearchHistory /> : <ServerList />}
                 </SidebarContent>
             </Pane>
         </>
     )
 }
-
-
-const SidebarContent = styled(Pane) <{ scrollable: boolean }>`
-    max-height: calc(100vh - 78px - 44px);
-    &:hover {
-        overflow-y: ${props => props.scrollable ? 'scroll' : 'hidden'};
-    }
-`
 
 export default Sidebar;

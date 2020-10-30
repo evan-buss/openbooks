@@ -1,15 +1,22 @@
 import { Action, configureStore, ThunkAction } from "@reduxjs/toolkit";
-import historyReducer from "./historySlice";
-import serverReducer from "./serverSlice";
 import throttle from "lodash/throttle";
+import historyReducer from "./historySlice";
+import { websocketConn } from "./socketMiddleware";
+import serverReducer from "./serverSlice";
+import stateReducer from "./stateSlice";
+
+const wsProtocol = window.location.protocol === "https:" ? "wss://" : "ws://";
+const wsHost = process.env.NODE_ENV === "development" ? "localhost:5228" : window.location.host;
+const wsUrl = `${wsProtocol}${wsHost}/ws`;
 
 export const store = configureStore({
     reducer: {
+        state: stateReducer,
         history: historyReducer,
         servers: serverReducer
     },
+    middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(websocketConn(wsUrl))
 });
-
 
 const saveState = (key: string, state: any): void => {
     try {
@@ -29,4 +36,3 @@ export type AppThunk<ReturnType = void> = ThunkAction<
     unknown,
     Action<string>
 >;
-

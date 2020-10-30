@@ -13,8 +13,11 @@ const SearchHistory: React.FC = () => {
     return (
         <>
             {
-                history.length > 0 ?
-                    history.map((item: HistoryItem) => <HistoryCard key={item.timestamp.toString()} item={item} dispatch={dispatch} />)
+                history.length > 0 ? history.map((item: HistoryItem) =>
+                    <HistoryCard
+                        key={item.timestamp.toString()}
+                        item={item}
+                        dispatch={dispatch} />)
                     : <Pane display="flex" justifyContent="center">
                         <Text marginX="auto" marginY={16} color="muted">History is a mystery.</Text>
                     </Pane >

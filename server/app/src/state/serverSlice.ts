@@ -13,13 +13,13 @@ export const serverSlice = createSlice({
     name: "servers",
     initialState,
     reducers: {
-        updateServers(state, action: PayloadAction<string[]>) {
+        setServers(state, action: PayloadAction<string[]>) {
             state.servers = action.payload;
         }
     }
 });
 
-export const { updateServers } = serverSlice.actions;
+export const { setServers } = serverSlice.actions;
 
 export const selectServers = (state: RootState) => state.servers.servers;
 
