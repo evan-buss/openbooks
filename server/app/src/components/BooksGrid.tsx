@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { BookDetail, MessageType } from '../models/messages';
 import { sendMessage } from '../state/stateSlice';
 import { RootState } from '../state/store';
+import image from '../assets/reading.svg'
 
 
 export const BooksGrid: React.FC = () => {
@@ -22,7 +23,10 @@ export const BooksGrid: React.FC = () => {
     const filteredRows = filtered(activeItem?.results ?? [], servers);
 
     if (activeItem === null) {
-        return (<Text fontSize="2em" margin="3em">Search a book to get started.</Text>);
+        return (<>
+            <Text fontSize="2em" margin="3em">Search a book to get started.</Text>
+            <img width="40%" src={image} alt="person reading" />
+        </>);
     }
 
     // Active item selected, but the results are null
@@ -49,7 +53,7 @@ export const BooksGrid: React.FC = () => {
     return (
         <Table width="100%" height="100%">
             <Table.Head>
-                <Table.TextHeaderCell flexBasis={200} flexGrow={0} flexShrink={0}></Table.TextHeaderCell>
+                <Table.TextHeaderCell flexBasis={200} flexGrow={0} flexShrink={0}>Server</Table.TextHeaderCell>
                 <Table.TextHeaderCell flexBasis={250} flexGrow={0} flexShrink={0} >Author</Table.TextHeaderCell>
                 <Table.TextHeaderCell>Title</Table.TextHeaderCell>
                 <Table.TextHeaderCell flexBasis={100} flexGrow={0} flexShrink={0}>Format</Table.TextHeaderCell>

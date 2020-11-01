@@ -13,7 +13,9 @@ const ServerList: React.FC = () => {
     return (
         <>
             <Pane display="flex" justifyContent="center">
-                <Text marginX="auto" marginY={4} color="muted">Click to filter.</Text>
+                <Text marginX="auto" marginY={4} color="muted">
+                    {servers.length > 0 ? 'Click to filter.' : 'Servers not found.'}
+                </Text>
             </Pane >
             {servers.map(name =>
                 (

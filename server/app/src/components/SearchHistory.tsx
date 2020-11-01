@@ -41,28 +41,25 @@ const HistoryCard: React.FC<Props> = ({ activeTS, item, dispatch }: Props) => {
             position={Position.BOTTOM}
             content={
                 <Menu>
-                    <Menu.Group>
-                        {activeTS !== item.timestamp &&
-                            <Menu.Item
-                                icon={EyeOpenIcon}
-                                onClick={() => dispatch(setActiveItem(item))}>
-                                View
+                    {activeTS !== item.timestamp &&
+                        <Menu.Item
+                            icon={EyeOpenIcon}
+                            onClick={() => dispatch(setActiveItem(item))}>
+                            Show
                             </Menu.Item>
-                        }
-                        {activeTS === item.timestamp &&
-                            <Menu.Item
-                                icon={EyeOffIcon}
-                                onClick={() => dispatch(setActiveItem(null))}>
-                                Hide
+                    }
+                    {activeTS === item.timestamp &&
+                        <Menu.Item
+                            icon={EyeOffIcon}
+                            onClick={() => dispatch(setActiveItem(null))}>
+                            Hide
                             </Menu.Item>
-                        }
-                        <Menu.Divider></Menu.Divider>
-                        <Menu.Item icon={TrashIcon}
-                            onClick={() => dispatch(deleteHistoryItem(item.timestamp))}
-                            intent="danger">
-                            Delete
+                    }
+                    <Menu.Item icon={TrashIcon}
+                        onClick={() => dispatch(deleteHistoryItem(item.timestamp))}
+                        intent="danger">
+                        Delete
                         </Menu.Item>
-                    </Menu.Group>
                 </Menu>
             }>
             <Pane
