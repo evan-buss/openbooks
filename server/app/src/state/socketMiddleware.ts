@@ -1,12 +1,14 @@
-import { PayloadAction, Store } from "@reduxjs/toolkit";
-import { BookResponse, MessageType } from "../models/messages";
+import { AnyAction, PayloadAction, Store } from "@reduxjs/toolkit";
+import { BookDetail, BookResponse, MessageType } from "../models/messages";
+import { displayNotification, NotificationType } from "./notifications";
 import { setServers } from "./serverSlice";
-import { sendMessage } from "./stateSlice";
+import { sendMessage, setSearchResults } from "./stateSlice";
 
 // Web socket redux middleware. 
 // Listens for messages and sends dispatches to the socket
-export const websocketConn = (wsUrl: string) => {
-    return (store: any) => {
+export const websocketConn = (wsUrl: string): any => {
+    return (store: Store) => {
+        console.log(store);
         const socket = new WebSocket(wsUrl);
 
         socket.onopen = () => onOpen(store);
@@ -15,10 +17,15 @@ export const websocketConn = (wsUrl: string) => {
         socket.onerror = (event) => console.error(event);
 
         return (next: any) => (action: PayloadAction<any>) => {
+            // Send Message action? Send data to the socket.
             if (sendMessage.match(action)) {
-                socket.send(action.payload.message)
+                if (socket.readyState === socket.OPEN) {
+                    socket.send(action.payload.message)
+                } else {
+                    socket.send("not sending because socket is not open.");
+                }
             }
-            console.log(action);
+
             return next(action);
         }
     }
@@ -31,16 +38,16 @@ const route = (store: Store, msg: MessageEvent<any>): void => {
     switch (response.type) {
         // TODO: How to get the message type with typed properties
         case MessageType.ERROR:
-            displayNotification(response.details)
+            displayNotification(NotificationType.DANGER, response.details)
             break;
         case MessageType.CONNECT:
-            displayNotification("Welcome, connection established.");
+            displayNotification(NotificationType.NOTIFY, "Welcome, connection established.");
             store.dispatch(sendMessage({ type: MessageType.SERVERS, payload: {} }));
             break;
         case MessageType.SEARCH:
-            // this.loading$.next(false);
-            // this.searchResults$.next(message.books as BookDetail[]);
-            displayNotification("Search results returned.")
+            console.log("search results")
+            store.dispatch((setSearchResults(response.books as BookDetail[]) as unknown) as AnyAction);
+            displayNotification(NotificationType.WARNING, "Search results returned.")
             break;
         case MessageType.DOWNLOAD:
             break;
@@ -50,16 +57,12 @@ const route = (store: Store, msg: MessageEvent<any>): void => {
             break;
         case MessageType.WAIT:
             console.log(response);
-            displayNotification(response.status)
+            displayNotification(NotificationType.WARNING, response.status)
             break;
         case MessageType.IRCERROR:
-            displayNotification("Internal Server Error. Try again.")
+            displayNotification(NotificationType.WARNING, "Internal Server Error. Try again.")
             break;
     }
-}
-
-const displayNotification = (message: string) => {
-    console.log(message);
 }
 
 const onOpen = (store: Store): void => {

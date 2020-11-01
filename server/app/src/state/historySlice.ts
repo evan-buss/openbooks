@@ -1,9 +1,10 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { BookDetail } from "../models/messages";
-import { RootState } from "./store";
+import { setActiveItem } from "./stateSlice";
+import { AppThunk, RootState } from "./store";
 
 // HistoryItem represents a single search history item
-export type HistoryItem = {
+type HistoryItem = {
     query: string;
     timestamp: number;
     results?: BookDetail[];
@@ -15,10 +16,7 @@ interface HistoryState {
 
 const loadState = (): HistoryItem[] => {
     try {
-        console.log('loading state');
-        const serialized = localStorage.getItem('history');
-        console.log(serialized);
-        return JSON.parse(serialized!) ?? [];
+        return JSON.parse(localStorage.getItem('history')!) ?? [];
     } catch (err) {
         return [];
     }
@@ -35,14 +33,41 @@ export const historySlice = createSlice({
         addHistoryItem: (state, action: PayloadAction<HistoryItem>) => {
             state.items = [action.payload, ...state.items].slice(0, 16);
         },
-        deleteHistoryItem: (state, action: PayloadAction<number>) => {
+        deleteByTimetamp: (state, action: PayloadAction<number>) => {
             state.items = state.items.filter(x => x.timestamp !== action.payload);
+        },
+        updateHistoryItem: (state, action: PayloadAction<HistoryItem>) => {
+            var pendingItemIndex = state.items.findIndex(x => x.timestamp === action.payload.timestamp);
+            state.items = [
+                ...state.items.slice(0, pendingItemIndex),
+                action.payload,
+                ...state.items.slice(pendingItemIndex + 1)
+            ];
         }
     },
 })
 
-export const { addHistoryItem, deleteHistoryItem } = historySlice.actions;
+// Delete an item from history. Clear current item and loading state if deleting active search
+const deleteHistoryItem = (timeStamp: number): AppThunk => (dispatch, getStore) => {
+    const activeItem = getStore().state.activeItem;
+    if (activeItem?.timestamp === timeStamp) {
+        dispatch(setActiveItem(null));
+    }
 
-export const selectHistory = (state: RootState) => state.history.items;
+    dispatch(historySlice.actions.deleteByTimetamp(timeStamp));
+}
+
+const { addHistoryItem, updateHistoryItem } = historySlice.actions;
+
+const selectHistory = (state: RootState) => state.history.items;
+
+export type { HistoryItem };
+export {
+    deleteHistoryItem,
+    addHistoryItem,
+    updateHistoryItem,
+    selectHistory
+};
+
 
 export default historySlice.reducer;

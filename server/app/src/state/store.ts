@@ -4,10 +4,13 @@ import historyReducer from "./historySlice";
 import { websocketConn } from "./socketMiddleware";
 import serverReducer from "./serverSlice";
 import stateReducer from "./stateSlice";
+import { enableMapSet } from "immer";
 
 const wsProtocol = window.location.protocol === "https:" ? "wss://" : "ws://";
 const wsHost = process.env.NODE_ENV === "development" ? "localhost:5228" : window.location.host;
 const wsUrl = `${wsProtocol}${wsHost}/ws`;
+
+enableMapSet();
 
 export const store = configureStore({
     reducer: {

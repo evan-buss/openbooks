@@ -2,23 +2,23 @@ import { Button, Pane, SearchInput } from 'evergreen-ui';
 import React, { FormEvent, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
-import SearchResults from '../components/SearchResults';
-import { addHistoryItem } from '../state/historySlice';
+import { BooksGrid } from '../components/BooksGrid';
+import { sendSearch } from '../state/stateSlice';
 
 const SearchPage: React.FC = () => {
     const dispatch = useDispatch();
     const [searchQuery, setSearchQuery] = useState("");
 
     const searchHandler = (event: FormEvent) => {
-        event.preventDefault()
+        event.preventDefault();
         if (searchQuery === "") return;
-        dispatch(addHistoryItem({ query: searchQuery, timestamp: new Date().getTime() }));
+        dispatch(sendSearch(searchQuery));
         setSearchQuery("");
     }
 
     return (
         <Pane display="flex" justifyContent="center" background="tint1" width="100%">
-            <Pane width="65%" display="flex" flexDirection="column" alignItems="center">
+            <Pane width="85%" display="flex" flexDirection="column" alignItems="center">
                 <Form onSubmit={(e) => searchHandler(e)}>
                     <SearchInput
                         value={searchQuery}
@@ -30,7 +30,7 @@ const SearchPage: React.FC = () => {
                     </SearchInput>
                     <Button type="submit" height={40} appearance="primary">Search</Button>
                 </Form>
-                <SearchResults></SearchResults>
+                <BooksGrid />
             </Pane>
         </Pane>
     )

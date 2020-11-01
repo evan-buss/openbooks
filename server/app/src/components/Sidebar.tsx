@@ -14,7 +14,7 @@ const Sidebar: React.FC = () => {
 
     return (
         <>
-            <Pane minWidth={300}>
+            <Pane minWidth={325}>
                 <Pane zIndex={1} flexShrink={0} elevation={0}>
                     <Pane padding={16} borderBottom="muted">
                         <Heading size={600}>OpenBooks</Heading>

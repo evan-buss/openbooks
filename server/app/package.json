@@ -14,7 +14,6 @@
     "@types/react": "^16.9.53",
     "@types/react-dom": "^16.9.8",
     "@types/react-redux": "^7.1.9",
-    "antd": "^4.7.3",
     "evergreen-ui": "^5.1.2",
     "lodash": "^4.17.20",
     "react": "^17.0.1",
