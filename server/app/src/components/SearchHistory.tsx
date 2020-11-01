@@ -1,6 +1,5 @@
 import { Dispatch } from "@reduxjs/toolkit";
-import { Search } from "@styled-icons/feather/Search";
-import { Badge, EyeOffIcon, EyeOpenIcon, Menu, Pane, Popover, Position, Spinner, Text, TrashIcon } from 'evergreen-ui';
+import { Badge, EyeOffIcon, EyeOpenIcon, Menu, Pane, Popover, Position, SearchIcon, Spinner, Text, TrashIcon } from 'evergreen-ui';
 import React from 'react';
 import { useDispatch, useSelector } from "react-redux";
 import { deleteHistoryItem, HistoryItem, selectHistory } from "../state/historySlice";
@@ -73,7 +72,7 @@ const HistoryCard: React.FC<Props> = ({ activeTS, item, dispatch }: Props) => {
                 justifyContent="space-between"
                 alignItems="center"
             >
-                <Search size={24} title="search history icon" />
+                <SearchIcon size={15} color="#234361" />
                 <Text width={140}
                     whiteSpace="nowrap"
                     display="block"

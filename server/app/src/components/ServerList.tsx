@@ -1,5 +1,4 @@
-import { Server } from '@styled-icons/feather/Server';
-import { Pane, Text } from 'evergreen-ui';
+import { Badge, DatabaseIcon, Pane, Text } from 'evergreen-ui';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectServers } from "../state/serverSlice";
@@ -22,10 +21,18 @@ const ServerList: React.FC = () => {
                         onClick={() => dispatch(toggleServerFilter(name))}
                         key={name}
                         border
-                        background={filters.has(name) ? "greenTint" : ""}
-                        padding={6} elevation={1} margin={8}>
-                        <Server size={24} color="green" title="server icon" />
-                        <Text marginLeft={24}>{name}</Text>
+                        display="flex"
+                        alignItems="center"
+                        padding={6} elevation={1} margin={6}>
+                        <DatabaseIcon size={15} color="#234361" />
+                        <Text width="100%" marginLeft={24} display="flex" alignItems="center" justifyContent="space-between">
+                            {name}
+                            {filters.has(name) &&
+                                <Badge color="blue">
+                                    Active
+                            </Badge>
+                            }
+                        </Text>
                     </Pane>
                 )
             )}
