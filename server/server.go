@@ -6,8 +6,11 @@ import (
 	"sync"
 
 	"github.com/evan-buss/openbooks/irc"
-	"github.com/gobuffalo/packr/v2"
 	"github.com/gorilla/websocket"
+	"github.com/rakyll/statik/fs"
+
+	// Load the static content
+	_ "github.com/evan-buss/openbooks/server/statik"
 )
 
 var upgrader = websocket.Upgrader{
@@ -33,10 +36,12 @@ func Start(irc *irc.Conn, port string) {
 		irc: irc,
 	}
 
-	// Access the SPA bundled in the binary
-	box := packr.New("ReactApp", "./app/build")
+	staticFs, err := fs.New()
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	http.Handle("/", http.FileServer(box))
+	http.Handle("/", http.FileServer(staticFs))
 	http.HandleFunc("/ws", wsHandler)
 
 	openbrowser("http://127.0.0.1:" + port + "/")

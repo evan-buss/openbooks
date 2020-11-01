@@ -69,7 +69,7 @@ for, click download and the book will be sent to you.
 
 ### Install the dependencies
   - `go get`
-  - `go get -u github.com/gobuffalo/packr/v2/packr2`
+  - `go get github.com/rakyll/statik`
     - This is installed as a binary to your `$GOBIN`
   - `cd server/app && npm install`
 
