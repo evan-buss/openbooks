@@ -2,6 +2,7 @@ import useLocalStorage from '@rehooks/local-storage';
 import { Heading, Pane, Paragraph, Tab, Tablist } from 'evergreen-ui';
 import React from 'react';
 import styled from "styled-components";
+import Pulse from './Pulse';
 import SearchHistory from './SearchHistory';
 import ServerList from './ServerList';
 
@@ -17,7 +18,13 @@ const Sidebar: React.FC = () => {
             <Pane minWidth={325}>
                 <Pane zIndex={1} flexShrink={0} elevation={0}>
                     <Pane padding={16} borderBottom="muted">
-                        <Heading size={600}>OpenBooks</Heading>
+                        <Heading size={600}
+                            display="flex"
+                            justifyContent="space-between"
+                            paddingRight="10px">
+                            OpenBooks
+                            <Pulse />
+                        </Heading>
                         <Paragraph size={400} color="muted">
                             Download eBooks from IRC Highway
                     </Paragraph>

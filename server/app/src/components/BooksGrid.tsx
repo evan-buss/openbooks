@@ -1,16 +1,18 @@
 import { Button, Pane, Spinner, Table, Text } from 'evergreen-ui';
 import React from 'react';
-import { useSelector } from 'react-redux';
-import { BookDetail } from '../models/messages';
+import { useDispatch, useSelector } from 'react-redux';
+import { BookDetail, MessageType } from '../models/messages';
+import { sendMessage } from '../state/stateSlice';
 import { RootState } from '../state/store';
 
 
 export const BooksGrid: React.FC = () => {
     const activeItem = useSelector((store: RootState) => store.state.activeItem);
     const servers = useSelector((store: RootState) => new Set<string>(store.state.serverFilters));
+    const dispatch = useDispatch();
 
     const download = (book: BookDetail) => {
-        alert("Clicked: " + book.title);
+        dispatch(sendMessage({ type: MessageType.DOWNLOAD, payload: { book: book.full } }));
     }
 
     const filtered = (books: BookDetail[], servers: Set<string>) => {

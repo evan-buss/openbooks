@@ -7,19 +7,27 @@ export enum NotificationType {
     DANGER
 }
 
-export const displayNotification = (type: NotificationType, message: string) => {
+export const displayNotification = (type: NotificationType = NotificationType.NOTIFY, message: string, subText?: string) => {
     switch (type) {
         case NotificationType.NOTIFY:
-            toaster.notify(message);
+            toaster.notify(message, {
+                description: subText
+            });
             break;
         case NotificationType.SUCCESS:
-            toaster.success(message);
+            toaster.success(message, {
+                description: subText
+            });
             break;
         case NotificationType.WARNING:
-            toaster.warning(message);
+            toaster.warning(message, {
+                description: subText
+            });
             break;
         case NotificationType.DANGER:
-            toaster.danger(message);
+            toaster.danger(message, {
+                description: subText
+            });
             break;
     }
 }

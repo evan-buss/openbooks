@@ -22,7 +22,7 @@ export const websocketConn = (wsUrl: string): any => {
                 if (socket.readyState === socket.OPEN) {
                     socket.send(action.payload.message)
                 } else {
-                    socket.send("not sending because socket is not open.");
+                    displayNotification(NotificationType.WARNING, "Server connection closed. Reload page.");
                 }
             }
 
@@ -41,27 +41,30 @@ const route = (store: Store, msg: MessageEvent<any>): void => {
             displayNotification(NotificationType.DANGER, response.details)
             break;
         case MessageType.CONNECT:
-            displayNotification(NotificationType.NOTIFY, "Welcome, connection established.");
+            displayNotification(NotificationType.SUCCESS, "Welcome, connection established.");
             store.dispatch(sendMessage({ type: MessageType.SERVERS, payload: {} }));
             break;
         case MessageType.SEARCH:
             console.log("search results")
             store.dispatch((setSearchResults(response.books as BookDetail[]) as unknown) as AnyAction);
-            displayNotification(NotificationType.WARNING, "Search results returned.")
+            displayNotification(NotificationType.SUCCESS, "Search results received.")
             break;
         case MessageType.DOWNLOAD:
+            displayNotification(NotificationType.SUCCESS, "Book file received.", response.name);
+            saveByteArray(response.name, response.file);
             break;
         case MessageType.SERVERS:
-            // this.servers$.next(response.servers);
             store.dispatch(setServers(response.servers))
             break;
         case MessageType.WAIT:
-            console.log(response);
-            displayNotification(NotificationType.WARNING, response.status)
+            displayNotification(NotificationType.SUCCESS, response.status)
             break;
         case MessageType.IRCERROR:
-            displayNotification(NotificationType.WARNING, "Internal Server Error. Try again.")
+            displayNotification(NotificationType.DANGER, "IRC Error. Try again.")
             break;
+        default:
+            console.error(response);
+            displayNotification(NotificationType.DANGER, "Unknown error type. See console.")
     }
 }
 
@@ -69,6 +72,14 @@ const onOpen = (store: Store): void => {
     console.log("WebSocket connected.");
     store.dispatch(sendMessage({ type: MessageType.CONNECT, payload: {} }));
 }
+
+// saveByteArray creates a link and download popup for the returned file
+function saveByteArray(fileName: string, byte: Blob) {
+    let link = document.createElement('a');
+    link.href = `data:application/octet-stream;base64,${byte}`;
+    link.download = fileName;
+    link.click();
+};
 
 const onClose = (): void => {
     console.log("WebSocket closed.");

@@ -30,7 +30,7 @@ const ServerList: React.FC = () => {
                             {filters.has(name) &&
                                 <Badge color="blue">
                                     Active
-                            </Badge>
+                                </Badge>
                             }
                         </Text>
                     </Pane>

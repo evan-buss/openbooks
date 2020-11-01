@@ -42,10 +42,13 @@ const HistoryCard: React.FC<Props> = ({ activeTS, item, dispatch }: Props) => {
             content={
                 <Menu>
                     <Menu.Group>
-                        <Menu.Item icon={EyeOpenIcon}
-                            onClick={() => dispatch(setActiveItem(item))}>
-                            View
-                        </Menu.Item>
+                        {activeTS !== item.timestamp &&
+                            <Menu.Item
+                                icon={EyeOpenIcon}
+                                onClick={() => dispatch(setActiveItem(item))}>
+                                View
+                            </Menu.Item>
+                        }
                         {activeTS === item.timestamp &&
                             <Menu.Item
                                 icon={EyeOffIcon}
@@ -74,6 +77,8 @@ const HistoryCard: React.FC<Props> = ({ activeTS, item, dispatch }: Props) => {
             >
                 <SearchIcon size={15} color="#234361" />
                 <Text width={140}
+                    marginLeft={24}
+                    flex={1}
                     whiteSpace="nowrap"
                     display="block"
                     fontWeight={500}
@@ -82,9 +87,9 @@ const HistoryCard: React.FC<Props> = ({ activeTS, item, dispatch }: Props) => {
                     {item.query}
                 </Text>
                 {!item.results?.length ?
-                    <Spinner size={24} /> :
-                    <Badge color="green" size={300}>
-                        {item.results?.length + ' Results'}
+                    <Spinner size={24} marginRight={5} /> :
+                    <Badge color="green">
+                        {`${item.results?.length} RESULTS`}
                     </Badge>
                 }
             </Pane>
