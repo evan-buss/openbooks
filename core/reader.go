@@ -2,6 +2,7 @@ package core
 
 import (
 	"bufio"
+	"fmt"
 	"log"
 	"os"
 	"strings"
@@ -41,7 +42,7 @@ var serverCache ServerCache
 // specific messages and dispatches appropriate handler functions
 // Params: irc - IRC connection
 //         handler - domain specific handler that responds to IRC events
-func ReadDaemon(irc *irc.Conn, handler ReaderHandler) {
+func ReadDaemon(irc *irc.Conn, handler ReaderHandler, disconnect <-chan struct{}) {
 
 	var logFile *os.File
 	serverCache = ServerCache{Servers: []string{}, Time: time.Now()}
@@ -63,44 +64,52 @@ func ReadDaemon(irc *irc.Conn, handler ReaderHandler) {
 	}
 
 	for scanner.Scan() {
-		text := scanner.Text()
-		if err := scanner.Err(); err != nil {
-			log.Println("Scanner errror: ", err)
-		}
+		select {
+		case <-disconnect:
+			fmt.Println("breaking out of scanner due to disconnect")
+			return
 
-		if irc.Logging {
-			_, err := logFile.WriteString(text + "\n")
-			if err != nil {
-				log.Println(err)
-			}
-		}
+		default:
 
-		// Respond to Direct Client-to-Client downloads
-		if strings.Contains(text, sendMessage) {
-			if strings.Contains(text, "_results_for") {
-				go handler.DownloadSearchResults(text)
-			} else {
-				go handler.DownloadBookFile(text)
+			text := scanner.Text()
+			if err := scanner.Err(); err != nil {
+				log.Println("Scanner errror: ", err)
 			}
-		} else if strings.Contains(text, noticeMessage) {
-			if strings.Contains(text, noResults) {
-				handler.NoResults()
-			} else if strings.Contains(text, serverUnavailable) {
-				handler.BadServer()
-			} else if strings.Contains(text, searchAccepted) {
-				handler.SearchAccepted()
-			} else if strings.Contains(text, numMatches) {
-				start := strings.LastIndex(text, "returned") + 9
-				end := strings.LastIndex(text, "matches") - 1
-				handler.MatchesFound(text[start:end])
+
+			if irc.Logging {
+				_, err := logFile.WriteString(text + "\n")
+				if err != nil {
+					log.Println(err)
+				}
 			}
-		} else if strings.Contains(text, beginUserList) {
-			users.WriteString(text) // Accumulate the user list
-		} else if strings.Contains(text, endUserList) {
-			serverCache.ParseServers(users.String())
-			users.Reset()
-		} else if strings.Contains(text, pingMessage) {
-			irc.PONG("irc.irchighway.net")
+
+			// Respond to Direct Client-to-Client downloads
+			if strings.Contains(text, sendMessage) {
+				if strings.Contains(text, "_results_for") {
+					go handler.DownloadSearchResults(text)
+				} else {
+					go handler.DownloadBookFile(text)
+				}
+			} else if strings.Contains(text, noticeMessage) {
+				if strings.Contains(text, noResults) {
+					handler.NoResults()
+				} else if strings.Contains(text, serverUnavailable) {
+					handler.BadServer()
+				} else if strings.Contains(text, searchAccepted) {
+					handler.SearchAccepted()
+				} else if strings.Contains(text, numMatches) {
+					start := strings.LastIndex(text, "returned") + 9
+					end := strings.LastIndex(text, "matches") - 1
+					handler.MatchesFound(text[start:end])
+				}
+			} else if strings.Contains(text, beginUserList) {
+				users.WriteString(text) // Accumulate the user list
+			} else if strings.Contains(text, endUserList) {
+				serverCache.ParseServers(users.String())
+				users.Reset()
+			} else if strings.Contains(text, pingMessage) {
+				irc.PONG("irc.irchighway.net")
+			}
 		}
 	}
 }

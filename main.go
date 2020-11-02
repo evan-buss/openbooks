@@ -33,8 +33,6 @@ func init() {
 func main() {
 	flag.Parse()
 
-	fmt.Println("TEST")
-
 	// Username can be supplied via ARGS or found from the user's system name
 	if strings.Contains(userName, " ") {
 		// If there is a space split it and take the first word
@@ -42,20 +40,22 @@ func main() {
 		userName = strings.Split(userName, " ")[0]
 	}
 
-	conn := irc.New(userName, userName)
-	conn.Logging = logIRC
-
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
-	go func() {
-		<-c
-		conn.Disconnect()
-		os.Exit(1)
-	}()
-
 	if cliMode {
+		conn := irc.New(userName, userName)
+		conn.Logging = logIRC
+
+		c := make(chan os.Signal, 1)
+		signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+		go func() {
+			<-c
+			conn.Disconnect()
+			os.Exit(1)
+		}()
+
 		cli.Start(conn)
 	} else {
-		server.Start(conn, port)
+		// TODO: Generate config type struct
+		// TODO: Use proper logging
+		server.Start(userName, port)
 	}
 }

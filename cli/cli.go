@@ -4,9 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"strconv"
 	"strings"
-	"time"
 
 	"github.com/evan-buss/openbooks/core"
 	"github.com/evan-buss/openbooks/irc"
@@ -28,14 +26,9 @@ func Start(irc *irc.Conn) {
 	core.Join(IRC)
 
 	exitSignal := make(chan struct{})
-	go core.ReadDaemon(irc, Handler{})
+	go core.ReadDaemon(irc, Handler{}, exitSignal)
 
 	fmt.Println("Connection established...")
-
-	for i := 30; i > 0; i-- {
-		fmt.Print("\rServer rules mandate a " + strconv.Itoa(i) + " second wait period   ")
-		time.Sleep(time.Second)
-	}
 
 	fmt.Print("\r")
 
@@ -64,7 +57,7 @@ func userInput(reader *bufio.Reader, irc *irc.Conn) {
 		message, _ := reader.ReadString('\n')
 		core.DownloadBook(irc, message)
 	case "d":
-		fmt.Println("disonnecting")
+		fmt.Println("Disconnecting")
 		irc.Disconnect()
 		os.Exit(0)
 	default:

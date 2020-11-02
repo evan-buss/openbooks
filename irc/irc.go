@@ -1,6 +1,7 @@
 package irc
 
 import (
+	"fmt"
 	"log"
 	"net"
 )
@@ -26,11 +27,14 @@ func New(username, realname string) *Conn {
 
 // Connect connects to the given server at port 6667
 func (i *Conn) Connect(address string) {
+	fmt.Println("Dialing")
 	conn, err := net.Dial("tcp", address+":6667")
 
 	if err != nil {
 		log.Fatal("IRC Connection Error", err)
 	}
+	fmt.Println("dialed success??")
+
 	i.Conn = conn
 
 	user := "USER " + i.username + " " + i.username + " " + i.username + " :" +
@@ -44,6 +48,7 @@ func (i *Conn) Connect(address string) {
 // Disconnect closes connection to the IRC server
 func (i *Conn) Disconnect() {
 	i.Write([]byte("QUIT :Goodbye\r\n"))
+	i.Conn.Close()
 }
 
 // SendMessage sends the given message string to the connected IRC server

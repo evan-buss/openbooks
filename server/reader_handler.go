@@ -11,7 +11,9 @@ import (
 )
 
 // Handler is the server implementation of the ReaderHandler interface.
-type Handler struct{}
+type Handler struct {
+	*Client
+}
 
 // DownloadSearchResults downloads from DCC server, parses data, and sends data to client
 func (h Handler) DownloadSearchResults(text string) {
@@ -20,10 +22,10 @@ func (h Handler) DownloadSearchResults(text string) {
 	go dcc.NewDownload(text, false, searchDownloaded)
 	// Retrieve the file's location
 	fileLocation := <-searchDownloaded
-	writeJSON(SearchResponse{
+	h.send <- SearchResponse{
 		MessageType: SEARCH,
 		Books:       core.ParseSearchFile(fileLocation),
-	})
+	}
 
 	err := os.Remove(fileLocation)
 	if err != nil {
@@ -43,11 +45,11 @@ func (h Handler) DownloadBookFile(text string) {
 		log.Println("Error reading data from " + fileLocation)
 	}
 
-	writeJSON(DownloadResponse{
+	h.send <- DownloadResponse{
 		MessageType: DOWNLOAD,
 		Name:        fileName,
 		File:        data,
-	})
+	}
 
 	err = os.Remove(fileLocation)
 	if err != nil {
@@ -57,32 +59,32 @@ func (h Handler) DownloadBookFile(text string) {
 
 // NoResults is called when the server returns that nothing was found for the query
 func (h Handler) NoResults() {
-	writeJSON(IrcErrorResponse{
+	h.send <- IrcErrorResponse{
 		MessageType: IRCERROR,
 		Status:      "No results found for the query.",
-	})
+	}
 }
 
 // BadServer is called when the requested download fails because the server is not available
 func (h Handler) BadServer() {
-	writeJSON(IrcErrorResponse{
+	h.send <- IrcErrorResponse{
 		MessageType: IRCERROR,
 		Status:      "Server is not available. Try another one.",
-	})
+	}
 }
 
 // SearchAccepted is called when the user's query is accepted into the search queue
 func (h Handler) SearchAccepted() {
-	writeJSON(WaitResponse{
+	h.send <- WaitResponse{
 		MessageType: WAIT,
 		Status:      "Search accepted into the queue",
-	})
+	}
 }
 
 // MatchesFound is called when the server finds matches for the user's query
 func (h Handler) MatchesFound(num string) {
-	writeJSON(WaitResponse{
+	h.send <- WaitResponse{
 		MessageType: WAIT,
 		Status:      "Found " + num + " results for your search",
-	})
+	}
 }

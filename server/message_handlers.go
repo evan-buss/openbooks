@@ -3,6 +3,7 @@ package server
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 
 	"github.com/evan-buss/openbooks/core"
@@ -10,11 +11,12 @@ import (
 
 // RequestHandler defines a generic handle() method that is called when a specific request type is made
 type RequestHandler interface {
-	handle()
+	handle(c *Client)
 }
 
 // messageRouter is used to parse the incoming request and respond appropriately
-func messageRouter(message Request) {
+func (c *Client) routeMessage(message Request) {
+	fmt.Println("Routing message")
 	var obj RequestHandler
 
 	switch message.RequestType {
@@ -32,35 +34,35 @@ func messageRouter(message Request) {
 
 	err := json.Unmarshal(message.Payload, &obj)
 	if err != nil {
-		writeJSON(ErrorResponse{
+		c.send <- ErrorResponse{
 			Error:   message.RequestType,
 			Details: err.Error(),
-		})
+		}
 	}
-	obj.handle()
+	obj.handle(c)
 }
 
 // handle ConnectionRequests and either connect to the server or do nothing
-func (c ConnectionRequest) handle() {
+func (ConnectionRequest) handle(c *Client) {
 
 	log.Println("Connection request received.")
 
-	if !Conn.irc.IsConnected() {
+	if !c.irc.IsConnected() {
 		log.Println("Connecting to the IRC server.")
 
-		core.Join(Conn.irc)
-		go core.ReadDaemon(Conn.irc, Handler{}) // Start the Read Daemon
+		core.Join(c.irc)
+		go core.ReadDaemon(c.irc, Handler{Client: c}, c.disconnect) // Start the Read Daemon
 
-		writeJSON(ConnectionResponse{
+		c.send <- ConnectionResponse{
 			MessageType: CONNECT,
-			Status:      "You must wait 30 seconds before searching",
-			Wait:        30,
-		})
+			Status:      "Welcome to OpenBooks. Search a book to get started.",
+			Wait:        0,
+		}
 		return
 	}
 	log.Println("IRC server previously connected.")
 
-	writeJSON(ConnectionResponse{
+	c.conn.WriteJSON(ConnectionResponse{
 		MessageType: CONNECT,
 		Status:      "IRC Server Ready",
 		Wait:        0,
@@ -68,33 +70,33 @@ func (c ConnectionRequest) handle() {
 }
 
 // handle SearchRequests and send the query to the book server
-func (s SearchRequest) handle() {
-	core.SearchBook(Conn.irc, s.Query)
+func (s SearchRequest) handle(c *Client) {
+	core.SearchBook(c.irc, s.Query)
 
-	writeJSON(WaitResponse{
+	c.send <- WaitResponse{
 		MessageType: WAIT,
 		Status:      "Search request sent",
-	})
+	}
 }
 
 // handle DownloadRequests by sending the request to the book server
-func (d DownloadRequest) handle() {
-	core.DownloadBook(Conn.irc, d.Book)
+func (d DownloadRequest) handle(c *Client) {
+	core.DownloadBook(c.irc, d.Book)
 
-	writeJSON(WaitResponse{
+	c.send <- WaitResponse{
 		MessageType: WAIT,
 		Status:      "Download request received",
-	})
+	}
 }
 
 // handle ServerRequests by sending the currently available book servers
-func (s ServersRequest) handle() {
+func (s ServersRequest) handle(c *Client) {
 	servers := make(chan []string, 1)
 	go core.GetServers(servers)
 	results := <-servers
 
-	writeJSON(ServersResponse{
+	c.send <- ServersResponse{
 		MessageType: SERVERS,
 		Servers:     results,
-	})
+	}
 }
