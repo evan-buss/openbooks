@@ -1,6 +1,9 @@
 package server
 
-import "log"
+import (
+	"log"
+	"sync/atomic"
+)
 
 // Hub maintains the set of active clients and broadcasts messages to the
 // clients.
@@ -32,10 +35,13 @@ func (h *Hub) run() {
 		select {
 		case client := <-h.register:
 			log.Println("HUB: Client registered.")
+			// TODO: Maybe broadcast the number of connections to the client.
 			h.clients[client] = true
+			atomic.AddInt32(numConnections, 1)
 		case client := <-h.unregister:
 			if _, ok := h.clients[client]; ok {
 				log.Println("HUB: Client unregistered.")
+				atomic.AddInt32(numConnections, -1)
 				close(client.send)
 				close(client.disconnect)
 				delete(h.clients, client)

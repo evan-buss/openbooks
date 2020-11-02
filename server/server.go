@@ -15,6 +15,7 @@ import (
 )
 
 var ircName string
+var numConnections *int32 = new(int32)
 
 // Start instantiates the web server and opens the browser
 func Start(userName, port string) {

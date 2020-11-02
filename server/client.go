@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"sync/atomic"
 	"time"
 
 	"github.com/evan-buss/openbooks/irc"
@@ -33,6 +32,8 @@ var upgrader = websocket.Upgrader{
 
 // Client is a middleman between the websocket connection and the hub.
 type Client struct {
+	// TODO: Add UUID to identify the client in logs
+
 	hub *Hub
 	// The websocket connection.
 	conn *websocket.Conn
@@ -54,10 +55,8 @@ type Client struct {
 // reads from this goroutine.
 func (c *Client) readPump() {
 	defer func() {
-		c.hub.unregister <- c
-		c.irc.Disconnect()
-		atomic.AddInt32(numConnections, -1)
-		c.conn.Close()
+		fmt.Println("defer readPump")
+		closeClient(c)
 	}()
 	c.conn.SetReadLimit(maxMessageSize)
 	c.conn.SetReadDeadline(time.Now().Add(pongWait))
@@ -91,8 +90,9 @@ func (c *Client) readPump() {
 func (c *Client) writePump() {
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
+		fmt.Println("defer writePump")
 		ticker.Stop()
-		c.conn.Close()
+		closeClient(c)
 	}()
 	for {
 		select {
@@ -121,7 +121,11 @@ func (c *Client) writePump() {
 	}
 }
 
-var numConnections *int32 = new(int32)
+func closeClient(c *Client) {
+	c.irc.Disconnect()
+	c.conn.Close()
+	c.hub.unregister <- c
+}
 
 // serveWs handles websocket requests from the peer.
 func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
@@ -130,8 +134,6 @@ func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		return
 	}
-
-	atomic.AddInt32(numConnections, 1)
 
 	name := fmt.Sprintf("%s-%d", "openbooks", *numConnections)
 	client := &Client{

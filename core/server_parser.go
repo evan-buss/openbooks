@@ -1,6 +1,7 @@
 package core
 
 import (
+	"log"
 	"sort"
 	"strings"
 	"time"
@@ -40,14 +41,18 @@ func (s *ServerCache) ParseServers(data string) {
 }
 
 // GetServers returns the IRC book servers that are online
+// TODO: Look into a cleaner way of doing this
 func GetServers(servers chan<- []string) {
 	cacheIsOld := time.Now().Sub(serverCache.Time) > (time.Minute * 2)
 	if len(serverCache.Servers) == 0 || cacheIsOld {
+		log.Println("Hit old cache")
 		ircConn.GetUsers("ebooks")
 		oldTime := serverCache.Time
 		for serverCache.Time.Equal(oldTime) {
 			time.Sleep(time.Millisecond * 500)
 		}
+	} else {
+		log.Println("fresh cache. sending cached results")
 	}
 	servers <- serverCache.Servers
 }

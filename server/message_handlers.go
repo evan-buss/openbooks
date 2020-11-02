@@ -3,7 +3,6 @@ package server
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"log"
 
 	"github.com/evan-buss/openbooks/core"
@@ -16,7 +15,6 @@ type RequestHandler interface {
 
 // messageRouter is used to parse the incoming request and respond appropriately
 func (c *Client) routeMessage(message Request) {
-	fmt.Println("Routing message")
 	var obj RequestHandler
 
 	switch message.RequestType {
@@ -62,11 +60,11 @@ func (ConnectionRequest) handle(c *Client) {
 	}
 	log.Println("IRC server previously connected.")
 
-	c.conn.WriteJSON(ConnectionResponse{
+	c.send <- ConnectionResponse{
 		MessageType: CONNECT,
 		Status:      "IRC Server Ready",
 		Wait:        0,
-	})
+	}
 }
 
 // handle SearchRequests and send the query to the book server
