@@ -4,11 +4,13 @@ import { addHistoryItem, HistoryItem, updateHistoryItem } from "./historySlice";
 import { AppThunk } from "./store";
 
 interface AppState {
+    isConnected: boolean;
     serverFilters: string[];
     activeItem: HistoryItem | null;
 }
 
 const initialState: AppState = {
+    isConnected: false,
     serverFilters: [],
     activeItem: null
 }
@@ -30,6 +32,9 @@ const stateSlice = createSlice({
         setActiveItem(state, action: PayloadAction<HistoryItem | null>) {
             state.activeItem = action.payload;
         },
+        setConnectionState(state, action: PayloadAction<boolean>) {
+            state.isConnected = action.payload;
+        }
     },
 });
 
@@ -72,13 +77,14 @@ const setSearchResults = (results: BookDetail[]): AppThunk => (dispatch, getStor
     dispatch(setActiveItem(updatedItem));
     dispatch(updateHistoryItem(updatedItem))
 }
-const { toggleServerFilter, setActiveItem } = stateSlice.actions;
+const { toggleServerFilter, setActiveItem, setConnectionState } = stateSlice.actions;
 
 export {
     stateSlice,
     sendMessage,
     toggleServerFilter,
     setActiveItem,
+    setConnectionState,
     sendSearch,
     setSearchResults,
 };

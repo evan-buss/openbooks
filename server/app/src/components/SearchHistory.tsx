@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { deleteHistoryItem, HistoryItem, selectHistory } from "../state/historySlice";
 import { setActiveItem } from "../state/stateSlice";
 import { RootState } from "../state/store";
+import TogglePane from "./TogglePane";
 
 
 const SearchHistory: React.FC = () => {
@@ -36,19 +37,21 @@ type Props = {
 }
 
 const HistoryCard: React.FC<Props> = ({ activeTS, item, dispatch }: Props) => {
+    const isActive = activeTS === item.timestamp;
+
     return (
         <Popover
             position={Position.BOTTOM}
             content={
                 <Menu>
-                    {activeTS !== item.timestamp &&
+                    {!isActive &&
                         <Menu.Item
                             icon={EyeOpenIcon}
                             onClick={() => dispatch(setActiveItem(item))}>
                             Show
                             </Menu.Item>
                     }
-                    {activeTS === item.timestamp &&
+                    {isActive &&
                         <Menu.Item
                             icon={EyeOffIcon}
                             onClick={() => dispatch(setActiveItem(null))}>
@@ -59,12 +62,13 @@ const HistoryCard: React.FC<Props> = ({ activeTS, item, dispatch }: Props) => {
                         onClick={() => dispatch(deleteHistoryItem(item.timestamp))}
                         intent="danger">
                         Delete
-                        </Menu.Item>
+                    </Menu.Item>
                 </Menu>
             }>
-            <Pane
+            <TogglePane
                 cursor="pointer"
                 border
+                active={isActive ? 1 : 0}
                 padding={6}
                 elevation={1}
                 margin={8}
@@ -89,9 +93,11 @@ const HistoryCard: React.FC<Props> = ({ activeTS, item, dispatch }: Props) => {
                         {`${item.results?.length} RESULTS`}
                     </Badge>
                 }
-            </Pane>
+            </TogglePane>
         </Popover>
     )
 }
+
+
 
 export default SearchHistory;

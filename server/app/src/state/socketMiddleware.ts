@@ -2,17 +2,18 @@ import { AnyAction, PayloadAction, Store } from "@reduxjs/toolkit";
 import { BookDetail, BookResponse, MessageType } from "../models/messages";
 import { displayNotification, NotificationType } from "./notifications";
 import { setServers } from "./serverSlice";
-import { sendMessage, setSearchResults } from "./stateSlice";
+import { sendMessage, setConnectionState, setSearchResults } from "./stateSlice";
 
 // Web socket redux middleware. 
-// Listens for messages and sends dispatches to the socket
+// Listens to socket and dispatches handlers. 
+// Handles send_message actions by sending to socket.
 export const websocketConn = (wsUrl: string): any => {
     return (store: Store) => {
         console.log(store);
         const socket = new WebSocket(wsUrl);
 
         socket.onopen = () => onOpen(store);
-        socket.onclose = () => onClose();
+        socket.onclose = () => onClose(store);
         socket.onmessage = (message) => route(store, message);
         socket.onerror = (event) => console.error(event);
 
@@ -70,6 +71,7 @@ const route = (store: Store, msg: MessageEvent<any>): void => {
 
 const onOpen = (store: Store): void => {
     console.log("WebSocket connected.");
+    store.dispatch(setConnectionState(true));
     store.dispatch(sendMessage({ type: MessageType.CONNECT, payload: {} }));
 }
 
@@ -81,6 +83,7 @@ function saveByteArray(fileName: string, byte: Blob) {
     link.click();
 };
 
-const onClose = (): void => {
+const onClose = (store: Store): void => {
     console.log("WebSocket closed.");
+    store.dispatch(setConnectionState(false));
 }

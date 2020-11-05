@@ -22,6 +22,8 @@ func (h Handler) DownloadSearchResults(text string) {
 	go dcc.NewDownload(text, false, searchDownloaded)
 	// Retrieve the file's location
 	fileLocation := <-searchDownloaded
+
+	log.Printf("%s: Sending search results.\n", h.uuid.String())
 	h.send <- SearchResponse{
 		MessageType: SEARCH,
 		Books:       core.ParseSearchFile(fileLocation),
@@ -29,7 +31,7 @@ func (h Handler) DownloadSearchResults(text string) {
 
 	err := os.Remove(fileLocation)
 	if err != nil {
-		log.Println("Couldn't remove search file", err)
+		log.Printf("%s: Error deleting search results file: %v.\n", h.uuid, err)
 	}
 }
 
@@ -42,9 +44,10 @@ func (h Handler) DownloadBookFile(text string) {
 
 	data, err := ioutil.ReadFile(fileLocation)
 	if err != nil {
-		log.Println("Error reading data from " + fileLocation)
+		log.Printf("%s: Error reading book file: %v.\n", h.uuid, err)
 	}
 
+	log.Printf("%s: Sending book entitled %s.\n", h.uuid.String(), fileName)
 	h.send <- DownloadResponse{
 		MessageType: DOWNLOAD,
 		Name:        fileName,
@@ -53,7 +56,7 @@ func (h Handler) DownloadBookFile(text string) {
 
 	err = os.Remove(fileLocation)
 	if err != nil {
-		log.Println("Couldn't remove book file", err)
+		log.Printf("%s: Error deleting search results file %v.\n", h.uuid, err)
 	}
 }
 

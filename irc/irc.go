@@ -1,7 +1,6 @@
 package irc
 
 import (
-	"fmt"
 	"log"
 	"net"
 )
@@ -12,7 +11,6 @@ type Conn struct {
 	channel  string
 	username string
 	realname string
-	Logging  bool
 }
 
 // New creates a new IRC connection to the server using the supplied username and realname
@@ -27,18 +25,15 @@ func New(username, realname string) *Conn {
 
 // Connect connects to the given server at port 6667
 func (i *Conn) Connect(address string) {
-	fmt.Println("Dialing")
 	conn, err := net.Dial("tcp", address+":6667")
 
 	if err != nil {
 		log.Fatal("IRC Connection Error", err)
 	}
-	fmt.Println("dialed success??")
 
 	i.Conn = conn
 
-	user := "USER " + i.username + " " + i.username + " " + i.username + " :" +
-		i.realname + "\r\n"
+	user := "USER " + i.username + " " + i.username + " " + i.username + " :" + i.realname + "\r\n"
 	nick := "NICK " + i.username + "\r\n"
 
 	i.Write([]byte(user))

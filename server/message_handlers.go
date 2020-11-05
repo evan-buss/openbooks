@@ -2,7 +2,6 @@ package server
 
 import (
 	"encoding/json"
-	"errors"
 	"log"
 
 	"github.com/evan-buss/openbooks/core"
@@ -27,11 +26,12 @@ func (c *Client) routeMessage(message Request) {
 	case SERVERS:
 		obj = new(ServersRequest)
 	default:
-		log.Println(errors.New("unknown message type"))
+		log.Printf("%s: Unknown request type received.\n", c.uuid.String())
 	}
 
 	err := json.Unmarshal(message.Payload, &obj)
 	if err != nil {
+		log.Printf("%s: Invalid request payload.\n", c.uuid.String())
 		c.send <- ErrorResponse{
 			Error:   message.RequestType,
 			Details: err.Error(),
@@ -42,23 +42,9 @@ func (c *Client) routeMessage(message Request) {
 
 // handle ConnectionRequests and either connect to the server or do nothing
 func (ConnectionRequest) handle(c *Client) {
-
-	log.Println("Connection request received.")
-
-	if !c.irc.IsConnected() {
-		log.Println("Connecting to the IRC server.")
-
-		core.Join(c.irc)
-		go core.ReadDaemon(c.irc, Handler{Client: c}, c.disconnect) // Start the Read Daemon
-
-		c.send <- ConnectionResponse{
-			MessageType: CONNECT,
-			Status:      "Welcome to OpenBooks. Search a book to get started.",
-			Wait:        0,
-		}
-		return
-	}
-	log.Println("IRC server previously connected.")
+	core.Join(c.irc)
+	// Start the Read Daemon
+	go core.ReadDaemon(c.irc, config.Log, Handler{Client: c}, c.disconnect)
 
 	c.send <- ConnectionResponse{
 		MessageType: CONNECT,

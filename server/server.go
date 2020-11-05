@@ -8,19 +8,21 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/evan-buss/openbooks/core"
+
 	"github.com/rakyll/statik/fs"
 
-	// Load the static content
+	// Load the static SPA content
 	_ "github.com/evan-buss/openbooks/server/statik"
 )
 
-var ircName string
+var config core.Config
 var numConnections *int32 = new(int32)
 
 // Start instantiates the web server and opens the browser
-func Start(userName, port string) {
+func Start(conf core.Config) {
+	config = conf
 
-	ircName = userName
 	hub := newHub()
 	go hub.run()
 
@@ -44,7 +46,9 @@ func Start(userName, port string) {
 		serveWs(hub, w, r)
 	})
 
-	// openbrowser("http://127.0.0.1:" + port + "/")
+	if config.OpenBrowser {
+		openbrowser("http://127.0.0.1:" + config.Port + "/")
+	}
 
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	log.Fatal(http.ListenAndServe(":"+config.Port, nil))
 }

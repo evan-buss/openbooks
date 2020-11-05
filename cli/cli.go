@@ -4,7 +4,9 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 
 	"github.com/evan-buss/openbooks/core"
 	"github.com/evan-buss/openbooks/irc"
@@ -17,16 +19,26 @@ var Reader *bufio.Reader
 var IRC *irc.Conn
 
 // Start instantiates the OpenBooks CLI interface
-func Start(irc *irc.Conn) {
+func Start(config core.Config) {
+
+	IRC := irc.New(config.UserName, "OpenBooks CLI")
+
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-c
+		IRC.Disconnect()
+		os.Exit(1)
+	}()
+
 	fmt.Println("=======================================")
 	fmt.Println("          Welcome to OpenBooks         ")
 	fmt.Println("=======================================")
 
-	IRC = irc
 	core.Join(IRC)
 
 	exitSignal := make(chan struct{})
-	go core.ReadDaemon(irc, Handler{}, exitSignal)
+	go core.ReadDaemon(IRC, config.Log, Handler{}, exitSignal)
 
 	fmt.Println("Connection established...")
 
@@ -57,11 +69,11 @@ func userInput(reader *bufio.Reader, irc *irc.Conn) {
 		message, _ := reader.ReadString('\n')
 		core.DownloadBook(irc, message)
 	case "d":
-		fmt.Println("Disconnecting")
+		fmt.Println("Disconnecting.")
 		irc.Disconnect()
 		os.Exit(0)
 	default:
-		fmt.Println("Invalid Selection")
+		fmt.Println("Invalid Selection.")
 		userInput(reader, irc)
 	}
 }

@@ -42,18 +42,18 @@ var serverCache ServerCache
 // specific messages and dispatches appropriate handler functions
 // Params: irc - IRC connection
 //         handler - domain specific handler that responds to IRC events
-func ReadDaemon(irc *irc.Conn, handler ReaderHandler, disconnect <-chan struct{}) {
+func ReadDaemon(irc *irc.Conn, logIrc bool, handler ReaderHandler, disconnect <-chan struct{}) {
 
 	var logFile *os.File
 	serverCache = ServerCache{Servers: []string{}, Time: time.Now()}
 	var users strings.Builder // Accumulate list of users and then flush
 	scanner := bufio.NewScanner(irc)
 
-	if irc.Logging {
+	if logIrc {
 		var err error
 		logFile, err = os.OpenFile("irc_log.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 		if err != nil {
-			log.Fatal("error opening log file", err)
+			log.Fatal("Error Opening Log File.", err)
 		}
 		defer logFile.Close()
 
@@ -76,7 +76,7 @@ func ReadDaemon(irc *irc.Conn, handler ReaderHandler, disconnect <-chan struct{}
 				log.Println("Scanner errror: ", err)
 			}
 
-			if irc.Logging {
+			if logIrc {
 				_, err := logFile.WriteString(text + "\n")
 				if err != nil {
 					log.Println(err)

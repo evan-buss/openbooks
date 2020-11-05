@@ -2,15 +2,10 @@ package server
 
 import (
 	"encoding/json"
+	"strconv"
 
 	"github.com/evan-buss/openbooks/core"
 )
-
-// Messages defines the client and server messages that are passed between
-// the websocket / website server and the client (website)
-
-// ERROR represents some sort of error outside of specific handlers
-// such as parsing requests
 
 // Available commands. These are sent via integers starting at 0
 const (
@@ -22,6 +17,17 @@ const (
 	WAIT
 	IRCERROR
 )
+
+func messageToString(s int) string {
+	name := []string{"ERROR", "CONNECT", "SEARCH", "DOWNLOAD", "SERVERS", "WAIT", "IRCERROR"}
+	i := uint8(s)
+	switch {
+	case i <= uint8(IRCERROR):
+		return name[i]
+	default:
+		return strconv.Itoa(int(i))
+	}
+}
 
 // Request in a generic structure for all requests from the websocket client
 type Request struct {

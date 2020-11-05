@@ -1,7 +1,9 @@
 import useLocalStorage from '@rehooks/local-storage';
 import { Heading, Pane, Paragraph, Tab, Tablist } from 'evergreen-ui';
 import React from 'react';
+import { useSelector } from 'react-redux';
 import styled from "styled-components";
+import { RootState } from '../state/store';
 import Pulse from './Pulse';
 import SearchHistory from './SearchHistory';
 import ServerList from './ServerList';
@@ -12,6 +14,7 @@ const SidebarContent = styled(Pane)`
 
 const Sidebar: React.FC = () => {
     const [selectedIndex, setIndex] = useLocalStorage("index", 0);
+    const connected = useSelector((store: RootState) => store.state.isConnected);
 
     return (
         <>
@@ -23,7 +26,7 @@ const Sidebar: React.FC = () => {
                             justifyContent="space-between"
                             paddingRight="10px">
                             OpenBooks
-                            <Pulse />
+                            <Pulse disabled={!connected} />
                         </Heading>
                         <Paragraph size={400} color="muted">
                             Download eBooks from IRC Highway

@@ -8,7 +8,7 @@ type Props = {
 
 const Pulse: React.FC<Props> = ({ disabled = false }) => {
     return (
-        <Tooltip position={Position.BOTTOM} content={`IRC server ${disabled ? 'disconnected' : 'connected'}.`}>
+        <Tooltip position={Position.BOTTOM} content={`OpenBooks server ${disabled ? 'disconnected' : 'connected'}.`}>
             <div className="center">
                 <div className={`circle pulse ${disabled && 'disabled'}`}></div>
             </div>

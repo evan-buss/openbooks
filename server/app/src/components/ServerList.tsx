@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { selectServers } from "../state/serverSlice";
 import { toggleServerFilter } from '../state/stateSlice';
 import { RootState } from '../state/store';
+import TogglePane from './TogglePane';
 
 const ServerList: React.FC = () => {
     const dispatch = useDispatch();
@@ -19,9 +20,10 @@ const ServerList: React.FC = () => {
             </Pane >
             {servers.map(name =>
                 (
-                    <Pane cursor="pointer"
+                    <TogglePane cursor="pointer"
                         onClick={() => dispatch(toggleServerFilter(name))}
                         key={name}
+                        active={filters.has(name) ? 1 : 0}
                         border
                         display="flex"
                         alignItems="center"
@@ -35,7 +37,7 @@ const ServerList: React.FC = () => {
                                 </Badge>
                             }
                         </Text>
-                    </Pane>
+                    </TogglePane>
                 )
             )}
         </>

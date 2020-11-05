@@ -1,7 +1,6 @@
 package server
 
 import (
-	"log"
 	"sync/atomic"
 )
 
@@ -34,26 +33,21 @@ func (h *Hub) run() {
 	for {
 		select {
 		case client := <-h.register:
-			log.Println("HUB: Client registered.")
-			// TODO: Maybe broadcast the number of connections to the client.
 			h.clients[client] = true
 			atomic.AddInt32(numConnections, 1)
 		case client := <-h.unregister:
 			if _, ok := h.clients[client]; ok {
-				log.Println("HUB: Client unregistered.")
 				atomic.AddInt32(numConnections, -1)
 				close(client.send)
 				close(client.disconnect)
 				delete(h.clients, client)
 			}
 		case <-h.shutdown:
-			log.Println("HUB: Shutting down.")
 			for client := range h.clients {
 				close(client.send)
 				close(client.disconnect)
 				delete(h.clients, client)
 			}
 		}
-
 	}
 }

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/evan-buss/openbooks/irc"
+	"github.com/google/uuid"
 
 	"github.com/gorilla/websocket"
 )
@@ -32,9 +33,12 @@ var upgrader = websocket.Upgrader{
 
 // Client is a middleman between the websocket connection and the hub.
 type Client struct {
-	// TODO: Add UUID to identify the client in logs
+	// Unique ID for the client
+	uuid uuid.UUID
 
+	// Global hub that manages client registrations
 	hub *Hub
+
 	// The websocket connection.
 	conn *websocket.Conn
 
@@ -48,6 +52,49 @@ type Client struct {
 	irc *irc.Conn
 }
 
+func closeClient(c *Client) {
+	c.irc.Disconnect()
+	c.conn.Close()
+	c.hub.unregister <- c
+}
+
+// serveWs handles websocket requests from the peer.
+func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
+	upgrader.CheckOrigin = func(req *http.Request) bool {
+		return true
+	}
+
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	// Each client gets its own connection, so use different usernames by appending count
+	name := fmt.Sprintf("%s-%d", config.UserName, *numConnections)
+	client := &Client{
+		hub:        hub,
+		conn:       conn,
+		send:       make(chan interface{}, 128),
+		disconnect: make(chan struct{}),
+		uuid:       uuid.New(),
+		irc:        irc.New(name, name),
+	}
+
+	client.hub.register <- client
+
+	// Allow collection of memory referenced by the caller by doing all work in
+	// new goroutines.
+	go client.writePump()
+	go client.readPump()
+
+	log.Printf("%s: Client connected from %s\n", client.uuid, conn.RemoteAddr().String())
+	conn.SetCloseHandler(func(code int, text string) error {
+		log.Printf("%s: Client disconnected from %s\n", client.uuid, conn.RemoteAddr().String())
+		return nil
+	})
+}
+
 // readPump pumps messages from the websocket connection to the hub.
 //
 // The application runs readPump in a per-connection goroutine. The application
@@ -55,7 +102,6 @@ type Client struct {
 // reads from this goroutine.
 func (c *Client) readPump() {
 	defer func() {
-		fmt.Println("defer readPump")
 		closeClient(c)
 	}()
 	c.conn.SetReadLimit(maxMessageSize)
@@ -69,6 +115,8 @@ func (c *Client) readPump() {
 		default:
 			var request Request
 			err := c.conn.ReadJSON(&request)
+
+			log.Printf("%s: %s Message Received\n", c.uuid.String(), messageToString(request.RequestType))
 
 			if err != nil {
 				if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
@@ -90,10 +138,10 @@ func (c *Client) readPump() {
 func (c *Client) writePump() {
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
-		fmt.Println("defer writePump")
 		ticker.Stop()
 		closeClient(c)
 	}()
+
 	for {
 		select {
 		case message, ok := <-c.send:
@@ -119,45 +167,4 @@ func (c *Client) writePump() {
 			}
 		}
 	}
-}
-
-func closeClient(c *Client) {
-	c.irc.Disconnect()
-	c.conn.Close()
-	c.hub.unregister <- c
-}
-
-// serveWs handles websocket requests from the peer.
-func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
-	conn, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
-	name := fmt.Sprintf("%s-%d", "openbooks", *numConnections)
-	client := &Client{
-		hub:        hub,
-		conn:       conn,
-		send:       make(chan interface{}, 128),
-		disconnect: make(chan struct{}),
-		irc:        irc.New(name, name),
-	}
-
-	client.hub.register <- client
-
-	// Allow collection of memory referenced by the caller by doing all work in
-	// new goroutines.
-	go client.writePump()
-	go client.readPump()
-
-	upgrader.CheckOrigin = func(req *http.Request) bool {
-		return true
-	}
-
-	log.Println("Client connected: " + r.RemoteAddr)
-	conn.SetCloseHandler(func(code int, text string) error {
-		log.Println("Client disconnected: " + conn.RemoteAddr().String())
-		return nil
-	})
 }

@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"log"
 	"os/exec"
 	"runtime"
@@ -18,9 +17,9 @@ func openbrowser(url string) {
 	case "darwin":
 		err = exec.Command("open", url).Start()
 	default:
-		err = fmt.Errorf("unsupported platform")
+		log.Println("Error opening browser. Unsupported platform.")
 	}
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 }
