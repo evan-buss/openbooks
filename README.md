@@ -20,20 +20,13 @@ for, click download and the book will be sent to you.
 - Launch the application normally
   - `OpenBooks`
 - Your web browser will be opened to the OpenBooks interface.
-  - You must wait 30 seconds before your first search as there is a mandatory delay on the IRC server
   - On the left side you will see your past searches as well as a list of online download servers
 - Enter your search query.
-  - The book is sent to the backend server and placed in the queue
-  - When the results are recieved they are then parsed and put into a      table for easy filtering.
-  - The recommended button refines the search to servers that I 
-    personally recommend and use whenever possible as they give 
-    consistent results.
-- When you find what you are looking for simply click the download
-  button. 
-  - It is recommended that you ensure the server is online before 
-    clicking download.
-- At any time you can select a past search from the sidebar to take 
-  another look at results you may have missed.
+  - The book is sent to the backend server and placed in the IRC queue
+  - When the results are recieved they are then parsed and put into a table for easy viewing.
+  - Clicking a server in the sidebar will filter the results to show only books from that server.
+  - Clicking a history item allows you to show, hide, or delete it.
+- When you find what you are looking for simply click the download button. 
 
 ### CLI 
 - Launch the application with the -cli flag
