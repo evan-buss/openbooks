@@ -1,11 +1,5 @@
-General:
-	- Write some tests for things simple things like utilities
-	- Look into logging. Learn how to change the logger output
+Fix / set up github actions automated builds
+Package docker container for easy deployments.
 
-Future:
-  ☐ Reset table filters on new search
-  
-
-  Package docker container for use on media server.
-  Add favicon to new app.
-  Give each client a unique ID so we know who connects and how long
+Future
+- Maybe enable username client username inputs so each client connection has a different name

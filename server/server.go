@@ -23,6 +23,7 @@ var numConnections *int32 = new(int32)
 func Start(conf core.Config) {
 	config = conf
 
+	*numConnections = 1
 	hub := newHub()
 	go hub.run()
 

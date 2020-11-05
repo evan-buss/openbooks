@@ -74,7 +74,8 @@ for, click download and the book will be sent to you.
   - `cd server/app && npm install`
 
 ### Build the React SPA and compile the complete binary
-  - `cd server/app && npm run integrate`
+  - `cd server/app && npm run build`
+  - Go back to root directory: `./statik.sh && go build`
 
 ### Build the go binary (if you haven't changed the frontend)
   - `go build`
