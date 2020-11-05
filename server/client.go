@@ -110,7 +110,6 @@ func (c *Client) readPump() {
 	for {
 		select {
 		case <-c.disconnect:
-			log.Println("Disconnect signal received. Returning from reader.")
 			return
 		default:
 			var request Request
@@ -158,7 +157,6 @@ func (c *Client) writePump() {
 				return
 			}
 		case <-c.disconnect:
-			log.Println("Disconnect signal. Returning from writer.")
 			return
 		case <-ticker.C:
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))

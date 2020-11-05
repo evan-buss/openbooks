@@ -1,7 +1,6 @@
 package core
 
 import (
-	"log"
 	"sort"
 	"strings"
 	"time"
@@ -45,14 +44,11 @@ func (s *ServerCache) ParseServers(data string) {
 func GetServers(servers chan<- []string) {
 	cacheIsOld := time.Now().Sub(serverCache.Time) > (time.Minute * 2)
 	if len(serverCache.Servers) == 0 || cacheIsOld {
-		log.Println("Hit old cache")
 		ircConn.GetUsers("ebooks")
 		oldTime := serverCache.Time
 		for serverCache.Time.Equal(oldTime) {
 			time.Sleep(time.Millisecond * 500)
 		}
-	} else {
-		log.Println("fresh cache. sending cached results")
 	}
 	servers <- serverCache.Servers
 }
