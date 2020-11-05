@@ -4,6 +4,7 @@ Allow specifying download directory.
     Pass in via config options
     Docker build will run the app with set directory
     If not present, default to downloads directory.
+Handle name conflicts when connecting to IRC server.
 
 Future
 - Maybe enable username client username inputs so each client connection has a different name

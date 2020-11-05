@@ -57,12 +57,16 @@ for, click download and the book will be sent to you.
 
 ### Optional Launch Flags
 ```
- -cli 
-    Launch OpenBooks in the terminal instead of the web UI
- -log 
-    Save IRC logs to "irc_log.txt"
- -name string 
-    Use a name that differs from your account name. (default "[os username]")
+-browser
+      Open the browser on server start.
+-cli
+      Launch OpenBooks in the terminal instead of the web UI.
+-log
+      Save IRC logs to irc_log.txt.
+-name string
+      Use a name that differs from your account name. One word only. (default "[os username]")
+-port string
+      Set the local network port for browser mode. (default "5228"
 ```
 
 ## Development
@@ -87,13 +91,15 @@ for, click download and the book will be sent to you.
 - I wrote this as an easier way to search and download books from irchighway.net. It handles all the extraction and data processing for you. You just have to click the book you want. Hopefully you find it much easier than the IRC interface.
 - It was also interesting to learn how the [IRC](https://en.wikipedia.org/wiki/Internet_Relay_Chat) and [DCC](https://en.wikipedia.org/wiki/Direct_Client-to-Client) protocols work and write custom implementations.
 
-## Technology
+## Stack
 
 - Backend
   - Golang
-  - Packr2 (bundle static assets in the go binary)
+  - Statik (bundle static assets in the go binary)
   - Archiver (extract files from archive)
   - gorilla/websocket (communication between backend and UI)
 - Frontend
   - React.js
-  - Ant Design Components
+  - Redux / Redux Toolkit
+  - Styled Components
+  - Evergreen UI
