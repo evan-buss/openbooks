@@ -33,8 +33,8 @@ func (h *Hub) run() {
 	for {
 		select {
 		case client := <-h.register:
-			h.clients[client] = true
 			atomic.AddInt32(numConnections, 1)
+			h.clients[client] = true
 		case client := <-h.unregister:
 			if _, ok := h.clients[client]; ok {
 				atomic.AddInt32(numConnections, -1)

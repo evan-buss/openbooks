@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -23,7 +24,6 @@ var numConnections *int32 = new(int32)
 func Start(conf core.Config) {
 	config = conf
 
-	*numConnections = 1
 	hub := newHub()
 	go hub.run()
 
@@ -43,8 +43,13 @@ func Start(conf core.Config) {
 	}
 
 	http.Handle("/", http.FileServer(staticFs))
+
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		serveWs(hub, w, r)
+	})
+
+	http.HandleFunc("/connections", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "There are currently %d active connections.", *numConnections)
 	})
 
 	if config.OpenBrowser {
