@@ -12,25 +12,19 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [14.x]
-
     steps:
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v2
 
-    - name: Set up Go 1.13
-      uses: actions/setup-go@v1
+    - uses: actions/setup-go@v2
       with:
-        go-version: 1.15
-      id: go
+        go-version: '^1.15.0'
+    - run: go version
 
-    - name: Use Node.js ${{ matrix.node-version }}
+    - name: Use LTS Node.js
       uses: actions/setup-node@v1
       with:
-        node-version: ${{ matrix.node-version }}
-
-    - name: Check out code into the Go module directory
-      uses: actions/checkout@v1
+        node-version: '14'
 
     - name: Build
       run: ./build.sh
