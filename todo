@@ -1,7 +1,10 @@
 Fix / set up github actions automated builds
-Package docker container for easy deployments.
+
+Handle name conflicts when connecting to IRC server.
+
 Allow specifying download directory.
     Pass in via config options.
     Docker build will run the app with set directory
     If not present, default to downloads directory.
-Handle name conflicts when connecting to IRC server.
+
+Each deploy should use separate name conventions or specify names from the args to avoid conflicts.

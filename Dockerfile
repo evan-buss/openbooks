@@ -17,10 +17,7 @@ RUN go get github.com/rakyll/statik
 RUN statik -src ./build -dest /server
 RUN go build
 
-FROM alpine:3.12.1 as app
-# Add SSL certs
-RUN apk add ca-certificates && update-ca-certificates
-
+FROM gcr.io/distroless/static as app
 WORKDIR /app
 COPY --from=build /go/src/openbooks .
 EXPOSE 80

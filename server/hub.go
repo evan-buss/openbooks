@@ -48,6 +48,7 @@ func (h *Hub) run() {
 				close(client.disconnect)
 				delete(h.clients, client)
 			}
+			return
 		}
 	}
 }

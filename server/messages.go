@@ -7,9 +7,9 @@ import (
 	"github.com/evan-buss/openbooks/core"
 )
 
-// Available commands. These are sent via integers starting at 0
+// Available commands. These are sent via integers starting at 1
 const (
-	ERROR = iota
+	ERROR = iota + 1
 	CONNECT
 	SEARCH
 	DOWNLOAD
@@ -19,7 +19,7 @@ const (
 )
 
 func messageToString(s int) string {
-	name := []string{"ERROR", "CONNECT", "SEARCH", "DOWNLOAD", "SERVERS", "WAIT", "IRCERROR"}
+	name := []string{"INVALID", "ERROR", "CONNECT", "SEARCH", "DOWNLOAD", "SERVERS", "WAIT", "IRCERROR"}
 	i := uint8(s)
 	switch {
 	case i <= uint8(IRCERROR):

@@ -1,11 +1,11 @@
 export enum MessageType {
-    ERROR = 0,
-    CONNECT = 1,
-    SEARCH = 2,
-    DOWNLOAD = 3,
-    SERVERS = 4,
-    WAIT = 5,
-    IRCERROR = 6
+    ERROR = 1,
+    CONNECT = 2,
+    SEARCH = 3,
+    DOWNLOAD = 4,
+    SERVERS = 5,
+    WAIT = 6,
+    IRCERROR = 7
 }
 
 export interface BookResponse {

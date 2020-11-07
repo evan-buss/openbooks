@@ -71,7 +71,7 @@ func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Each client gets its own connection, so use different usernames by appending count
-	name := fmt.Sprintf("%s-%d", config.UserName, *numConnections)
+	name := fmt.Sprintf("%s-%d", config.UserName, *numConnections+1)
 	client := &Client{
 		hub:        hub,
 		conn:       conn,
@@ -89,10 +89,6 @@ func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 	go client.readPump()
 
 	log.Printf("%s: Client connected from %s\n", client.uuid, conn.RemoteAddr().String())
-	conn.SetCloseHandler(func(code int, text string) error {
-		log.Printf("%s: Client disconnected from %s\n", client.uuid, conn.RemoteAddr().String())
-		return nil
-	})
 }
 
 // readPump pumps messages from the websocket connection to the hub.
@@ -118,8 +114,10 @@ func (c *Client) readPump() {
 			log.Printf("%s: %s Message Received\n", c.uuid.String(), messageToString(request.RequestType))
 
 			if err != nil {
-				if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-					log.Printf("error: %v", err)
+				if websocket.IsCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
+					log.Printf("%s: Close error: %v", c.uuid.String(), err)
+				} else {
+					log.Printf("%s: Client Disconnected.\n", c.uuid.String())
 				}
 				return
 			}
@@ -153,7 +151,7 @@ func (c *Client) writePump() {
 
 			err := c.conn.WriteJSON(message)
 			if err != nil {
-				log.Println("Error writing JSON to websocket: ", err)
+				log.Printf("%s: Error writing JSON to websocket: %s", c.uuid.String(), err.Error())
 				return
 			}
 		case <-c.disconnect:
