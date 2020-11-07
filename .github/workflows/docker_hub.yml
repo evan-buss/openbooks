@@ -20,12 +20,12 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       - uses: actions/checkout@v2
-      
+
       - name: Set up Docker Buildx
         id: buildx
         uses: docker/setup-buildx-action@v1
 
-      - name: Docker Login        
+      - name: Docker Login
         uses: docker/login-action@v1.6.0
         with:
           # Server address of Docker registry. If not set then will default to Docker Hub
@@ -33,8 +33,8 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           # Password or personal access token used to log against the Docker registry
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
-          
-          
+
+
       - name: Build and push
         id: docker_build
         uses: docker/build-push-action@v2
@@ -42,7 +42,7 @@ jobs:
           context: ./
           file: ./Dockerfile
           push: true
-          tags: openbooks:latest
+          tags: evanbuss/openbooks:latest
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
