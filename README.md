@@ -20,20 +20,13 @@ for, click download and the book will be sent to you.
 - Launch the application normally
   - `OpenBooks`
 - Your web browser will be opened to the OpenBooks interface.
-  - You must wait 30 seconds before your first search as there is a mandatory delay on the IRC server
   - On the left side you will see your past searches as well as a list of online download servers
 - Enter your search query.
-  - The book is sent to the backend server and placed in the queue
-  - When the results are recieved they are then parsed and put into a      table for easy filtering.
-  - The recommended button refines the search to servers that I 
-    personally recommend and use whenever possible as they give 
-    consistent results.
-- When you find what you are looking for simply click the download
-  button. 
-  - It is recommended that you ensure the server is online before 
-    clicking download.
-- At any time you can select a past search from the sidebar to take 
-  another look at results you may have missed.
+  - The book is sent to the backend server and placed in the IRC queue
+  - When the results are recieved they are then parsed and put into a table for easy viewing.
+  - Clicking a server in the sidebar will filter the results to show only books from that server.
+  - Clicking a history item allows you to show, hide, or delete it.
+- When you find what you are looking for simply click the download button. 
 
 ### CLI 
 - Launch the application with the -cli flag
@@ -57,24 +50,29 @@ for, click download and the book will be sent to you.
 
 ### Optional Launch Flags
 ```
- -cli 
-    Launch OpenBooks in the terminal instead of the web UI
- -log 
-    Save IRC logs to "irc_log.txt"
- -name string 
-    Use a name that differs from your account name. (default "[os username]")
+-browser
+      Open the browser on server start.
+-cli
+      Launch OpenBooks in the terminal instead of the web UI.
+-log
+      Save IRC logs to irc_log.txt.
+-name string
+      Use a name that differs from your account name. One word only. (default "[os username]")
+-port string
+      Set the local network port for browser mode. (default "5228"
 ```
 
 ## Development
 
 ### Install the dependencies
   - `go get`
-  - `go get -u github.com/gobuffalo/packr/v2/packr2`
+  - `go get github.com/rakyll/statik`
     - This is installed as a binary to your `$GOBIN`
   - `cd server/app && npm install`
 
 ### Build the React SPA and compile the complete binary
-  - `cd server/app && npm run integrate`
+  - `cd server/app && npm run build`
+  - Go back to root directory: `./statik.sh && go build`
 
 ### Build the go binary (if you haven't changed the frontend)
   - `go build`
@@ -86,13 +84,15 @@ for, click download and the book will be sent to you.
 - I wrote this as an easier way to search and download books from irchighway.net. It handles all the extraction and data processing for you. You just have to click the book you want. Hopefully you find it much easier than the IRC interface.
 - It was also interesting to learn how the [IRC](https://en.wikipedia.org/wiki/Internet_Relay_Chat) and [DCC](https://en.wikipedia.org/wiki/Direct_Client-to-Client) protocols work and write custom implementations.
 
-## Technology
+## Stack
 
 - Backend
   - Golang
-  - Packr2 (bundle static assets in the go binary)
+  - Statik (bundle static assets in the go binary)
   - Archiver (extract files from archive)
   - gorilla/websocket (communication between backend and UI)
 - Frontend
   - React.js
-  - Ant Design Components
+  - Redux / Redux Toolkit
+  - Styled Components
+  - Evergreen UI

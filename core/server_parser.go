@@ -40,6 +40,7 @@ func (s *ServerCache) ParseServers(data string) {
 }
 
 // GetServers returns the IRC book servers that are online
+// TODO: Look into a cleaner way of doing this
 func GetServers(servers chan<- []string) {
 	cacheIsOld := time.Now().Sub(serverCache.Time) > (time.Minute * 2)
 	if len(serverCache.Servers) == 0 || cacheIsOld {

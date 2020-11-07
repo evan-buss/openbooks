@@ -1,14 +1,10 @@
-General:
-	- Write some tests for things simple things like utilities
-	- Look into logging. Learn how to change the logger output
+Fix / set up github actions automated builds
 
-If Willing:
-☐ Improve parsing accuracy with "per-server" parsing functions
-   - Each one adapted to the common format for that server
-   - Would require studying the format of the server with multiple search files
+Handle name conflicts when connecting to IRC server.
 
-Future:
-  ☐ Convert to new React syntax using hooks
-  ☐ Convert to typescript.
-  ☐ Rewrite websocket message handling logic to use event callbacks. 
-  ☐ Reset table filters on new search
+Allow specifying download directory.
+    Pass in via config options.
+    Docker build will run the app with set directory
+    If not present, default to downloads directory.
+
+Each deploy should use separate name conventions or specify names from the args to avoid conflicts.

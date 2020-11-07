@@ -11,7 +11,6 @@ type Conn struct {
 	channel  string
 	username string
 	realname string
-	Logging  bool
 }
 
 // New creates a new IRC connection to the server using the supplied username and realname
@@ -31,10 +30,10 @@ func (i *Conn) Connect(address string) {
 	if err != nil {
 		log.Fatal("IRC Connection Error", err)
 	}
+
 	i.Conn = conn
 
-	user := "USER " + i.username + " " + i.username + " " + i.username + " :" +
-		i.realname + "\r\n"
+	user := "USER " + i.username + " " + i.username + " " + i.username + " :" + i.realname + "\r\n"
 	nick := "NICK " + i.username + "\r\n"
 
 	i.Write([]byte(user))
@@ -44,6 +43,7 @@ func (i *Conn) Connect(address string) {
 // Disconnect closes connection to the IRC server
 func (i *Conn) Disconnect() {
 	i.Write([]byte("QUIT :Goodbye\r\n"))
+	i.Conn.Close()
 }
 
 // SendMessage sends the given message string to the connected IRC server
@@ -65,7 +65,7 @@ func (i *Conn) GetUsers(channel string) {
 	i.Write([]byte("NAMES #" + channel + "\r\n"))
 }
 
-// PONG sends a PONG message to the server, often used afte a PING request
+// PONG sends a PONG message to the server, often used after a PING request
 func (i *Conn) PONG(server string) {
 	i.Write([]byte("PONG " + server + "\r\n"))
 }
