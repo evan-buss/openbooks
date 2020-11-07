@@ -80,7 +80,7 @@ func (h Handler) BadServer() {
 func (h Handler) SearchAccepted() {
 	h.send <- WaitResponse{
 		MessageType: WAIT,
-		Status:      "Search accepted into the queue",
+		Status:      "Search accepted into the queue.",
 	}
 }
 
@@ -88,6 +88,6 @@ func (h Handler) SearchAccepted() {
 func (h Handler) MatchesFound(num string) {
 	h.send <- WaitResponse{
 		MessageType: WAIT,
-		Status:      "Found " + num + " results for your search",
+		Status:      "Found " + num + " results for your query.",
 	}
 }
