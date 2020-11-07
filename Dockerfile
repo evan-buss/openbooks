@@ -1,10 +1,10 @@
-FROM node:15.1.0 as web
+FROM node:lts as web
 WORKDIR /web
 COPY ./server/app/ .
 RUN npm install
 RUN npm run build
 
-FROM golang:1.15.3 as build
+FROM golang:latest as build
 WORKDIR /go/src/
 COPY . .
 COPY --from=web /web/build/ ./build
