@@ -3,17 +3,20 @@ package cli
 import (
 	"fmt"
 
+	"github.com/evan-buss/openbooks/core"
 	"github.com/evan-buss/openbooks/dcc"
 )
 
 // Handler is the CLI implementation of the EventHandler interface.
-type Handler struct{}
+type Handler struct {
+	config core.Config
+}
 
 // DownloadSearchResults downloads the search results
 // and sends user a response message
 func (h Handler) DownloadSearchResults(text string) {
 	fileLocation := make(chan string)
-	go dcc.NewDownload(text, true, fileLocation)
+	go dcc.NewDownload(text, h.config.DownloadDir, fileLocation)
 	fmt.Println("Results location: " + <-fileLocation)
 	userInput(Reader, IRC)
 }
@@ -22,7 +25,7 @@ func (h Handler) DownloadSearchResults(text string) {
 // a user a response message
 func (h Handler) DownloadBookFile(text string) {
 	fileLocation := make(chan string)
-	go dcc.NewDownload(text, true, fileLocation)
+	go dcc.NewDownload(text, h.config.DownloadDir, fileLocation)
 	fmt.Println("File location: " + <-fileLocation)
 	userInput(Reader, IRC)
 }

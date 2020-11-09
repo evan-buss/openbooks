@@ -8,3 +8,27 @@ Allow specifying download directory.
     If not present, default to downloads directory.
 
 Each deploy should use separate name conventions or specify names from the args to avoid conflicts.
+
+
+Variable platform docker image
+Set up automatic github release deployments
+Configure docker image to use custom name arguments from environment variables. If custom environment variable is not specified,
+     generate a random username to avoid server deployment naming conflicts.
+
+
+Only deploy to github actions when the tag version changes.
+
+Add new config options:
+    - dir (directory where book files will be persisted)
+    - persist (enable persistance)
+
+
+In the docker container:
+    Set a "docker" environment variable
+    Get get a persist flag from the username
+    If persist is enabled and docker -> set directory to a special output directory so that users can mount the volume
+
+
+    Set username to something like "default"
+    If docker and username is "default" generate a random one
+    Expose an evironment variable from docker that lets user set the username

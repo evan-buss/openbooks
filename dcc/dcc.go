@@ -16,7 +16,7 @@ import (
 
 // There are two types of DCC strings this program accepts.
 // Search Results
-// 	- A text file containing a list of search results returned from your search
+// 	- A text file containing a list of search results returned from a search
 //    query.
 // Book Files
 //  - The actual book file itself. You get the download string from the search
@@ -31,22 +31,14 @@ type Data struct {
 }
 
 // NewDownload parses the DCC SEND string and downloads the file
-func NewDownload(text string, isCli bool, doneChan chan<- string) {
+func NewDownload(text string, downloadDir string, doneChan chan<- string) {
 	dcc := Data{}
 	err := dcc.ParseDCC(text)
 	if err != nil {
 		log.Fatal("ParseDCC Error: ", err)
 	}
 
-	if isCli {
-		homeDir, err := os.UserHomeDir()
-		if err != nil {
-			log.Println(err)
-		}
-		dcc.filename = filepath.Join(homeDir, "Downloads", dcc.filename)
-	} else {
-		dcc.filename = filepath.Join(os.TempDir(), dcc.filename)
-	}
+	dcc.filename = filepath.Join(downloadDir, dcc.filename)
 
 	downloadDCC(dcc, doneChan)
 }

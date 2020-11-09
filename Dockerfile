@@ -21,5 +21,10 @@ RUN go build
 FROM gcr.io/distroless/static as app
 WORKDIR /app
 COPY --from=build /go/src/openbooks .
+
+ENV IS_DOCKER true
+
 EXPOSE 80
-ENTRYPOINT ["./openbooks", "-name", "openbooks", "-port", "80"]
+VOLUME [ "/books" ]
+
+ENTRYPOINT ["./openbooks", "-name", "docker", "-dir", "/books", "-port", "80"]

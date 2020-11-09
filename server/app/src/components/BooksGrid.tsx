@@ -30,7 +30,7 @@ export const BooksGrid: React.FC = () => {
     }
 
     // Active item selected, but the results are null
-    // The item's results haven't been loadeded. Show 
+    // The item's results haven't been loadeded. Show
     // loading indicator
     if (activeItem !== null && !activeItem.results) {
         return (
@@ -63,7 +63,7 @@ export const BooksGrid: React.FC = () => {
             <Table.VirtualBody height={900}>
                 {
                     filteredRows.map((book, i) => (
-                        <Table.Row key={book.full + i}>
+                        <Table.Row key={book.full + i} isSelectable>
                             <Table.TextCell flexBasis={200} flexGrow={0} flexShrink={0}>{book.server}</Table.TextCell>
                             <Table.TextCell flexBasis={250} flexGrow={0} flexShrink={0}>{book.author}</Table.TextCell>
                             <Table.TextCell>{book.title}</Table.TextCell>

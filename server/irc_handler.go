@@ -19,7 +19,7 @@ type Handler struct {
 func (h Handler) DownloadSearchResults(text string) {
 	searchDownloaded := make(chan string)
 	// Download the file and wait until it is completed
-	go dcc.NewDownload(text, false, searchDownloaded)
+	go dcc.NewDownload(text, config.DownloadDir, searchDownloaded)
 	// Retrieve the file's location
 	fileLocation := <-searchDownloaded
 
@@ -38,7 +38,7 @@ func (h Handler) DownloadSearchResults(text string) {
 // DownloadBookFile downloads the book file and sends it over the websocket
 func (h Handler) DownloadBookFile(text string) {
 	bookDownloaded := make(chan string)
-	go dcc.NewDownload(text, false, bookDownloaded)
+	go dcc.NewDownload(text, config.DownloadDir, bookDownloaded)
 	fileLocation := <-bookDownloaded
 	fileName := filepath.Base(fileLocation)
 
@@ -54,9 +54,11 @@ func (h Handler) DownloadBookFile(text string) {
 		File:        data,
 	}
 
-	err = os.Remove(fileLocation)
-	if err != nil {
-		log.Printf("%s: Error deleting search results file %v.\n", h.uuid, err)
+	if !config.Persist {
+		err = os.Remove(fileLocation)
+		if err != nil {
+			log.Printf("%s: Error deleting search results file %v.\n", h.uuid, err)
+		}
 	}
 }
 

@@ -29,9 +29,9 @@ for, click download and the book will be sent to you.
   - When the results are recieved they are then parsed and put into a table for easy viewing.
   - Clicking a server in the sidebar will filter the results to show only books from that server.
   - Clicking a history item allows you to show, hide, or delete it.
-- When you find what you are looking for simply click the download button. 
+- When you find what you are looking for simply click the download button.
 
-### CLI 
+### CLI
 - Launch the application with the -cli flag
   - `OpenBooks -cli`
 - Search eBooks by entering `s` for search. Then enter your query.
@@ -39,12 +39,12 @@ for, click download and the book will be sent to you.
   - Example Results
   ```
   !LawdyServer Kurt Vonnegut - Slaughterhouse Five.pdf  ::INFO:: 220.0KB
-  !Oatmeal Vonnegut, Kurt - Slaughterhouse-Five(v1.1)[htm].rar  ::INFO:: 257.0KB 
-  !Oatmeal 023 - Vonnegut, Kurt Jr. - Slaughterhouse-five (v1.1) [html, jpg].rar  ::INFO:: 257.0KB 
-  !Oatmeal Kurt Vonnegut - Slaughterhouse-Five (v4.0) (html).rar  ::INFO:: 245.9KB 
-  !Oatmeal Kurt Vonnegut - Slaughterhouse-Five (v5.0) (epub).rar  ::INFO:: 1.9MB 
+  !Oatmeal Vonnegut, Kurt - Slaughterhouse-Five(v1.1)[htm].rar  ::INFO:: 257.0KB
+  !Oatmeal 023 - Vonnegut, Kurt Jr. - Slaughterhouse-five (v1.1) [html, jpg].rar  ::INFO:: 257.0KB
+  !Oatmeal Kurt Vonnegut - Slaughterhouse-Five (v4.0) (html).rar  ::INFO:: 245.9KB
+  !Oatmeal Kurt Vonnegut - Slaughterhouse-Five (v5.0) (epub).rar  ::INFO:: 1.9MB
   !Pondering42 023 - Vonnegut, Kurt Jr. - Slaughterhouse-five (v1.1) [html, jpg].rar ::INFO:: 256.99KB
-  ``` 
+  ```
 - Download eBooks by entering `d` for download. Then paste in your book string
   - Enter the download string of the book you want to receive (don't include the ::INFO:: )
     - Ex) `!Oatmeal Kurt Vonnegut - Slaughterhouse-Five (v5.0) (epub).rar`
@@ -57,12 +57,16 @@ for, click download and the book will be sent to you.
       Open the browser on server start.
 -cli
       Launch OpenBooks in the terminal instead of the web UI.
+-dir string
+      Only applies to server mode. CLI mode downloads to the current directory. (default "/tmp")
 -log
       Save IRC logs to irc_log.txt.
 -name string
-      Use a name that differs from your account name. One word only. (default "[os username]")
+      Use a name that differs from your account name. One word only. (default "evan")
+-persist
+      Keep book files in the download dir. Default is to delete after sending. (Server mode only)
 -port string
-      Set the local network port for browser mode. (default "5228"
+      Set the local network port for browser mode. (default "5228")
 ```
 
 ## Development

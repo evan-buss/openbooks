@@ -78,7 +78,7 @@ func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 		send:       make(chan interface{}, 128),
 		disconnect: make(chan struct{}),
 		uuid:       uuid.New(),
-		irc:        irc.New(name, name),
+		irc:        irc.New(name, "OpenBooks - Search and download eBooks"),
 	}
 
 	client.hub.register <- client

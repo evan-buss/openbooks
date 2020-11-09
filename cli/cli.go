@@ -3,6 +3,7 @@ package cli
 import (
 	"bufio"
 	"fmt"
+	"log"
 	"os"
 	"os/signal"
 	"strings"
@@ -37,8 +38,14 @@ func Start(config core.Config) {
 
 	core.Join(IRC)
 
+	cwd, err := os.Getwd()
+	if err != nil {
+		log.Fatalln("Could not get current working directory.", err)
+	}
+	config.DownloadDir = cwd
+
 	exitSignal := make(chan struct{})
-	go core.ReadDaemon(IRC, config.Log, Handler{}, exitSignal)
+	go core.ReadDaemon(IRC, config.Log, Handler{config}, exitSignal)
 
 	fmt.Println("Connection established...")
 

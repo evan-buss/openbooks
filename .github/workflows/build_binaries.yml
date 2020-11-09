@@ -1,5 +1,6 @@
 name: Build Platform Binaries
 
+# Run on every push to make sure the build doesn't break with changes.
 on:
   push:
     branches: [ master ]
