@@ -24,7 +24,7 @@ COPY --from=build /go/src/openbooks .
 
 ENV IS_DOCKER true
 
-EXPOSE 80
+EXPOSE 8080
 VOLUME [ "/books" ]
 
-ENTRYPOINT ["./openbooks", "-name", "docker", "-dir", "/books", "-port", "80"]
+ENTRYPOINT ["./openbooks", "-name", "docker", "-dir", "/books", "-port", "8080"]
