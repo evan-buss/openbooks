@@ -9,19 +9,27 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/evan-buss/openbooks/core"
-
 	"github.com/rakyll/statik/fs"
 
 	// Load the static SPA content
 	_ "github.com/evan-buss/openbooks/server/statik"
 )
 
-var config core.Config
+// Config contains settings for server
+type Config struct {
+	Log         bool
+	OpenBrowser bool
+	Port        string
+	UserName    string
+	Persist     bool
+	DownloadDir string
+}
+
+var config Config
 var numConnections *int32 = new(int32)
 
 // Start instantiates the web server and opens the browser
-func Start(conf core.Config) {
+func Start(conf Config) {
 	config = conf
 
 	hub := newHub()

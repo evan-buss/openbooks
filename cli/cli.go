@@ -13,22 +13,27 @@ import (
 	"github.com/evan-buss/openbooks/irc"
 )
 
+// Config is used to configure CLI mode settings.
+type Config struct {
+	UserName string // Username to use when connecting to IRC
+	Log      bool   // True if IRC messages should be logged
+}
+
 // Reader is a way to recieve input from the user
-var Reader *bufio.Reader
+var reader *bufio.Reader
 
 // IRC is the current IRC connection
-var IRC *irc.Conn
+var conn *irc.Conn
 
 // Start instantiates the OpenBooks CLI interface
-func Start(config core.Config) {
-
-	IRC := irc.New(config.UserName, "OpenBooks CLI")
+func Start(config Config) {
+	conn := irc.New(config.UserName, "OpenBooks CLI")
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-c
-		IRC.Disconnect()
+		conn.Disconnect()
 		os.Exit(1)
 	}()
 
@@ -36,30 +41,31 @@ func Start(config core.Config) {
 	fmt.Println("          Welcome to OpenBooks         ")
 	fmt.Println("=======================================")
 
-	core.Join(IRC)
+	core.Join(conn)
 
 	cwd, err := os.Getwd()
 	if err != nil {
 		log.Fatalln("Could not get current working directory.", err)
 	}
-	config.DownloadDir = cwd
 
 	exitSignal := make(chan struct{})
-	go core.ReadDaemon(IRC, config.Log, Handler{config}, exitSignal)
+	go core.ReadDaemon(conn, config.Log, Handler{cwd}, exitSignal)
 
 	fmt.Println("Connection established...")
 
 	fmt.Print("\r")
 
-	Reader = bufio.NewReader(os.Stdin)
+	reader = bufio.NewReader(os.Stdin)
 
 	// Get the first input
-	userInput(Reader, IRC)
+	// Reader, IRC
+	menu()
 	// We make a channel to block forever. We want the reader daemon to run forever
 	<-exitSignal
 }
 
-func userInput(reader *bufio.Reader, irc *irc.Conn) {
+//reader *bufio.Reader, irc *irc.Conn
+func menu() {
 	fmt.Print("\ns)search\ng)et book\nd)one\n~> ")
 
 	input, _ := reader.ReadString('\n')
@@ -70,17 +76,17 @@ func userInput(reader *bufio.Reader, irc *irc.Conn) {
 	case "s":
 		fmt.Print("@search ")
 		message, _ := reader.ReadString('\n')
-		core.SearchBook(irc, message)
+		core.SearchBook(conn, message)
 	case "g":
 		fmt.Print("Download String: ")
 		message, _ := reader.ReadString('\n')
-		core.DownloadBook(irc, message)
+		core.DownloadBook(conn, message)
 	case "d":
 		fmt.Println("Disconnecting.")
-		irc.Disconnect()
+		conn.Disconnect()
 		os.Exit(0)
 	default:
 		fmt.Println("Invalid Selection.")
-		userInput(reader, irc)
+		menu()
 	}
 }

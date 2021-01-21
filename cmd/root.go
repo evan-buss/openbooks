@@ -3,17 +3,22 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"os/user"
+	"strings"
 
 	"github.com/spf13/cobra"
 )
 
+var userName string
+
+func init() {
+	user, _ := user.Current()
+	userName = strings.Split(user.Name, " ")[0]
+}
+
 var rootCmd = &cobra.Command{
 	Use:   "openbooks",
-	Short: "Test",
-	Long:  `A utility that makes searching and downloading eBooks easier.`,
-	// Run: func(cmd *cobra.Command, args []string) {
-	// 	// Do Stuff Here
-	// },
+	Short: "Quickly and easily download eBooks from IRCHighway.",
 }
 
 // Execute starts the root command handler.
