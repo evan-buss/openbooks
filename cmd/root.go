@@ -3,18 +3,9 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"os/user"
-	"strings"
 
 	"github.com/spf13/cobra"
 )
-
-var userName string
-
-func init() {
-	user, _ := user.Current()
-	userName = strings.Split(user.Name, " ")[0]
-}
 
 var rootCmd = &cobra.Command{
 	Use:   "openbooks",

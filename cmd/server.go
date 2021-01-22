@@ -2,7 +2,9 @@ package cmd
 
 import (
 	"fmt"
+	"math/rand"
 	"os"
+	"time"
 
 	"github.com/brianvoe/gofakeit/v5"
 	"github.com/evan-buss/openbooks/server"
@@ -12,25 +14,28 @@ import (
 
 func init() {
 	rootCmd.AddCommand(serverCmd)
+	userName := generateUserName()
 
-	serverCmd.LocalFlags().BoolP("log", "l", false, "Save IRC logs to irc_log.txt.")
-	serverCmd.LocalFlags().BoolP("browser", "b", false, "Open the browser on server start.")
-	serverCmd.LocalFlags().StringP("name", "n", userName, "Use a name that differs from your account name. One word only.")
-	serverCmd.LocalFlags().String("port", "5228", "Set the local network port for browser mode.")
-	serverCmd.LocalFlags().StringP("dir", "d", os.TempDir(), "The directory where files are saved when persist enabled.")
-	serverCmd.LocalFlags().BoolP("persist", "p", false, "Persist eBooks in 'dir'. Default is to delete after sending.")
+	serverCmd.Flags().BoolP("log", "l", false, "Save IRC logs to irc_log.txt.")
+	serverCmd.Flags().BoolP("browser", "b", false, "Open the browser on server start.")
+	serverCmd.Flags().StringP("name", "n", userName, "Use a name that isn't randomly generated. One word only.")
+	serverCmd.Flags().String("port", "5228", "Set the local network port for browser mode.")
+	serverCmd.Flags().StringP("dir", "d", os.TempDir(), "The directory where eBooks are saved when persist enabled.")
+	serverCmd.Flags().BoolP("persist", "p", false, "Persist eBooks in 'dir'. Default is to delete after sending.")
 }
 
+// TODO: Something is broken with this new setup...
 var serverCmd = &cobra.Command{
 	Use:   "server",
 	Short: "Run OpenBooks in server mode.",
+	Long:  "Run OpenBooks in server mode. This allows you to use a web interface to search and download eBooks.",
 	Run: func(cmd *cobra.Command, args []string) {
-		log, _ := cmd.LocalFlags().GetBool("log")
-		browser, _ := cmd.LocalFlags().GetBool("browser")
-		name, _ := cmd.LocalFlags().GetString("name")
-		port, _ := cmd.LocalFlags().GetString("port")
-		dir, _ := cmd.LocalFlags().GetString("dir")
-		persist, _ := cmd.LocalFlags().GetBool("persist")
+		log, _ := cmd.Flags().GetBool("log")
+		browser, _ := cmd.Flags().GetBool("browser")
+		name, _ := cmd.Flags().GetString("name")
+		port, _ := cmd.Flags().GetString("port")
+		dir, _ := cmd.Flags().GetString("dir")
+		persist, _ := cmd.Flags().GetBool("persist")
 
 		config := server.Config{
 			Log:         log,
@@ -45,21 +50,10 @@ var serverCmd = &cobra.Command{
 	},
 }
 
-// if _, isDocker := os.LookupEnv("IS_DOCKER"); isDocker {
-// 	// Download directory is exported as a volume from the container image
-// 	config.Log = false
-// 	config.CliMode = false
-// 	config.OpenBrowser = false
-// 	config.Port = "80"
-// 	config.DownloadDir = "/books"
-
-// 	if config.UserName == "docker" {
-// 		config.UserName = generateUserName()
-// 		fmt.Printf("Setting IRC Name: %s\n", config.UserName)
-// 	}
-// }
-
+// Generate a random username to avoid IRC name collisions if multiple users are hosting
+// at the same time.
 func generateUserName() string {
-	gofakeit.Seed(0)
+	rand.Seed(time.Now().UnixNano())
+	gofakeit.Seed(int64(rand.Int()))
 	return fmt.Sprintf("%s-%s", gofakeit.Adjective(), gofakeit.Noun())
 }
