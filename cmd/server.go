@@ -19,9 +19,9 @@ func init() {
 	serverCmd.Flags().BoolP("log", "l", false, "Save IRC logs to irc_log.txt.")
 	serverCmd.Flags().BoolP("browser", "b", false, "Open the browser on server start.")
 	serverCmd.Flags().StringP("name", "n", userName, "Use a name that isn't randomly generated. One word only.")
-	serverCmd.Flags().String("port", "5228", "Set the local network port for browser mode.")
+	serverCmd.Flags().StringP("port", "p", "5228", "Set the local network port for browser mode.")
 	serverCmd.Flags().StringP("dir", "d", os.TempDir(), "The directory where eBooks are saved when persist enabled.")
-	serverCmd.Flags().BoolP("persist", "p", false, "Persist eBooks in 'dir'. Default is to delete after sending.")
+	serverCmd.Flags().Bool("persist", false, "Persist eBooks in 'dir'. Default is to delete after sending.")
 }
 
 // TODO: Something is broken with this new setup...

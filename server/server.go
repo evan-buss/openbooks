@@ -64,5 +64,6 @@ func Start(conf Config) {
 		openbrowser("http://127.0.0.1:" + config.Port + "/")
 	}
 
+	log.Printf("OpenBooks is listening on port %v", config.Port)
 	log.Fatal(http.ListenAndServe(":"+config.Port, nil))
 }

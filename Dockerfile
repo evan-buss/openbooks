@@ -25,4 +25,4 @@ COPY --from=build /go/src/openbooks .
 EXPOSE 80
 VOLUME [ "/books" ]
 
-ENTRYPOINT ["./openbooks", "server", "-dir", "/books", "-port", "80"]
+ENTRYPOINT ["./openbooks", "server", "--dir", "/books", "--port", "80"]
