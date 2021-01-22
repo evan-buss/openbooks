@@ -1,11 +1,3 @@
-Fix / set up github actions automated builds
-
-Handle name conflicts when connecting to IRC server.
-
-Allow specifying download directory.
-    Pass in via config options.
-    Docker build will run the app with set directory
-    If not present, default to downloads directory.
 Variable platform docker image
 
 Improve filtering.
