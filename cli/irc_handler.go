@@ -3,45 +3,44 @@ package cli
 import (
 	"fmt"
 
-	"github.com/evan-buss/openbooks/core"
 	"github.com/evan-buss/openbooks/dcc"
 )
 
 // Handler is the CLI implementation of the EventHandler interface.
 type Handler struct {
-	config core.Config
+	downloadDir string
 }
 
 // DownloadSearchResults downloads the search results
 // and sends user a response message
 func (h Handler) DownloadSearchResults(text string) {
 	fileLocation := make(chan string)
-	go dcc.NewDownload(text, h.config.DownloadDir, fileLocation)
+	go dcc.NewDownload(text, h.downloadDir, fileLocation)
 	fmt.Println("Results location: " + <-fileLocation)
-	userInput(Reader, IRC)
+	menu()
 }
 
 // DownloadBookFile downloads the search results and sends
 // a user a response message
 func (h Handler) DownloadBookFile(text string) {
 	fileLocation := make(chan string)
-	go dcc.NewDownload(text, h.config.DownloadDir, fileLocation)
+	go dcc.NewDownload(text, h.downloadDir, fileLocation)
 	fmt.Println("File location: " + <-fileLocation)
-	userInput(Reader, IRC)
+	menu()
 }
 
 // NoResults is called when the user searches for something that
 // is not available sends a CLI message
 func (h Handler) NoResults() {
 	fmt.Println("No results returned for that search...")
-	userInput(Reader, IRC)
+	menu()
 }
 
 // BadServer is called when the user tries to download a file from a
 // server that is not available.
 func (h Handler) BadServer() {
 	fmt.Println("That server is not available. Try again...")
-	userInput(Reader, IRC)
+	menu()
 }
 
 // SearchAccepted is called when the search has been accepted but the user
