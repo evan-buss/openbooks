@@ -27,7 +27,6 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "integrate": "react-scripts build && statik -src ..\\app\\build\\ && cd ..\\.. && go build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

@@ -55,7 +55,6 @@ Openbooks allows you to download ebooks from irc.irchighway.net quickly and easi
 
 - Backend
   - Golang
-  - Statik (bundle SPA into single binary)
   - Archiver (extract files from various archive formats)
   - gorilla/websocket
 - Frontend
