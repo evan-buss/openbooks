@@ -16,7 +16,6 @@ openbooks
 
 openbooks.exe
 irc_log.txt
-statik.go
 build/
 
 # Test binary, built with `go test -c`

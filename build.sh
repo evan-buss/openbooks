@@ -6,12 +6,6 @@ npm install
 npm run build
 cd ../..
 
-echo "Converting React app to binary file."
-go get github.com/rakyll/statik
-statik -src server/app/build -dest server/
-go get -d -v ./...
-go install -v ./...
-
 echo "Building binaries for various platforms.";
 env CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -o build/openbooks.exe
 env CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o build/openbooks_mac

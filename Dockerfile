@@ -1,17 +1,14 @@
 FROM node:lts as web
 WORKDIR /web
-COPY ./server/app/ .
+COPY . .
+WORKDIR /web/server/app/
 RUN npm install
 RUN npm run build
 
-FROM golang:latest as build
+FROM golang:rc-alpine3.13 as build
 WORKDIR /go/src/
 COPY . .
-COPY --from=web /web/build/ ./build
-
-# Force static linking so we don't need any deps
-RUN go get github.com/rakyll/statik
-RUN statik -src /go/src/build -dest /go/src/server
+COPY --from=web /web/ .
 
 ENV CGO_ENABLED=0
 RUN go get -d -v ./...
