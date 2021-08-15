@@ -5,6 +5,7 @@ name: Publish Image to Docker Hub
 # Controls when the action will run. Triggers the workflow on push or pull request
 # events but only for the master branch
 on:
+  workflow_dispatch:
   push:
     tags:
       - 'v*.*.*'
@@ -21,6 +22,17 @@ jobs:
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
+        
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          # list of Docker images to use as base name for tags
+          images: |
+            evanbuss/openbooks
+          # generate Docker tags based on the following events/attributes
+          tags: |
+            type=sha
 
       - name: Set up Docker Buildx
         id: buildx
@@ -40,7 +52,7 @@ jobs:
           file: ./Dockerfile
           push: true
           platforms: linux/amd64,linux/arm64
-          tags: evanbuss/openbooks:latest,evanbuss/openbooks:${GITHUB_SHA::8}
+          tags: ${{ steps.meta.outputs.tags }}
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
