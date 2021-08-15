@@ -19,9 +19,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
         
       - name: Docker meta
         id: meta
@@ -33,12 +30,16 @@ jobs:
           # generate Docker tags based on the following events/attributes
           tags: |
             type=sha
+            
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
 
       - name: Set up Docker Buildx
         id: buildx
         uses: docker/setup-buildx-action@v1
-        with:
-          uses: linux/amd64,linux/arm64
+        
+      - name: Available platforms
+        run: echo ${{ steps.buildx.outputs.platforms }}
 
       - name: Docker Login
         uses: azure/docker-login@v1
