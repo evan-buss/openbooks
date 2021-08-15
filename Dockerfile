@@ -1,11 +1,11 @@
-FROM node:lts as web
+FROM node:16 as web
 WORKDIR /web
 COPY . .
 WORKDIR /web/server/app/
 RUN npm install
 RUN npm run build
 
-FROM golang:rc-alpine3.13 as build
+FROM golang as build
 WORKDIR /go/src/
 COPY . .
 COPY --from=web /web/ .
