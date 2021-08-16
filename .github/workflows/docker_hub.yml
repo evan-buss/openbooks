@@ -53,7 +53,7 @@ jobs:
             password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
       - name: Publish Multi Platform Image
-      - run: docker buildx build --push --platform linux/arm64,linux/amd64 --tag evanbuss/openbooks:latest .
+        run: docker buildx build --push --platform linux/arm64,linux/amd64 --tag evanbuss/openbooks:latest .
 
       # - name: Build and push AMD64
       #   uses: docker/build-push-action@v2
