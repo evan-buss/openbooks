@@ -28,6 +28,8 @@ jobs:
           images: |
             evanbuss/openbooks
           # generate Docker tags based on the following events/attributes
+          flavor: |
+            latest=true
           tags: |
             type=sha
             
@@ -52,8 +54,8 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
-          push: true
           platforms: linux/amd64,linux/arm64
+          push: true
           tags: ${{ steps.meta.outputs.tags }}
 
       - name: Image digest
