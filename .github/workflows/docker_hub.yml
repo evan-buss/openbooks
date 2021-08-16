@@ -47,7 +47,6 @@ jobs:
             password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
       - name: Build and push AMD64
-        id: docker_build
         uses: docker/build-push-action@v2
         with:
           context: .
@@ -61,16 +60,12 @@ jobs:
       #       this or create a script to execute the create/build 
       #       commands manually...
       - name: Build and push ARM64
-        id: docker_build
         uses: docker/build-push-action@v2
         with:
           context: .
           platforms: linux/arm64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
-
-      - name: Image digest
-        run: echo ${{ steps.docker_build.outputs.digest }}
 
       - name: Docker Hub Description
         uses: peter-evans/dockerhub-description@v2
