@@ -3,3 +3,13 @@ Variable platform docker image
 Improve filtering.
     Server / Title - Search Text Box
     Format - Find unique formats and have clickable options
+
+- Migrate as much communication from WebSocket to HTTP api as possible.
+    - We are overusing websocket communication and it just adds complexity
+    - Send files via HTTP instead of base64 encoding in the websocket JSON message
+- Use evergreen virtual scrolling grid that fits page size 
+- Add filtering to grid
+    - See: https://evergreen-storybook.netlify.app/?path=/story/table--advanced-sortable-table
+- Use new Pulsar component instead of custom version
+- Make the "connected" indicator actually work...
+- Migrate from Create React App to Vite

@@ -2,7 +2,11 @@
 
 # [Choice] Go version: 1, 1.16, 1.15
 ARG VARIANT="1.16"
-FROM mcr.microsoft.com/vscode/devcontainers/go:0-${VARIANT}
+# NOTE: Temporary workaround because Microsoft doesn't publish
+#       ARM images for their devcontainers yet. AMD64 containers
+#       use way too much CPU on M1 so I've built the image for ARM.
+# FROM mcr.microsoft.com/vscode/devcontainers/go:0-${VARIANT}
+FROM evanbuss/devcontainers-go:latest
 
 # [Choice] Node.js version: none, lts, 16, 14, 12, 10
 ARG NODE_VERSION="none"
@@ -16,4 +20,4 @@ RUN if [ "${NODE_VERSION}" != "none" ]; then su vscode -c "umask 0002 && . /usr/
 # RUN go get -x <your-dependency-or-tool>
 
 # [Optional] Uncomment this line to install global node packages.
-# RUN su vscode -c "source /usr/local/share/nvm/nvm.sh && npm install -g <your-package-here>" 2>&1
+RUN su vscode -c "source /usr/local/share/nvm/nvm.sh && npm install -g npm-check-updates" 2>&1

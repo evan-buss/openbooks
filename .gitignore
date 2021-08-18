@@ -1,5 +1,7 @@
 # start persist
 openbooks
+*.DS_Store
+**/dist
 # end persist
 
 

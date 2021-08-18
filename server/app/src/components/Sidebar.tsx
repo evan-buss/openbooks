@@ -1,8 +1,8 @@
-import useLocalStorage from '@rehooks/local-storage';
 import { Heading, Pane, Paragraph, Tab, Tablist } from 'evergreen-ui';
 import React from 'react';
 import { useSelector } from 'react-redux';
 import styled from "styled-components";
+import useLocalStorageState from "use-local-storage-state";
 import { RootState } from '../state/store';
 import Pulse from './Pulse';
 import SearchHistory from './SearchHistory';
@@ -13,7 +13,7 @@ const SidebarContent = styled(Pane)`
 `;
 
 const Sidebar: React.FC = () => {
-    const [selectedIndex, setIndex] = useLocalStorage("index", 0);
+    const [selectedIndex, setIndex] = useLocalStorageState("index", 0);
     const connected = useSelector((store: RootState) => store.state.isConnected);
 
     return (
