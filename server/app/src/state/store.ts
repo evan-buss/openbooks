@@ -7,7 +7,7 @@ import stateReducer from "./stateSlice";
 import { enableMapSet } from "immer";
 
 const wsProtocol = window.location.protocol === "https:" ? "wss://" : "ws://";
-const wsHost = process.env.NODE_ENV === "development" ? "localhost:5228" : window.location.host;
+const wsHost = import.meta.env.DEV ? "localhost:5228" : window.location.host;
 const wsUrl = `${wsProtocol}${wsHost}/ws`;
 
 enableMapSet();
