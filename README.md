@@ -36,7 +36,7 @@ Openbooks allows you to download ebooks from irc.irchighway.net quickly and easi
 ### Build the React SPA and compile binaries for multiple platforms.
 
 - Run `./build.sh`
-- This will install npm packages, build the React app, and compile the executa
+- This will install npm packages, build the React app, and compile the executable.
 
 ### Build the go binary (if you haven't changed the frontend)
 
