@@ -29,22 +29,18 @@ Openbooks allows you to download ebooks from irc.irchighway.net quickly and easi
 ### Install the dependencies
 
 - `go get`
-- `go get github.com/rakyll/statik`
-  - This is installed as a binary to your `$GOBIN`
 - `cd server/app && npm install`
+- `cd ../..`
+- `go run main.go`
 
-### Build the React SPA and compile the complete binary
+### Build the React SPA and compile binaries for multiple platforms.
 
-- `cd server/app && npm run build`
-- Go back to root directory: `./statik.sh && go build`
+- Run `./build.sh`
+- This will install npm packages, build the React app, and compile the executa
 
 ### Build the go binary (if you haven't changed the frontend)
 
 - `go build`
-
-### Build the complete binary for all platforms
-
-- `./build.sh`
 
 ## Why / How
 
