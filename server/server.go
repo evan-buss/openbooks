@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-//go:embed app/build
+//go:embed app/dist
 var reactClient embed.FS
 
 // Config contains settings for server
@@ -45,7 +45,7 @@ func Start(conf Config) {
 		os.Exit(1)
 	}()
 
-	http.Handle("/", AddRoutePrefix("/app/build/", http.FileServer(http.FS(reactClient))))
+	http.Handle("/", AddRoutePrefix("/app/dist/", http.FileServer(http.FS(reactClient))))
 
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		serveWs(hub, w, r)
