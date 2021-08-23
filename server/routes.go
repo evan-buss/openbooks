@@ -14,7 +14,7 @@ var reactClient embed.FS
 
 func registerRoutes(hub *Hub) {
 	basePath := getBaseRoute()
-	fmt.Printf("Base Path %s\n", basePath)
+	fmt.Printf("Base Path: %s\n", basePath)
 
 	http.Handle(basePath, serveStaticFiles(basePath, "app/dist"))
 
