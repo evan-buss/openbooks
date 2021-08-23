@@ -24,6 +24,15 @@ Openbooks allows you to download ebooks from irc.irchighway.net quickly and easi
 - Config to perist all eBook files to disk
   - `docker run -p 8080:80 -v /home/evan/Downloads/books:/books evanbuss/openbooks --persist`
 
+### Setting the Base Path
+
+OpenBooks server doesn't have to be hosted at the root of your webserver. The basepath value allows you to host it behind a reverse proxy. The base path value must have opening and closing forward slashes (default "/").
+
+- Docker
+  - `docker run -p 8080:80 -e BASE_PATH=/openbooks/ evanbuss/openbooks`
+- Binary
+  - `./openbooks server --basepath /openbooks/`
+
 ## Development
 
 ### Install the dependencies

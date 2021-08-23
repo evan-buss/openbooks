@@ -8,3 +8,5 @@
     - Format - Find unique formats and have clickable options
 - Use new Pulsar component instead of custom version
 - Make the "connected" indicator actually work...
+- Show IRC name in web interface
+- Show raw IRC logs in web interface
