@@ -1,8 +1,9 @@
 # This is a basic workflow to help you get started with Actions
 
-name: Publish Release Binaries
+name: Create New Release and Upload Binaries
 
 on:
+  workflow_dispatch:
   push:
     tags:
       - "v*.*.*"
@@ -15,81 +16,26 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Check out code into the Go module directory
-        uses: actions/checkout@v2
-
       - uses: actions/setup-go@v2
         with:
-          stable: false
-          go-version: "^1.16.0-rc1"
+          go-version: "^1.17.0"
       - run: go version
-
-      - name: Use LTS Node.js
-        uses: actions/setup-node@v1
+    
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
         with:
-          node-version: "14"
+          node-version: "16"
 
       - name: Build
         run: ./build.sh
 
       - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/v')
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
-          draft: false
+          draft: true
           prerelease: false
-
-      - name: Upload Mac Build
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
-          asset_path: ./build/openbooks_mac
-          asset_name: openbooks_mac
-          asset_content_type: application/octet-stream
-
-      - name: Upload Mac ARM Build
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
-          asset_path: ./build/openbooks_mac_arm
-          asset_name: openbooks_mac_arm
-          asset_content_type: application/octet-stream
-
-      - name: Upload Windows Build
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
-          asset_path: ./build/openbooks.exe
-          asset_name: openbooks.exe
-          asset_content_type: application/octet-stream
-
-      - name: Upload Linux AMD64 Build
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
-          asset_path: ./build/openbooks_linux
-          asset_name: openbooks_linux
-          asset_content_type: application/octet-stream
-
-      - name: Upload Linux ARM Build
-        id: upload-release-asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
-          asset_path: ./build/openbooks_linux_arm
-          asset_name: openbooks_linux_arm
-          asset_content_type: application/octet-stream
+          fail_on_unmatched_files: true
+          name: Release ${{ github.ref }}
+          files: |
+            ./build/*
