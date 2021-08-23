@@ -22,9 +22,9 @@ func init() {
 	serverCmd.Flags().StringP("port", "p", "5228", "Set the local network port for browser mode.")
 	serverCmd.Flags().StringP("dir", "d", os.TempDir(), "The directory where eBooks are saved when persist enabled.")
 	serverCmd.Flags().Bool("persist", false, "Persist eBooks in 'dir'. Default is to delete after sending.")
+	serverCmd.Flags().String("basepath", "/", `Base path where the application is accessible. For example "/openbooks/".`)
 }
 
-// TODO: Something is broken with this new setup...
 var serverCmd = &cobra.Command{
 	Use:   "server",
 	Short: "Run OpenBooks in server mode.",
@@ -36,6 +36,15 @@ var serverCmd = &cobra.Command{
 		port, _ := cmd.Flags().GetString("port")
 		dir, _ := cmd.Flags().GetString("dir")
 		persist, _ := cmd.Flags().GetBool("persist")
+		basepath, _ := cmd.Flags().GetString("basepath")
+
+		// If cli flag isn't set (default value) check for the presence of an
+		// environment variable and use it if found.
+		if basepath == cmd.Flag("basepath").DefValue {
+			if envPath, present := os.LookupEnv("BASE_PATH"); present {
+				basepath = envPath
+			}
+		}
 
 		config := server.Config{
 			Log:         log,
@@ -44,6 +53,7 @@ var serverCmd = &cobra.Command{
 			Port:        port,
 			DownloadDir: dir,
 			Persist:     persist,
+			Basepath:    basepath,
 		}
 
 		server.Start(config)

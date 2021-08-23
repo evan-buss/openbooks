@@ -16,6 +16,10 @@
 
 `docker run -d -p 8080:80 evanbuss/openbooks --name my_irc_name`
 
+### Host at a sub path behind a reverse proxy
+
+`docker run -d -p 8080:80 -e BASE_PATH=/openbooks/ evanbuss/openbooks`
+
 ## Arguments
 
 ```
@@ -38,6 +42,8 @@ services:
         restart: unless-stopped
         container_name: OpenBooks
         command: --persist
+        environment:
+          - BASE_PATH=/openbooks/
         image: evan-buss/openbooks:latest
 
 volumes:

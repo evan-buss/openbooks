@@ -6,9 +6,12 @@ import serverReducer from "./serverSlice";
 import stateReducer from "./stateSlice";
 import { enableMapSet } from "immer";
 
-const wsProtocol = window.location.protocol === "https:" ? "wss://" : "ws://";
-const wsHost = import.meta.env.DEV ? "localhost:5228" : window.location.host;
-const wsUrl = `${wsProtocol}${wsHost}/ws`;
+const websocketURL = new URL(window.location.href + "ws")
+if (websocketURL.protocol.startsWith("https")) {
+    websocketURL.protocol = websocketURL.protocol.replace("https", "wss");
+} else {
+    websocketURL.protocol = websocketURL.protocol.replace("http", "ws");
+}
 
 enableMapSet();
 
@@ -18,7 +21,7 @@ export const store = configureStore({
         history: historyReducer,
         servers: serverReducer
     },
-    middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(websocketConn(wsUrl))
+    middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(websocketConn(websocketURL.href))
 });
 
 const saveState = (key: string, state: any): void => {
