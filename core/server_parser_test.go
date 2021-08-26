@@ -7,12 +7,19 @@ import (
 )
 
 func TestCaseInsensitiveSort(t *testing.T) {
-	servers := "+FWServer ~Oatmeal +LawdyServer +fwServer"
-	want := []string{"FWServer", "fwServer", "LawdyServer", "Oatmeal"}
 	cache := &ServerCache{Servers: make([]string, 0), Time: time.Now()}
-	cache.ParseServers(servers)
+	cases := []struct {
+		input string
+		want  []string
+	}{
+		{"+FWServer ~Oatmeal +LawdyServer +fwServer", []string{"FWServer", "fwServer", "LawdyServer", "Oatmeal"}},
+		{"", []string{}},
+	}
 
-	if !reflect.DeepEqual(cache.Servers, want) {
-		t.Errorf("got %#v, want %#v", cache.Servers, want)
+	for _, v := range cases {
+		cache.ParseServers(v.input)
+		if !reflect.DeepEqual(cache.Servers, v.want) {
+			t.Errorf("got %#v, want %#v", cache.Servers, v.want)
+		}
 	}
 }

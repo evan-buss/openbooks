@@ -28,8 +28,10 @@ func (s *ServerCache) ParseServers(data string) {
 	output := make([]string, 0)
 
 	for _, name := range servers {
-		if _, ok := prefixes[name[0]]; ok && len(name) > 1 {
-			output = append(output, name[1:])
+		if len(name) > 1 {
+			if _, exists := prefixes[name[0]]; exists {
+				output = append(output, name[1:])
+			}
 		}
 	}
 

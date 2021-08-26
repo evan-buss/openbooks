@@ -44,7 +44,9 @@ func (c *Client) routeMessage(message Request) {
 func (ConnectionRequest) handle(c *Client) {
 	core.Join(c.irc)
 	// Start the Read Daemon
-	go core.ReadDaemon(c.irc, config.Log, Handler{Client: c}, c.disconnect)
+	// TODO: Figure out a way to pass in the config object.
+	// go core.ReadDaemon(c.irc, config.Log, Handler{Client: c}, c.disconnect)
+	go core.ReadDaemon(c.irc, false, Handler{Client: c}, c.disconnect)
 
 	c.send <- ConnectionResponse{
 		MessageType: CONNECT,

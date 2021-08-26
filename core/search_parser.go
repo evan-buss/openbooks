@@ -46,6 +46,8 @@ func ParseSearchFile(filePath string) []BookDetail {
 	for scanner.Scan() {
 		if counter > 3 {
 			dat, err := parseLine(scanner.Text())
+			// TODO: Handle or log the error so we know if we are loosing a lot of books
+			// from a specific server.
 			if err == nil {
 				books = append(books, dat)
 			}

@@ -1,9 +1,5 @@
 package server
 
-import (
-	"sync/atomic"
-)
-
 // Hub maintains the set of active clients and broadcasts messages to the
 // clients.
 type Hub struct {
@@ -25,7 +21,11 @@ func newHub() *Hub {
 		shutdown:   make(chan struct{}),
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
-		clients:    make(map[*Client]bool),
+		// TODO: maybe use map[uuid.UUID]*Client so that we can look up users by
+		// UUID, this would allow us to migrate some WS calls to HTTP because we
+		// can send the UUID and the hub will take care of calling the correct
+		// client IRC and WS connection.
+		clients: make(map[*Client]bool),
 	}
 }
 
@@ -33,11 +33,9 @@ func (h *Hub) run() {
 	for {
 		select {
 		case client := <-h.register:
-			atomic.AddInt32(numConnections, 1)
 			h.clients[client] = true
 		case client := <-h.unregister:
 			if _, ok := h.clients[client]; ok {
-				atomic.AddInt32(numConnections, -1)
 				close(client.send)
 				close(client.disconnect)
 				delete(h.clients, client)

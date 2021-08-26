@@ -6,6 +6,7 @@ require (
 	github.com/brianvoe/gofakeit/v5 v5.11.2
 	github.com/dsnet/compress v0.0.1 // indirect
 	github.com/frankban/quicktest v1.11.3 // indirect
+	github.com/go-chi/chi/v5 v5.0.3
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/websocket v1.4.2

@@ -1,9 +1,7 @@
 package server
 
 import (
-	"fmt"
 	"log"
-	"net/http"
 	"time"
 
 	"github.com/evan-buss/openbooks/irc"
@@ -56,39 +54,6 @@ func closeClient(c *Client) {
 	c.irc.Disconnect()
 	c.conn.Close()
 	c.hub.unregister <- c
-}
-
-// serveWs handles websocket requests from the peer.
-func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
-	upgrader.CheckOrigin = func(req *http.Request) bool {
-		return true
-	}
-
-	conn, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
-	// Each client gets its own connection, so use different usernames by appending count
-	name := fmt.Sprintf("%s-%d", config.UserName, *numConnections+1)
-	client := &Client{
-		hub:        hub,
-		conn:       conn,
-		send:       make(chan interface{}, 128),
-		disconnect: make(chan struct{}),
-		uuid:       uuid.New(),
-		irc:        irc.New(name, "OpenBooks - Search and download eBooks"),
-	}
-
-	client.hub.register <- client
-
-	// Allow collection of memory referenced by the caller by doing all work in
-	// new goroutines.
-	go client.writePump()
-	go client.readPump()
-
-	log.Printf("%s: Client connected from %s\n", client.uuid, conn.RemoteAddr().String())
 }
 
 // readPump pumps messages from the websocket connection to the hub.
