@@ -6,12 +6,12 @@ import (
 	"time"
 )
 
-var prefixes = [...]string{
-	"~",
-	"&",
-	"@",
-	"%",
-	"+",
+var prefixes = map[byte]struct{}{
+	'~': {},
+	'&': {},
+	'@': {},
+	'%': {},
+	'+': {},
 }
 
 // ServerCache maintains a list of download servers that are available
@@ -27,14 +27,16 @@ func (s *ServerCache) ParseServers(data string) {
 	servers := strings.Split(data, " ")
 	output := make([]string, 0)
 
-	for _, user := range servers {
-		for _, prefix := range prefixes {
-			if strings.Contains(user, prefix) && strings.Index(user, prefix) == 0 && len(user) > 1 {
-				output = append(output, user[1:])
-			}
+	for _, name := range servers {
+		if _, ok := prefixes[name[0]]; ok && len(name) > 1 {
+			output = append(output, name[1:])
 		}
 	}
-	sort.Strings(output)
+
+	sort.Slice(output, func(i, j int) bool {
+		return strings.ToLower(output[i]) < strings.ToLower(output[j])
+	})
+
 	s.Servers = output
 	s.Time = time.Now()
 }
@@ -42,7 +44,7 @@ func (s *ServerCache) ParseServers(data string) {
 // GetServers returns the IRC book servers that are online
 // TODO: Look into a cleaner way of doing this
 func GetServers(servers chan<- []string) {
-	cacheIsOld := time.Now().Sub(serverCache.Time) > (time.Minute * 2)
+	cacheIsOld := time.Since(serverCache.Time) > (time.Minute * 2)
 	if len(serverCache.Servers) == 0 || cacheIsOld {
 		ircConn.GetUsers("ebooks")
 		oldTime := serverCache.Time
