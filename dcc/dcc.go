@@ -33,8 +33,9 @@ type Data struct {
 // NewDownload parses the DCC SEND string and downloads the file
 func NewDownload(text string, downloadDir string, doneChan chan<- string) {
 	dcc := Data{}
-	err := dcc.ParseDCC(text)
+	err := dcc.parseDCC(text)
 	if err != nil {
+		// TODO: This shouldn't be fatal. Need a good solution for error logging...
 		log.Fatal("ParseDCC Error: ", err)
 	}
 
@@ -116,7 +117,7 @@ func downloadDCC(dcc Data, doneChan chan<- string) {
 }
 
 // ParseDCC parses the important data of a DCC SEND string
-func (dcc *Data) ParseDCC(text string) error {
+func (dcc *Data) parseDCC(text string) error {
 	re := regexp.MustCompile(`DCC SEND "?(.+[^"])"?\s(\d+)\s+(\d+)\s+(\d+)\s*`)
 	groups := re.FindStringSubmatch(text)
 

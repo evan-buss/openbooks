@@ -6,7 +6,7 @@ import (
 )
 
 // TestSearchParse makes sure that data is properly extracted from the DCC
-// response string
+// response string. (filename, IP conversion, port, and size)
 func TestSearchParse(t *testing.T) {
 	tables := []struct {
 		search   string
@@ -17,15 +17,18 @@ func TestSearchParse(t *testing.T) {
 	}{
 		{
 			":SearchOok!ook@only.ook PRIVMSG evan_28 :DCC SEND SearchOok_results_for__hp_lovecraft.txt.zip 1543751478 2043 784",
-			"SearchOok_results_for__hp_lovecraft.txt.zip", "92.3.199.54", "2043", 784},
+			"SearchOok_results_for__hp_lovecraft.txt.zip", "92.3.199.54", "2043", 784,
+		},
 		{
-			":Search!Search@ihw-4q5hcb.dyn.suddenlink.net PRIVMSG evan_bot :DCC SEND SearchBot_results_for__stephen_king_the_stand.txt.zip 2907707975 4342 1116", "SearchBot_results_for__stephen_king_the_stand.txt.zip", "173.80.26.71", "4342", 1116},
+			":Search!Search@ihw-4q5hcb.dyn.suddenlink.net PRIVMSG evan_bot :DCC SEND SearchBot_results_for__stephen_king_the_stand.txt.zip 2907707975 4342 1116",
+			"SearchBot_results_for__stephen_king_the_stand.txt.zip", "173.80.26.71", "4342", 1116,
+		},
 	}
 
 	dcc := new(Data)
 	for _, table := range tables {
 
-		dcc.ParseDCC(table.search)
+		dcc.parseDCC(table.search)
 		fmt.Printf(dcc.filename)
 
 		if dcc.filename != table.filename {

@@ -2,6 +2,7 @@ package server
 
 import (
 	"embed"
+	"encoding/json"
 	"fmt"
 	"io/fs"
 	"log"
@@ -19,7 +20,7 @@ func (server *server) registerRoutes() *chi.Mux {
 	router := chi.NewRouter()
 	router.Handle("/*", server.staticFilesHandler("app/dist"))
 	router.Get("/ws", server.serveWs())
-	router.Get("/connections", server.statsHandler())
+	router.Get("/stats", server.statsHandler())
 	return router
 }
 
@@ -71,7 +72,23 @@ func (server *server) staticFilesHandler(assetPath string) http.Handler {
 }
 
 func (server *server) statsHandler() http.HandlerFunc {
+	type statsReponse struct {
+		UUID string `json:"uuid"`
+		IP   string `json:"ip"`
+	}
+
 	return func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "There are currently %d active connections.", len(server.hub.clients))
+		result := make([]statsReponse, 0, len(server.hub.clients))
+
+		for client := range server.hub.clients {
+			details := statsReponse{
+				UUID: client.uuid.String(),
+				IP:   client.conn.RemoteAddr().String(),
+			}
+
+			result = append(result, details)
+		}
+
+		json.NewEncoder(w).Encode(result)
 	}
 }
