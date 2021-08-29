@@ -1,7 +1,8 @@
 package main
 
-import "fmt"
+import "github.com/evan-buss/openbooks/mock"
 
 func main() {
-	fmt.Println("The mock server will mimic the basic of irchighways book bots for testing purposes.")
+	config := mock.Config{}
+	mock.Start(config)
 }
