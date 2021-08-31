@@ -13,7 +13,8 @@ var ircConn *irc.Conn
 // Join connects to the irc.irchighway.net server and joins the #ebooks channel
 func Join(irc *irc.Conn) {
 	ircConn = irc
-	irc.Connect("irc.irchighway.net")
+	// irc.Connect("irc.irchighway.net")
+	irc.Connect("localhost")
 	// Wait before joining the ebooks room
 	// Often you recieve a private message from the server
 	time.Sleep(time.Second * 2)

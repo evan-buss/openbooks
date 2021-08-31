@@ -31,17 +31,16 @@ type Config struct {
 	Basepath    string
 }
 
-// TODO: refactor this away
-var conf Config
-
 // Start instantiates the web server and opens the browser
 func Start(config Config) {
-	conf = config
 	config.Basepath = sanitizePath(config.Basepath)
 	fmt.Printf("Base Path: %v\n", config.Basepath)
 
 	router := chi.NewRouter()
+	router.Use(middleware.RequestID)
+	router.Use(middleware.RealIP)
 	router.Use(middleware.Logger)
+	router.Use(middleware.Recoverer)
 
 	hub := newHub()
 	go hub.run()

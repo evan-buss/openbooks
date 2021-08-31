@@ -1,10 +1,12 @@
 package server
 
+import "github.com/google/uuid"
+
 // Hub maintains the set of active clients and broadcasts messages to the
 // clients.
 type Hub struct {
 	// Registered clients.
-	clients map[*Client]bool
+	clients map[uuid.UUID]*Client
 
 	// Inbound messages from the clients.
 	shutdown chan struct{}
@@ -21,11 +23,7 @@ func newHub() *Hub {
 		shutdown:   make(chan struct{}),
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
-		// TODO: maybe use map[uuid.UUID]*Client so that we can look up users by
-		// UUID, this would allow us to migrate some WS calls to HTTP because we
-		// can send the UUID and the hub will take care of calling the correct
-		// client IRC and WS connection.
-		clients: make(map[*Client]bool),
+		clients:    make(map[uuid.UUID]*Client),
 	}
 }
 
@@ -33,18 +31,18 @@ func (h *Hub) run() {
 	for {
 		select {
 		case client := <-h.register:
-			h.clients[client] = true
+			h.clients[client.uuid] = client
 		case client := <-h.unregister:
-			if _, ok := h.clients[client]; ok {
+			if _, ok := h.clients[client.uuid]; ok {
 				close(client.send)
 				close(client.disconnect)
-				delete(h.clients, client)
+				delete(h.clients, client.uuid)
 			}
 		case <-h.shutdown:
-			for client := range h.clients {
+			for _, client := range h.clients {
 				close(client.send)
 				close(client.disconnect)
-				delete(h.clients, client)
+				delete(h.clients, client.uuid)
 			}
 			return
 		}

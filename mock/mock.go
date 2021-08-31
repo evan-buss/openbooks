@@ -1,7 +1,7 @@
 package mock
 
 import (
-	"io/ioutil"
+	"bufio"
 	"log"
 	"net"
 )
@@ -12,7 +12,7 @@ type Config struct {
 }
 
 func Start(config Config) {
-	server, err := net.Listen("tcp", ":8080")
+	server, err := net.Listen("tcp", ":6667")
 	if err != nil {
 		panic(err)
 	}
@@ -27,19 +27,17 @@ func Start(config Config) {
 }
 
 func handler(conn net.Conn, config Config) {
-	request, err := ioutil.ReadAll(conn)
-	if err != nil {
-		log.Fatal(err)
+	log.Printf("Connection received from %s", conn.RemoteAddr().String())
+	scanner := bufio.NewScanner(conn)
+
+	for scanner.Scan() {
+		request := scanner.Text()
+		if err := scanner.Err(); err != nil {
+			log.Println(err)
+		}
+
+		log.Printf("Request Received: %s\n", request)
 	}
 
-	log.Printf("Request: %s\n", string(request))
-
-	log.Println("Handling connection")
-	conn.Write([]byte("HTTP/1.1 200 OK\r\n"))
-	conn.Write([]byte("Content-Type: text/html\r\n"))
-	conn.Write([]byte("Connection: close\r\n"))
-	conn.Write([]byte("\r\n"))
-	conn.Write([]byte("Hello world\r\n"))
-	log.Println("Done sending?")
-	conn.Close()
+	log.Println("Connection closed.")
 }
