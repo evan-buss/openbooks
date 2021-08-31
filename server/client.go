@@ -76,16 +76,12 @@ func (c *Client) readPump() {
 			var request Request
 			err := c.conn.ReadJSON(&request)
 
-			log.Printf("%s: %s Message Received\n", c.uuid.String(), messageToString(request.RequestType))
-
 			if err != nil {
-				if websocket.IsCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-					log.Printf("%s: Close error: %v", c.uuid.String(), err)
-				} else {
-					log.Printf("%s: Client Disconnected.\n", c.uuid.String())
-				}
+				log.Printf("%s: Connection Closed: %v", c.uuid.String(), err)
 				return
 			}
+
+			log.Printf("%s: %s Message Received\n", c.uuid.String(), messageToString(request.RequestType))
 
 			c.routeMessage(request)
 		}
