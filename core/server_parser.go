@@ -3,7 +3,6 @@ package core
 import (
 	"sort"
 	"strings"
-	"time"
 )
 
 var prefixes = map[byte]struct{}{
@@ -14,45 +13,39 @@ var prefixes = map[byte]struct{}{
 	'+': {},
 }
 
-// ServerCache maintains a list of download servers that are available
-// Time ensures that the cache is never too far out of date
-type ServerCache struct {
-	Servers []string
-	Time    time.Time
+type IrcServers struct {
+	ElevatedUsers []string
+	RegularUsers  []string
 }
 
-// ParseServers parses the complete list of IRC users to get the elevates users which in
+// ParseServers parses the complete list of IRC users to get the elevated users which in
 // this case are the download servers
-func (s *ServerCache) ParseServers(data string) {
-	servers := strings.Split(data, " ")
-	output := make([]string, 0)
+func ParseServers(rawString string) IrcServers {
+	allServers := strings.Split(rawString, " ")
 
-	for _, name := range servers {
+	servers := IrcServers{
+		ElevatedUsers: make([]string, 0),
+		RegularUsers:  make([]string, 0),
+	}
+
+	for _, name := range allServers {
 		if len(name) > 1 {
 			if _, exists := prefixes[name[0]]; exists {
-				output = append(output, name[1:])
+				servers.ElevatedUsers = append(servers.ElevatedUsers, name[1:])
+			} else {
+				servers.RegularUsers = append(servers.RegularUsers, name)
 			}
 		}
 	}
 
-	sort.Slice(output, func(i, j int) bool {
-		return strings.ToLower(output[i]) < strings.ToLower(output[j])
-	})
+	sort.Slice(servers.ElevatedUsers, ignoreCaseSort(servers.ElevatedUsers))
+	sort.Slice(servers.RegularUsers, ignoreCaseSort(servers.RegularUsers))
 
-	s.Servers = output
-	s.Time = time.Now()
+	return servers
 }
 
-// GetServers returns the IRC book servers that are online
-// TODO: Look into a cleaner way of doing this
-func GetServers(servers chan<- []string) {
-	cacheIsOld := time.Since(serverCache.Time) > (time.Minute * 2)
-	if len(serverCache.Servers) == 0 || cacheIsOld {
-		ircConn.GetUsers("ebooks")
-		oldTime := serverCache.Time
-		for serverCache.Time.Equal(oldTime) {
-			time.Sleep(time.Millisecond * 500)
-		}
+func ignoreCaseSort(items []string) func(i, j int) bool {
+	return func(i, j int) bool {
+		return strings.ToLower(items[i]) < strings.ToLower(items[j])
 	}
-	servers <- serverCache.Servers
 }

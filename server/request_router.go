@@ -46,7 +46,7 @@ func (ConnectionRequest) handle(c *Client) {
 	// Start the Read Daemon
 	// TODO: Figure out a way to pass in the config object.
 	// go core.ReadDaemon(c.irc, config.Log, Handler{Client: c}, c.disconnect)
-	go core.ReadDaemon(c.irc, false, Handler{Client: c}, c.disconnect)
+	go core.ReadDaemon(c.irc, c, false, c.disconnect)
 
 	c.send <- ConnectionResponse{
 		MessageType: CONNECT,
@@ -77,12 +77,8 @@ func (d DownloadRequest) handle(c *Client) {
 
 // handle ServerRequests by sending the currently available book servers
 func (s ServersRequest) handle(c *Client) {
-	servers := make(chan []string, 1)
-	go core.GetServers(servers)
-	results := <-servers
-
 	c.send <- ServersResponse{
 		MessageType: SERVERS,
-		Servers:     results,
+		Servers:     []string{"test1", "test2", "test3"},
 	}
 }

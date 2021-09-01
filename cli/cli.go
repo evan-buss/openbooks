@@ -49,7 +49,7 @@ func Start(config Config) {
 	}
 
 	exitSignal := make(chan struct{})
-	go core.ReadDaemon(conn, config.Log, Handler{cwd}, exitSignal)
+	go core.ReadDaemon(conn, Handler{irc: conn, downloadDir: cwd}, config.Log, exitSignal)
 
 	fmt.Println("Connection established...")
 

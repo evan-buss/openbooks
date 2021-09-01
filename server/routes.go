@@ -70,6 +70,7 @@ func (server *server) serveWs() http.HandlerFunc {
 			disconnect: make(chan struct{}),
 			uuid:       userId,
 			irc:        irc.New(name, "OpenBooks - Search and download eBooks"),
+			config:     server.config,
 		}
 
 		client.hub.register <- client

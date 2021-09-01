@@ -3,11 +3,14 @@ package cli
 import (
 	"fmt"
 
+	"github.com/evan-buss/openbooks/core"
 	"github.com/evan-buss/openbooks/dcc"
+	"github.com/evan-buss/openbooks/irc"
 )
 
 // Handler is the CLI implementation of the EventHandler interface.
 type Handler struct {
+	irc         *irc.Conn
 	downloadDir string
 }
 
@@ -54,3 +57,9 @@ func (h Handler) SearchAccepted() {
 func (h Handler) MatchesFound(num string) {
 	fmt.Println("Your search returned " + num + " matches.")
 }
+
+func (h Handler) PING(url string) {
+	h.irc.PONG(url)
+}
+
+func (h Handler) ServerList(servers core.IrcServers) {}

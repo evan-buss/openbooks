@@ -3,23 +3,36 @@ package core
 import (
 	"reflect"
 	"testing"
-	"time"
 )
 
 func TestCaseInsensitiveSort(t *testing.T) {
-	cache := &ServerCache{Servers: make([]string, 0), Time: time.Now()}
 	cases := []struct {
 		input string
-		want  []string
+		want  IrcServers
 	}{
-		{"+FWServer ~Oatmeal +LawdyServer +fwServer", []string{"FWServer", "fwServer", "LawdyServer", "Oatmeal"}},
-		{"", []string{}},
+		{
+			"+FWServer ~Oatmeal +LawdyServer +fwServer evan",
+			IrcServers{
+				ElevatedUsers: []string{"FWServer", "fwServer", "LawdyServer", "Oatmeal"},
+				RegularUsers:  []string{"evan"},
+			},
+		},
+		{"",
+			IrcServers{
+				ElevatedUsers: []string{},
+				RegularUsers:  []string{},
+			},
+		},
 	}
 
 	for _, v := range cases {
-		cache.ParseServers(v.input)
-		if !reflect.DeepEqual(cache.Servers, v.want) {
-			t.Errorf("got %#v, want %#v", cache.Servers, v.want)
+		result := ParseServers(v.input)
+		if !reflect.DeepEqual(result.ElevatedUsers, v.want.ElevatedUsers) {
+			t.Errorf("got %#v, want %#v", result.ElevatedUsers, v.want.ElevatedUsers)
+		}
+
+		if !reflect.DeepEqual(result.RegularUsers, v.want.RegularUsers) {
+			t.Errorf("got %#v, want %#v", result.RegularUsers, v.want.RegularUsers)
 		}
 	}
 }

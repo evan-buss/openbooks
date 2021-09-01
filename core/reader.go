@@ -3,23 +3,23 @@ package core
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"strings"
-	"time"
-
-	"github.com/evan-buss/openbooks/irc"
 )
 
-// ReaderHandler handles and responds to different IRC events
+// IrcHighwayHandler handles and responds to different IRC events
 // Both the CLI and Server versions implement this interface
-type ReaderHandler interface {
+type IrcHighwayHandler interface {
 	DownloadSearchResults(text string)
 	DownloadBookFile(text string)
 	NoResults()
 	BadServer()
 	SearchAccepted()
+	ServerList(servers IrcServers)
 	MatchesFound(num string)
+	PING(url string)
 }
 
 // Possible messages that are sent by the server. We respond accordingly
@@ -35,19 +35,14 @@ const (
 	endUserList       = "366"
 )
 
-// Servers contains the cache of available download servers.
-var serverCache ServerCache
-
 // ReadDaemon is designed to be launched as a goroutine. Listens for
 // specific messages and dispatches appropriate handler functions
 // Params: irc - IRC connection
 //         handler - domain specific handler that responds to IRC events
-func ReadDaemon(irc *irc.Conn, logIrc bool, handler ReaderHandler, disconnect <-chan struct{}) {
-
+func ReadDaemon(reader io.Reader, handler IrcHighwayHandler, logIrc bool, disconnect <-chan struct{}) {
 	var logFile *os.File
-	serverCache = ServerCache{Servers: []string{}, Time: time.Now()}
 	var users strings.Builder // Accumulate list of users and then flush
-	scanner := bufio.NewScanner(irc)
+	scanner := bufio.NewScanner(reader)
 
 	if logIrc {
 		var err error
@@ -105,10 +100,10 @@ func ReadDaemon(irc *irc.Conn, logIrc bool, handler ReaderHandler, disconnect <-
 			} else if strings.Contains(text, beginUserList) {
 				users.WriteString(text) // Accumulate the user list
 			} else if strings.Contains(text, endUserList) {
-				serverCache.ParseServers(users.String())
+				handler.ServerList(ParseServers(users.String()))
 				users.Reset()
 			} else if strings.Contains(text, pingMessage) {
-				irc.PONG("irc.irchighway.net")
+				handler.PING("irc.irchighway.net")
 			}
 		}
 	}

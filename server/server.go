@@ -10,14 +10,16 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/evan-buss/openbooks/core"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 )
 
 type server struct {
-	router *chi.Mux
-	hub    *Hub
-	config Config
+	router     *chi.Mux
+	hub        *Hub
+	config     *Config
+	repository *Repository
 }
 
 // Config contains settings for server
@@ -46,9 +48,10 @@ func Start(config Config) {
 	go hub.run()
 
 	server := &server{
-		config: config,
-		router: router,
-		hub:    hub,
+		config:     &config,
+		router:     router,
+		hub:        hub,
+		repository: &Repository{servers: new(core.IrcServers)},
 	}
 
 	routes := server.registerRoutes()

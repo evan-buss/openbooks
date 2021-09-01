@@ -48,6 +48,8 @@ type Client struct {
 
 	// Individual IRC connection per connected client.
 	irc *irc.Conn
+
+	config *Config
 }
 
 func closeClient(c *Client) {
