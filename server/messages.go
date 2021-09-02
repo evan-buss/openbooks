@@ -13,13 +13,12 @@ const (
 	CONNECT
 	SEARCH
 	DOWNLOAD
-	SERVERS
 	WAIT
 	IRCERROR
 )
 
 func messageToString(s int) string {
-	name := []string{"INVALID", "ERROR", "CONNECT", "SEARCH", "DOWNLOAD", "SERVERS", "WAIT", "IRCERROR"}
+	name := []string{"INVALID", "ERROR", "CONNECT", "SEARCH", "DOWNLOAD", "WAIT", "IRCERROR"}
 	i := uint8(s)
 	switch {
 	case i <= uint8(IRCERROR):
@@ -60,15 +59,6 @@ type SearchRequest struct {
 type SearchResponse struct {
 	MessageType int               `json:"type"`
 	Books       []core.BookDetail `json:"books"`
-}
-
-// ServersRequest is a request that lists available IRC servers
-type ServersRequest struct{}
-
-// ServersResponse is a response that lists the IRC servers that are online and available
-type ServersResponse struct {
-	MessageType int      `json:"type"`
-	Servers     []string `json:"servers"`
 }
 
 // DownloadRequest is a request to download a specific book from the IRC server

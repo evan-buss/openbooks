@@ -11,9 +11,14 @@ import (
 )
 
 // Client implements the ReaderHandler interface
+type IrcHandler struct {
+	*Client
+	config *Config
+	repo   *Repository
+}
 
 // DownloadSearchResults downloads from DCC server, parses data, and sends data to client
-func (c *Client) DownloadSearchResults(text string) {
+func (c *IrcHandler) DownloadSearchResults(text string) {
 	searchDownloaded := make(chan string)
 	// Download the file and wait until it is completed
 	go dcc.NewDownload(text, c.config.DownloadDir, searchDownloaded)
@@ -33,7 +38,7 @@ func (c *Client) DownloadSearchResults(text string) {
 }
 
 // DownloadBookFile downloads the book file and sends it over the websocket
-func (c *Client) DownloadBookFile(text string) {
+func (c *IrcHandler) DownloadBookFile(text string) {
 	bookDownloaded := make(chan string)
 	go dcc.NewDownload(text, c.config.DownloadDir, bookDownloaded)
 	fileLocation := <-bookDownloaded
@@ -60,7 +65,7 @@ func (c *Client) DownloadBookFile(text string) {
 }
 
 // NoResults is called when the server returns that nothing was found for the query
-func (c *Client) NoResults() {
+func (c *IrcHandler) NoResults() {
 	c.send <- IrcErrorResponse{
 		MessageType: IRCERROR,
 		Status:      "No results found for the query.",
@@ -68,7 +73,7 @@ func (c *Client) NoResults() {
 }
 
 // BadServer is called when the requested download fails because the server is not available
-func (c *Client) BadServer() {
+func (c *IrcHandler) BadServer() {
 	c.send <- IrcErrorResponse{
 		MessageType: IRCERROR,
 		Status:      "Server is not available. Try another one.",
@@ -76,7 +81,7 @@ func (c *Client) BadServer() {
 }
 
 // SearchAccepted is called when the user's query is accepted into the search queue
-func (c *Client) SearchAccepted() {
+func (c *IrcHandler) SearchAccepted() {
 	c.send <- WaitResponse{
 		MessageType: WAIT,
 		Status:      "Search accepted into the queue.",
@@ -84,19 +89,17 @@ func (c *Client) SearchAccepted() {
 }
 
 // MatchesFound is called when the server finds matches for the user's query
-func (c *Client) MatchesFound(num string) {
+func (c *IrcHandler) MatchesFound(num string) {
 	c.send <- WaitResponse{
 		MessageType: WAIT,
 		Status:      "Found " + num + " results for your query.",
 	}
 }
 
-func (c *Client) PING(url string) {
+func (c *IrcHandler) PING(url string) {
 	c.irc.PONG("irc.irchighway.net")
 }
 
-func (c *Client) ServerList(servers core.IrcServers) {
-	// TODO: Update a shared cache
-	// We almost need an instance of the shared *server here but I'm not sure
-	// how to get it...
+func (c *IrcHandler) ServerList(servers core.IrcServers) {
+	c.repo.servers = servers
 }

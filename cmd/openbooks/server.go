@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"path"
 	"time"
 
 	"github.com/brianvoe/gofakeit/v5"
@@ -53,7 +54,7 @@ var serverCmd = &cobra.Command{
 			Port:        port,
 			DownloadDir: dir,
 			Persist:     persist,
-			Basepath:    basepath,
+			Basepath:    sanitizePath(basepath),
 		}
 
 		server.Start(config)
@@ -66,4 +67,12 @@ func generateUserName() string {
 	rand.Seed(time.Now().UnixNano())
 	gofakeit.Seed(int64(rand.Int()))
 	return fmt.Sprintf("%s-%s", gofakeit.Adjective(), gofakeit.Noun())
+}
+
+func sanitizePath(basepath string) string {
+	cleaned := path.Clean(basepath)
+	if cleaned == "/" {
+		return cleaned
+	}
+	return cleaned + "/"
 }

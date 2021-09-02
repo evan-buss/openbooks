@@ -23,6 +23,7 @@ func (server *server) registerRoutes() *chi.Mux {
 	router.Handle("/*", server.staticFilesHandler("app/dist"))
 	router.Get("/ws", server.serveWs())
 	router.Get("/stats", server.statsHandler())
+	router.Get("/servers", server.serverListHandler())
 
 	router.Group(func(r chi.Router) {
 		r.Use(server.requireUser)
@@ -61,24 +62,22 @@ func (server *server) serveWs() http.HandlerFunc {
 		}
 
 		// Each client gets its own connection, so use different usernames by appending count
-		name := fmt.Sprintf("%s-%d", server.config.UserName, len(server.hub.clients)+1)
+		name := fmt.Sprintf("%s-%d", server.config.UserName, len(server.clients)+1)
 		log.Printf("Connecting to IRC with name %s\n", name)
 		client := &Client{
-			hub:        server.hub,
 			conn:       conn,
 			send:       make(chan interface{}, 128),
 			disconnect: make(chan struct{}),
 			uuid:       userId,
 			irc:        irc.New(name, "OpenBooks - Search and download eBooks"),
-			config:     server.config,
 		}
 
-		client.hub.register <- client
+		server.register <- client
 
 		// Allow collection of memory referenced by the caller by doing all work in
 		// new goroutines.
-		go client.writePump()
-		go client.readPump()
+		go server.writePump(client)
+		go server.readPump(client)
 
 		log.Printf("%s: Client connected from %s\n", client.uuid, conn.RemoteAddr().String())
 	}
@@ -103,9 +102,9 @@ func (server *server) statsHandler() http.HandlerFunc {
 	}
 
 	return func(w http.ResponseWriter, r *http.Request) {
-		result := make([]statsReponse, 0, len(server.hub.clients))
+		result := make([]statsReponse, 0, len(server.clients))
 
-		for _, client := range server.hub.clients {
+		for _, client := range server.clients {
 			details := statsReponse{
 				UUID: client.uuid.String(),
 				Name: client.irc.Username,
@@ -116,6 +115,12 @@ func (server *server) statsHandler() http.HandlerFunc {
 		}
 
 		json.NewEncoder(w).Encode(result)
+	}
+}
+
+func (server *server) serverListHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		json.NewEncoder(w).Encode(server.repository.servers)
 	}
 }
 

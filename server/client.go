@@ -34,9 +34,6 @@ type Client struct {
 	// Unique ID for the client
 	uuid uuid.UUID
 
-	// Global hub that manages client registrations
-	hub *Hub
-
 	// The websocket connection.
 	conn *websocket.Conn
 
@@ -48,14 +45,12 @@ type Client struct {
 
 	// Individual IRC connection per connected client.
 	irc *irc.Conn
-
-	config *Config
 }
 
-func closeClient(c *Client) {
+func (s *server) closeClient(c *Client) {
 	c.irc.Disconnect()
 	c.conn.Close()
-	c.hub.unregister <- c
+	s.unregister <- c
 }
 
 // readPump pumps messages from the websocket connection to the hub.
@@ -63,9 +58,9 @@ func closeClient(c *Client) {
 // The application runs readPump in a per-connection goroutine. The application
 // ensures that there is at most one reader on a connection by executing all
 // reads from this goroutine.
-func (c *Client) readPump() {
+func (s *server) readPump(c *Client) {
 	defer func() {
-		closeClient(c)
+		s.closeClient(c)
 	}()
 	c.conn.SetReadLimit(maxMessageSize)
 	c.conn.SetReadDeadline(time.Now().Add(pongWait))
@@ -85,7 +80,7 @@ func (c *Client) readPump() {
 
 			log.Printf("%s: %s Message Received\n", c.uuid.String(), messageToString(request.RequestType))
 
-			c.routeMessage(request)
+			s.routeMessage(request, c)
 		}
 	}
 }
@@ -95,11 +90,11 @@ func (c *Client) readPump() {
 // A goroutine running writePump is started for each connection. The
 // application ensures that there is at most one writer to a connection by
 // executing all writes from this goroutine.
-func (c *Client) writePump() {
+func (s *server) writePump(c *Client) {
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
 		ticker.Stop()
-		closeClient(c)
+		s.closeClient(c)
 	}()
 
 	for {

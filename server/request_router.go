@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 
 	"github.com/evan-buss/openbooks/core"
@@ -13,20 +14,14 @@ type RequestHandler interface {
 }
 
 // messageRouter is used to parse the incoming request and respond appropriately
-func (c *Client) routeMessage(message Request) {
-	var obj RequestHandler
+func (s *server) routeMessage(message Request, c *Client) {
+	var obj interface{}
 
 	switch message.RequestType {
-	case CONNECT:
-		obj = new(ConnectionRequest)
 	case SEARCH:
 		obj = new(SearchRequest)
 	case DOWNLOAD:
 		obj = new(DownloadRequest)
-	case SERVERS:
-		obj = new(ServersRequest)
-	default:
-		log.Printf("%s: Unknown request type received.\n", c.uuid.String())
 	}
 
 	err := json.Unmarshal(message.Payload, &obj)
@@ -37,16 +32,25 @@ func (c *Client) routeMessage(message Request) {
 			Details: err.Error(),
 		}
 	}
-	obj.handle(c)
+	fmt.Printf("%#v\n", obj)
+
+	switch message.RequestType {
+	case CONNECT:
+		c.handleConnectionRequest(s)
+	case SEARCH:
+		c.handleSearchRequest(obj.(*SearchRequest))
+	case DOWNLOAD:
+		c.handleDownloadRequest(obj.(*DownloadRequest))
+	default:
+		log.Printf("%s: Unknown request type received.\n", c.uuid.String())
+	}
 }
 
 // handle ConnectionRequests and either connect to the server or do nothing
-func (ConnectionRequest) handle(c *Client) {
+func (c *Client) handleConnectionRequest(server *server) {
 	core.Join(c.irc)
-	// Start the Read Daemon
-	// TODO: Figure out a way to pass in the config object.
-	// go core.ReadDaemon(c.irc, config.Log, Handler{Client: c}, c.disconnect)
-	go core.ReadDaemon(c.irc, c, false, c.disconnect)
+	ircHandler := &IrcHandler{c, server.config, server.repository}
+	go core.ReadDaemon(c.irc, ircHandler, false, c.disconnect)
 
 	c.send <- ConnectionResponse{
 		MessageType: CONNECT,
@@ -56,7 +60,7 @@ func (ConnectionRequest) handle(c *Client) {
 }
 
 // handle SearchRequests and send the query to the book server
-func (s SearchRequest) handle(c *Client) {
+func (c *Client) handleSearchRequest(s *SearchRequest) {
 	core.SearchBook(c.irc, s.Query)
 
 	c.send <- WaitResponse{
@@ -66,19 +70,11 @@ func (s SearchRequest) handle(c *Client) {
 }
 
 // handle DownloadRequests by sending the request to the book server
-func (d DownloadRequest) handle(c *Client) {
+func (c *Client) handleDownloadRequest(d *DownloadRequest) {
 	core.DownloadBook(c.irc, d.Book)
 
 	c.send <- WaitResponse{
 		MessageType: WAIT,
 		Status:      "Download request received",
-	}
-}
-
-// handle ServerRequests by sending the currently available book servers
-func (s ServersRequest) handle(c *Client) {
-	c.send <- ServersResponse{
-		MessageType: SERVERS,
-		Servers:     []string{"test1", "test2", "test3"},
 	}
 }

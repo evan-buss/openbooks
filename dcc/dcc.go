@@ -14,6 +14,8 @@ import (
 	"github.com/mholt/archiver"
 )
 
+// TODO: Clean this up and use built in io methods
+
 // There are two types of DCC strings this program accepts.
 // Search Results
 // 	- A text file containing a list of search results returned from a search
