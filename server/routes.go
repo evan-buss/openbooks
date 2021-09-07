@@ -8,6 +8,7 @@ import (
 	"io/fs"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/evan-buss/openbooks/irc"
@@ -63,14 +64,17 @@ func (server *server) serveWs() http.HandlerFunc {
 
 		// Each client gets its own connection, so use different usernames by appending count
 		name := fmt.Sprintf("%s-%d", server.config.UserName, len(server.clients)+1)
-		log.Printf("Connecting to IRC with name %s\n", name)
 		client := &Client{
 			conn:       conn,
 			send:       make(chan interface{}, 128),
 			disconnect: make(chan struct{}),
 			uuid:       userId,
 			irc:        irc.New(name, "OpenBooks - Search and download eBooks"),
+			log:        log.New(os.Stdout, fmt.Sprintf("CLIENT (%s): ", name), log.LstdFlags|log.Lmsgprefix),
 		}
+
+		server.log.Printf("Client connected from %s\n", conn.RemoteAddr().String())
+		client.log.Println("New client created.")
 
 		server.register <- client
 
@@ -78,8 +82,6 @@ func (server *server) serveWs() http.HandlerFunc {
 		// new goroutines.
 		go server.writePump(client)
 		go server.readPump(client)
-
-		log.Printf("%s: Client connected from %s\n", client.uuid, conn.RemoteAddr().String())
 	}
 }
 

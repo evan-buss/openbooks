@@ -2,12 +2,13 @@ package server
 
 import (
 	"io/ioutil"
-	"log"
 	"os"
+	"path"
 	"path/filepath"
 
 	"github.com/evan-buss/openbooks/core"
 	"github.com/evan-buss/openbooks/dcc"
+	"github.com/evan-buss/openbooks/util"
 )
 
 // Client implements the ReaderHandler interface
@@ -19,47 +20,104 @@ type IrcHandler struct {
 
 // DownloadSearchResults downloads from DCC server, parses data, and sends data to client
 func (c *IrcHandler) DownloadSearchResults(text string) {
-	searchDownloaded := make(chan string)
 	// Download the file and wait until it is completed
-	go dcc.NewDownload(text, c.config.DownloadDir, searchDownloaded)
-	// Retrieve the file's location
-	fileLocation := <-searchDownloaded
-
-	log.Printf("%s: Sending search results.\n", c.uuid.String())
-	c.send <- SearchResponse{
-		MessageType: SEARCH,
-		Books:       core.ParseSearchFile(fileLocation),
+	download, err := dcc.ParseString(text)
+	if err != nil {
+		c.log.Println(err)
+		return
 	}
 
-	err := os.Remove(fileLocation)
+	// Create a new file based on the DCC file name
+	dccPath := path.Clean(path.Join(c.config.DownloadDir, download.Filename))
+	file, err := os.Create(dccPath)
 	if err != nil {
-		log.Printf("%s: Error deleting search results file: %v.\n", c.uuid, err)
+		c.log.Println(err)
+		return
+	}
+
+	// Download DCC data to the file
+	err = download.Download(file)
+	if err != nil {
+		c.log.Println(err)
+		return
+	}
+	file.Close()
+
+	extractedPath, err := util.ExtractArchive(dccPath)
+	c.log.Printf("New Path: %s\n", extractedPath)
+	if err != nil {
+		c.log.Println(err)
+		return
+	}
+
+	results, errors := core.ParseSearchFile(extractedPath)
+	// Output all errors so parser can be improved over time
+	if len(errors) > 0 {
+		c.log.Printf("%d Search Result Parsing Errors\n", len(errors))
+		for _, err := range errors {
+			c.log.Println(err)
+		}
+	}
+
+	if len(results) == 0 {
+		c.NoResults()
+		return
+	}
+
+	c.log.Printf("Sending %d search results.\n", len(results))
+	c.send <- SearchResponse{
+		MessageType: SEARCH,
+		Books:       results,
+	}
+
+	err = os.Remove(extractedPath)
+	if err != nil {
+		c.log.Printf("Error deleting search results file: %v", err)
 	}
 }
 
 // DownloadBookFile downloads the book file and sends it over the websocket
 func (c *IrcHandler) DownloadBookFile(text string) {
-	bookDownloaded := make(chan string)
-	go dcc.NewDownload(text, c.config.DownloadDir, bookDownloaded)
-	fileLocation := <-bookDownloaded
-	fileName := filepath.Base(fileLocation)
-
-	data, err := ioutil.ReadFile(fileLocation)
+	download, err := dcc.ParseString(text)
 	if err != nil {
-		log.Printf("%s: Error reading book file: %v.\n", c.uuid, err)
+		c.log.Println(err)
+		return
 	}
 
-	log.Printf("%s: Sending book entitled %s.\n", c.uuid.String(), fileName)
+	file, err := os.Create(path.Join(c.config.DownloadDir, download.Filename))
+	if err != nil {
+		c.log.Println(err)
+		return
+	}
+
+	filePath, err := filepath.Abs(file.Name())
+	if err != nil {
+		c.log.Println(err)
+		return
+	}
+
+	err = download.Download(file)
+	if err != nil {
+		c.log.Println(err)
+		return
+	}
+
+	data, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		c.log.Printf("%s: Error reading book file: %v.\n", c.uuid, err)
+	}
+
+	c.log.Printf("Sending book entitled '%s'.\n", download.Filename)
 	c.send <- DownloadResponse{
 		MessageType: DOWNLOAD,
-		Name:        fileName,
+		Name:        download.Filename,
 		File:        data,
 	}
 
 	if !c.config.Persist {
-		err = os.Remove(fileLocation)
+		err = os.Remove(filePath)
 		if err != nil {
-			log.Printf("%s: Error deleting search results file %v.\n", c.uuid, err)
+			c.log.Printf("Error deleting search results file %s.\n", err)
 		}
 	}
 }
@@ -96,8 +154,8 @@ func (c *IrcHandler) MatchesFound(num string) {
 	}
 }
 
-func (c *IrcHandler) PING(url string) {
-	c.irc.PONG("irc.irchighway.net")
+func (c *IrcHandler) Ping() {
+	c.irc.Pong(c.config.Server)
 }
 
 func (c *IrcHandler) ServerList(servers core.IrcServers) {

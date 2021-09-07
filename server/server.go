@@ -10,6 +10,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/evan-buss/openbooks/util"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/google/uuid"
@@ -30,6 +31,8 @@ type server struct {
 
 	// Unregister requests from clients.
 	unregister chan *Client
+
+	log *log.Logger
 }
 
 // Config contains settings for server
@@ -41,6 +44,8 @@ type Config struct {
 	Persist     bool
 	DownloadDir string
 	Basepath    string
+	Debug       bool
+	Server      string
 }
 
 func New(config Config) *server {
@@ -50,17 +55,15 @@ func New(config Config) *server {
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
 		clients:    make(map[uuid.UUID]*Client),
+		log:        log.New(os.Stdout, "SERVER: ", log.LstdFlags|log.Lmsgprefix),
 	}
 }
 
 // Start instantiates the web server and opens the browser
 func Start(config Config) {
-	fmt.Printf("Base Path: %v\n", config.Basepath)
-
 	router := chi.NewRouter()
 	router.Use(middleware.RequestID)
 	router.Use(middleware.RealIP)
-	router.Use(middleware.Logger)
 	router.Use(middleware.Recoverer)
 	server := New(config)
 	routes := server.registerRoutes()
@@ -70,13 +73,14 @@ func Start(config Config) {
 	server.registerGracefulShutdown(shutdown)
 	router.Mount(config.Basepath, routes)
 
+	server.log.Printf("Base Path: %v\n", config.Basepath)
 	if config.OpenBrowser {
 		browserUrl := "http://127.0.0.1:" + path.Join(config.Port+config.Basepath)
-		openbrowser(browserUrl)
+		util.OpenBrowser(browserUrl)
 	}
 
-	log.Printf("OpenBooks is listening on port %v", config.Port)
-	log.Fatal(http.ListenAndServe(":"+config.Port, router))
+	server.log.Printf("OpenBooks is listening on port %v", config.Port)
+	server.log.Fatal(http.ListenAndServe(":"+config.Port, router))
 }
 
 // The client hub is to be run in a goroutine and handles management of
@@ -109,7 +113,7 @@ func (server *server) registerGracefulShutdown(shutdown chan<- struct{}) {
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-c
-		log.Println("Graceful shutdown.")
+		server.log.Println("Graceful shutdown.")
 		// Close the shutdown channel. Triggering all reader/writer WS handlers to close.
 		close(shutdown)
 		time.Sleep(time.Second)

@@ -45,6 +45,8 @@ type Client struct {
 
 	// Individual IRC connection per connected client.
 	irc *irc.Conn
+
+	log *log.Logger
 }
 
 func (s *server) closeClient(c *Client) {
@@ -74,11 +76,11 @@ func (s *server) readPump(c *Client) {
 			err := c.conn.ReadJSON(&request)
 
 			if err != nil {
-				log.Printf("%s: Connection Closed: %v", c.uuid.String(), err)
+				c.log.Printf("Connection Closed: %v", err)
 				return
 			}
 
-			log.Printf("%s: %s Message Received\n", c.uuid.String(), messageToString(request.RequestType))
+			c.log.Printf("%s Message Received\n", messageToString(request.RequestType))
 
 			s.routeMessage(request, c)
 		}
@@ -109,7 +111,7 @@ func (s *server) writePump(c *Client) {
 
 			err := c.conn.WriteJSON(message)
 			if err != nil {
-				log.Printf("%s: Error writing JSON to websocket: %s", c.uuid.String(), err.Error())
+				c.log.Printf("%s: Error writing JSON to websocket: %s", c.uuid.String(), err.Error())
 				return
 			}
 		case <-c.disconnect:

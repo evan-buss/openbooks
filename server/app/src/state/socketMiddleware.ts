@@ -43,7 +43,7 @@ const route = (store: Store, msg: MessageEvent<any>): void => {
             break;
         case MessageType.CONNECT:
             displayNotification(NotificationType.SUCCESS, "Welcome, connection established.");
-            store.dispatch(sendMessage({ type: MessageType.SERVERS, payload: {} }));
+            // store.dispatch(sendMessage({ type: MessageType.SERVERS, payload: {} }));
             break;
         case MessageType.SEARCH:
             console.log("search results")
@@ -54,10 +54,11 @@ const route = (store: Store, msg: MessageEvent<any>): void => {
             displayNotification(NotificationType.SUCCESS, "Book file received.", response.name);
             saveByteArray(response.name, response.file);
             break;
-        case MessageType.SERVERS:
-            store.dispatch(setServers(response.servers))
-            break;
+        // case MessageType.SERVERS:
+        //     store.dispatch(setServers(response.servers))
+        //     break;
         case MessageType.WAIT:
+            console.log("returned a wait response.")
             displayNotification(NotificationType.SUCCESS, response.status)
             break;
         case MessageType.IRCERROR:

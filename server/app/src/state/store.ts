@@ -5,12 +5,17 @@ import { websocketConn } from "./socketMiddleware";
 import serverReducer from "./serverSlice";
 import stateReducer from "./stateSlice";
 import { enableMapSet } from "immer";
+import { env } from "process";
 
 const websocketURL = new URL(window.location.href + "ws")
 if (websocketURL.protocol.startsWith("https")) {
     websocketURL.protocol = websocketURL.protocol.replace("https", "wss");
 } else {
     websocketURL.protocol = websocketURL.protocol.replace("http", "ws");
+}
+
+if (import.meta.env.DEV) {
+    websocketURL.port = "5228";
 }
 
 enableMapSet();

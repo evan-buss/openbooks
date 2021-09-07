@@ -3,6 +3,8 @@ package core
 import (
 	"bufio"
 	"errors"
+	"fmt"
+	"io"
 	"log"
 	"os"
 	"sort"
@@ -32,34 +34,46 @@ type BookDetail struct {
 	Full   string `json:"full"`
 }
 
+type ParseError struct {
+	Line  string
+	Error error
+}
+
+func (p ParseError) String() string {
+	return fmt.Sprintf("Error: %s. Line: %s.", p.Error, p.Line)
+}
+
 // ParseSearchFile converts a single search file into an array of BookDetail
-func ParseSearchFile(filePath string) []BookDetail {
+func ParseSearchFile(filePath string) ([]BookDetail, []ParseError) {
 	file, err := os.Open(filePath)
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer file.Close()
 
-	scanner := bufio.NewScanner(file)
+	return ParseSearch(file)
+}
+
+func ParseSearch(reader io.Reader) ([]BookDetail, []ParseError) {
 	var books []BookDetail
+	var errors []ParseError
 
-	counter := 0
+	scanner := bufio.NewScanner(reader)
 	for scanner.Scan() {
-		if counter > 3 {
-			dat, err := parseLine(scanner.Text())
-			// TODO: Handle or log the error so we know if we are loosing a lot of books
-			// from a specific server.
-			if err == nil {
+		line := scanner.Text()
+		if strings.HasPrefix(line, "!") {
+			dat, err := parseLine(line)
+			if err != nil {
+				errors = append(errors, ParseError{Line: line, Error: err})
+			} else {
 				books = append(books, dat)
 			}
 		}
-		counter++
 	}
-
-	file.Close()
 
 	sort.Slice(books, func(i, j int) bool { return books[i].Server < books[j].Server })
 
-	return books
+	return books, errors
 }
 
 // Parse line extracts data from a single line
@@ -67,7 +81,7 @@ func parseLine(line string) (BookDetail, error) {
 
 	//First check if it follows the correct format. Some servers don't include file info...
 	if !strings.Contains(line, "::INFO::") {
-		return BookDetail{}, errors.New("invalid line format. No file info ")
+		return BookDetail{}, errors.New("invalid line format. ::INFO:: not found")
 	}
 
 	var book BookDetail

@@ -2,10 +2,14 @@ package cli
 
 import (
 	"fmt"
+	"log"
+	"os"
+	"path"
 
 	"github.com/evan-buss/openbooks/core"
 	"github.com/evan-buss/openbooks/dcc"
 	"github.com/evan-buss/openbooks/irc"
+	"github.com/evan-buss/openbooks/util"
 )
 
 // Handler is the CLI implementation of the EventHandler interface.
@@ -17,18 +21,65 @@ type Handler struct {
 // DownloadSearchResults downloads the search results
 // and sends user a response message
 func (h Handler) DownloadSearchResults(text string) {
-	fileLocation := make(chan string)
-	go dcc.NewDownload(text, h.downloadDir, fileLocation)
-	fmt.Println("Results location: " + <-fileLocation)
+	download, err := dcc.ParseString(text)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	filePath := path.Join(h.downloadDir, download.Filename)
+	file, err := os.Create(filePath)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	err = download.Download(file)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	file.Close()
+
+	extractedPath, err := util.ExtractArchive(filePath)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	fmt.Println("Results location: " + extractedPath)
 	menu()
 }
 
 // DownloadBookFile downloads the search results and sends
 // a user a response message
 func (h Handler) DownloadBookFile(text string) {
-	fileLocation := make(chan string)
-	go dcc.NewDownload(text, h.downloadDir, fileLocation)
-	fmt.Println("File location: " + <-fileLocation)
+	download, err := dcc.ParseString(text)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	filePath := path.Join(h.downloadDir, download.Filename)
+	file, err := os.Create(filePath)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	err = download.Download(file)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	file.Close()
+
+	extractedPath, err := util.ExtractArchive(filePath)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	fmt.Println("File location: " + extractedPath)
 	menu()
 }
 
@@ -58,8 +109,8 @@ func (h Handler) MatchesFound(num string) {
 	fmt.Println("Your search returned " + num + " matches.")
 }
 
-func (h Handler) PING(url string) {
-	h.irc.PONG(url)
+func (h Handler) Ping() {
+	h.irc.Pong("irc.irchighway.net")
 }
 
 func (h Handler) ServerList(servers core.IrcServers) {}

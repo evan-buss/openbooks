@@ -41,7 +41,7 @@ func Start(config Config) {
 	fmt.Println("          Welcome to OpenBooks         ")
 	fmt.Println("=======================================")
 
-	core.Join(conn)
+	core.Join(conn, "irc.irchighway.net")
 
 	cwd, err := os.Getwd()
 	if err != nil {
@@ -49,10 +49,26 @@ func Start(config Config) {
 	}
 
 	exitSignal := make(chan struct{})
-	go core.ReadDaemon(conn, Handler{irc: conn, downloadDir: cwd}, config.Log, exitSignal)
+
+	ircHandler := Handler{
+		irc:         conn,
+		downloadDir: cwd,
+	}
+
+	daemon := &core.ReadDaemon{
+		Reader:     conn,
+		Events:     ircHandler,
+		Disconnect: exitSignal,
+		LogConfig: core.LogConfig{
+			Enable:   config.Log,
+			UserName: conn.Username,
+			Path:     cwd,
+		},
+	}
+
+	go daemon.Start()
 
 	fmt.Println("Connection established...")
-
 	fmt.Print("\r")
 
 	reader = bufio.NewReader(os.Stdin)

@@ -2,7 +2,6 @@ package server
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 
 	"github.com/evan-buss/openbooks/core"
@@ -32,7 +31,6 @@ func (s *server) routeMessage(message Request, c *Client) {
 			Details: err.Error(),
 		}
 	}
-	fmt.Printf("%#v\n", obj)
 
 	switch message.RequestType {
 	case CONNECT:
@@ -48,9 +46,26 @@ func (s *server) routeMessage(message Request, c *Client) {
 
 // handle ConnectionRequests and either connect to the server or do nothing
 func (c *Client) handleConnectionRequest(server *server) {
-	core.Join(c.irc)
-	ircHandler := &IrcHandler{c, server.config, server.repository}
-	go core.ReadDaemon(c.irc, ircHandler, false, c.disconnect)
+	core.Join(c.irc, server.config.Server)
+
+	ircHandler := &IrcHandler{
+		Client: c,
+		config: server.config,
+		repo:   server.repository,
+	}
+
+	daemon := &core.ReadDaemon{
+		Reader:     c.irc,
+		Events:     ircHandler,
+		Disconnect: c.disconnect,
+		LogConfig: core.LogConfig{
+			Enable:   server.config.Log,
+			UserName: c.irc.Username,
+			Path:     server.config.DownloadDir,
+		},
+	}
+
+	go daemon.Start()
 
 	c.send <- ConnectionResponse{
 		MessageType: CONNECT,
