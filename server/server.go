@@ -44,7 +44,6 @@ type Config struct {
 	Persist     bool
 	DownloadDir string
 	Basepath    string
-	Debug       bool
 	Server      string
 }
 

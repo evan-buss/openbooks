@@ -51,6 +51,19 @@ OpenBooks server doesn't have to be hosted at the root of your webserver. The ba
 
 - `go build`
 
+### Mock Development Server
+
+- The mock server allows you to debug responses and requests to simplified IRC / DCC
+  servers that mimic the responses received from IRC Highway.
+- 
+  ```bash
+  cd cmd/mock_server
+  go run .
+  # Another Terminal
+  cd cmd/openbooks
+  go run . server --server localhost --log
+  ```
+
 ## Why / How
 
 - I wrote this as an easier way to search and download books from irchighway.net. It handles all the extraction and data processing for you. You just have to click the book you want. Hopefully you find it much easier than the IRC interface.

@@ -24,7 +24,6 @@ func init() {
 	serverCmd.Flags().StringP("dir", "d", os.TempDir(), "The directory where eBooks are saved when persist enabled.")
 	serverCmd.Flags().Bool("persist", false, "Persist eBooks in 'dir'. Default is to delete after sending.")
 	serverCmd.Flags().String("basepath", "/", `Base path where the application is accessible. For example "/openbooks/".`)
-	serverCmd.Flags().Bool("debug", false, "Debug mode for development.")
 	serverCmd.Flags().StringP("server", "s", "irc.irchighway.net", "IRC server to connect to.")
 }
 
@@ -40,7 +39,6 @@ var serverCmd = &cobra.Command{
 		dir, _ := cmd.Flags().GetString("dir")
 		persist, _ := cmd.Flags().GetBool("persist")
 		basepath, _ := cmd.Flags().GetString("basepath")
-		debug, _ := cmd.Flags().GetBool("debug")
 		url, _ := cmd.Flags().GetString("server")
 
 		// If cli flag isn't set (default value) check for the presence of an
@@ -51,10 +49,6 @@ var serverCmd = &cobra.Command{
 			}
 		}
 
-		if debug {
-			url = "localhost"
-		}
-
 		config := server.Config{
 			Log:         log,
 			OpenBrowser: browser,
@@ -63,7 +57,6 @@ var serverCmd = &cobra.Command{
 			DownloadDir: dir,
 			Persist:     persist,
 			Basepath:    sanitizePath(basepath),
-			Debug:       debug,
 			Server:      url,
 		}
 
