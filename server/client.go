@@ -111,7 +111,7 @@ func (s *server) writePump(c *Client) {
 
 			err := c.conn.WriteJSON(message)
 			if err != nil {
-				c.log.Printf("%s: Error writing JSON to websocket: %s", c.uuid.String(), err.Error())
+				c.log.Printf("Error writing JSON to websocket: %s\n", err)
 				return
 			}
 		case <-c.disconnect:

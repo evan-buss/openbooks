@@ -58,7 +58,7 @@ func (server *server) serveWs() http.HandlerFunc {
 
 		conn, err := upgrader.Upgrade(w, r, w.Header())
 		if err != nil {
-			log.Println(err)
+			server.log.Println(err)
 			return
 		}
 
@@ -89,7 +89,7 @@ func (server *server) staticFilesHandler(assetPath string) http.Handler {
 	// update the embedded file system's tree so that index.html is at the root
 	app, err := fs.Sub(reactClient, assetPath)
 	if err != nil {
-		log.Fatal(err)
+		server.log.Fatal(err)
 	}
 
 	// strip the predefined base path and serve the static file

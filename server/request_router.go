@@ -2,7 +2,6 @@ package server
 
 import (
 	"encoding/json"
-	"log"
 
 	"github.com/evan-buss/openbooks/core"
 )
@@ -25,7 +24,7 @@ func (s *server) routeMessage(message Request, c *Client) {
 
 	err := json.Unmarshal(message.Payload, &obj)
 	if err != nil {
-		log.Printf("%s: Invalid request payload.\n", c.uuid.String())
+		s.log.Println("Invalid request payload.")
 		c.send <- ErrorResponse{
 			Error:   message.RequestType,
 			Details: err.Error(),
@@ -40,7 +39,7 @@ func (s *server) routeMessage(message Request, c *Client) {
 	case DOWNLOAD:
 		c.handleDownloadRequest(obj.(*DownloadRequest))
 	default:
-		log.Printf("%s: Unknown request type received.\n", c.uuid.String())
+		s.log.Println("Unknown request type received.")
 	}
 }
 
