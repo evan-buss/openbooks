@@ -102,6 +102,16 @@ func (c *IrcHandler) DownloadBookFile(text string) {
 		return
 	}
 
+	// TODO: Enable browsing downloaded books and send an HTTP URL with this response
+	// instead of base 64 encoding it.
+
+	extractedPath, err := util.ExtractArchive(filePath)
+	c.log.Printf("New Path: %s\n", extractedPath)
+	// If we can't extract it, log the error and send the raw file.
+	if err != nil {
+		c.log.Println(err)
+	}
+
 	data, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		c.log.Printf("%s: Error reading book file: %v.\n", c.uuid, err)

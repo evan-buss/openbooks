@@ -11,3 +11,5 @@
 - Show IRC name in web interface
 - Show raw IRC logs in web interface
 - Update screenshots in readme
+- Refreshing the page should show selected search results.
+- Send HTTP link to static file on disk instead of sending binary via webosocket.

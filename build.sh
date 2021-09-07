@@ -6,7 +6,7 @@ npm install
 npm run build
 cd ../../cmd/openbooks
 
-echo "Building binaries for various platforms.";
+echo "Building binaries for various platforms."
 env CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -o ../../build/openbooks.exe
 env CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o ../../build/openbooks_mac
 env CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -o ../../build/openbooks_mac_arm
