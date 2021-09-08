@@ -11,6 +11,7 @@ require (
 	github.com/gorilla/websocket v1.4.2
 	github.com/mholt/archiver/v3 v3.5.0
 	github.com/nwaples/rardecode v1.1.2 // indirect
+	github.com/rs/cors v1.8.0
 	github.com/spf13/cobra v1.2.1
 	github.com/ulikunitz/xz v0.5.10 // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect

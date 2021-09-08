@@ -1,15 +1,12 @@
 - Migrate as much communication from WebSocket to HTTP api as possible.
     - We are overusing websocket communication and it just adds complexity
     - Send files via HTTP instead of base64 encoding in the websocket JSON message
-- Use evergreen virtual scrolling grid that fits page size 
-- Add filtering to grid
-    - See: https://evergreen-storybook.netlify.app/?path=/story/table--advanced-sortable-table
-    - Server / Title - Search Text Box
-    - Format - Find unique formats and have clickable options
 - Use new Pulsar component instead of custom version
 - Make the "connected" indicator actually work...
 - Show IRC name in web interface
 - Show raw IRC logs in web interface
 - Update screenshots in readme
 - Refreshing the page should show selected search results.
-- Send HTTP link to static file on disk instead of sending binary via webosocket.
+- Send HTTP link to static file on disk instead of sending binary via webosocket
+- Figure out how to make HTTP requests in redux middleware
+- Make servers request on page load.

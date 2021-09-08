@@ -1,4 +1,4 @@
-import { Button, Pane, SearchInput } from 'evergreen-ui';
+import { Button, majorScale, Pane, SearchInput } from 'evergreen-ui';
 import React, { FormEvent, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
@@ -19,22 +19,20 @@ const SearchPage: React.FC = () => {
     }
 
     return (
-        <Pane display="flex" justifyContent="center" background="tint1" width="100%">
-            <Pane width="85%" display="flex" flexDirection="column" alignItems="center">
-                <Form onSubmit={(e) => searchHandler(e)}>
-                    <SearchInput
-                        disabled={activeItem !== null && !activeItem.results}
-                        value={searchQuery}
-                        onChange={(e: any) => setSearchQuery(e.target.value)}
-                        placeholder="Search for a book."
-                        height={40}
-                        marginRight={24}
-                        width="100%">
-                    </SearchInput>
-                    <Button type="submit" height={40} appearance="primary" disabled={searchQuery === ""}>Search</Button>
-                </Form>
-                <BooksGrid />
-            </Pane>
+        <Pane margin={majorScale(4)} width="100%" display="flex" flexDirection="column" alignItems="center">
+            <Form onSubmit={(e) => searchHandler(e)}>
+                <SearchInput
+                    disabled={activeItem !== null && !activeItem.results}
+                    value={searchQuery}
+                    onChange={(e: any) => setSearchQuery(e.target.value)}
+                    placeholder="Search for a book."
+                    height={majorScale(5)}
+                    marginRight={majorScale(4)}
+                    width="100%">
+                </SearchInput>
+                <Button type="submit" height={40} appearance="primary" disabled={searchQuery === ""}>Search</Button>
+            </Form>
+            <BooksGrid />
         </Pane>
     )
 }
@@ -45,7 +43,7 @@ const Form = styled.form`
     flex-flow: row nowrap;
     justify-content: center;
     align-items: center;
-    margin: 24px;
+    margin-bottom: 32px;
 `
 
 export default SearchPage;

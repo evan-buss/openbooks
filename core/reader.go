@@ -11,6 +11,7 @@ import (
 	"time"
 )
 
+// TODO: Should this take a context.Context for implicit cancellations?
 type ReadDaemon struct {
 	Reader     io.Reader
 	Disconnect <-chan struct{}

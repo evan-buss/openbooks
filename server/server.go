@@ -14,6 +14,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/google/uuid"
+	"github.com/rs/cors"
 )
 
 type server struct {
@@ -64,6 +65,7 @@ func Start(config Config) {
 	router.Use(middleware.RequestID)
 	router.Use(middleware.RealIP)
 	router.Use(middleware.Recoverer)
+	router.Use(cors.Default().Handler)
 	server := New(config)
 	routes := server.registerRoutes()
 
