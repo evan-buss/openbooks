@@ -5,7 +5,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { deleteHistoryItem, HistoryItem, selectHistory } from "../state/historySlice";
 import { setActiveItem } from "../state/stateSlice";
 import { RootState } from "../state/store";
-import TogglePane from "./TogglePane";
 
 
 const SearchHistory: React.FC = () => {
@@ -49,14 +48,14 @@ const HistoryCard: React.FC<Props> = ({ activeTS, item, dispatch }: Props) => {
                             icon={EyeOpenIcon}
                             onClick={() => dispatch(setActiveItem(item))}>
                             Show
-                            </Menu.Item>
+                        </Menu.Item>
                     }
                     {isActive &&
                         <Menu.Item
                             icon={EyeOffIcon}
                             onClick={() => dispatch(setActiveItem(null))}>
                             Hide
-                            </Menu.Item>
+                        </Menu.Item>
                     }
                     <Menu.Item icon={TrashIcon}
                         onClick={() => dispatch(deleteHistoryItem(item.timestamp))}
@@ -65,17 +64,16 @@ const HistoryCard: React.FC<Props> = ({ activeTS, item, dispatch }: Props) => {
                     </Menu.Item>
                 </Menu>
             }>
-            <TogglePane
+            <Pane
+                borderLeft={isActive ? '3px solid #1070CA' : '1px solid #E4E7EB;'}
                 cursor="pointer"
-                border
-                active={isActive ? 1 : 0}
                 padding={6}
                 elevation={1}
                 margin={8}
                 display="flex"
                 justifyContent="space-between"
                 alignItems="center"
-            >
+                border>
                 <SearchIcon size={15} color="#234361" />
                 <Text width={140}
                     marginLeft={24}
@@ -93,7 +91,7 @@ const HistoryCard: React.FC<Props> = ({ activeTS, item, dispatch }: Props) => {
                         {`${item.results?.length} RESULTS`}
                     </Badge>
                 }
-            </TogglePane>
+            </Pane>
         </Popover>
     )
 }

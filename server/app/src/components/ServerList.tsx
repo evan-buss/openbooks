@@ -4,7 +4,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { selectServers } from "../state/serverSlice";
 import { toggleServerFilter } from '../state/stateSlice';
 import { RootState } from '../state/store';
-import TogglePane from './TogglePane';
 
 const ServerList: React.FC = () => {
     const dispatch = useDispatch();
@@ -19,26 +18,30 @@ const ServerList: React.FC = () => {
                 </Text>
             </Pane >
             {servers.map(name =>
-                (
-                    <TogglePane cursor="pointer"
-                        onClick={() => dispatch(toggleServerFilter(name))}
-                        key={name}
-                        active={filters.has(name) ? 1 : 0}
-                        border
-                        display="flex"
-                        alignItems="center"
-                        padding={6} elevation={1} margin={6}>
-                        <DatabaseIcon size={15} color="#234361" />
-                        <Text width="100%" marginLeft={24} display="flex" alignItems="center" justifyContent="space-between">
-                            {name}
-                            {filters.has(name) &&
-                                <Badge color="blue">
-                                    Active
-                                </Badge>
-                            }
-                        </Text>
-                    </TogglePane>
-                )
+            (
+                <Pane
+                    borderLeft={filters.has(name) ? '3px solid #1070CA' : '1px solid #E4E7EB;'}
+                    cursor="pointer"
+                    padding={6}
+                    elevation={1}
+                    margin={8}
+                    display="flex"
+                    justifyContent="space-between"
+                    alignItems="center"
+                    border
+                    onClick={() => dispatch(toggleServerFilter(name))}
+                    key={name}>
+                    <DatabaseIcon size={15} color="#234361" />
+                    <Text width="100%" marginLeft={24} display="flex" alignItems="center" justifyContent="space-between">
+                        {name}
+                        {filters.has(name) &&
+                            <Badge color="blue">
+                                Active
+                            </Badge>
+                        }
+                    </Text>
+                </Pane>
+            )
             )}
         </>
     );

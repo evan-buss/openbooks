@@ -1,16 +1,12 @@
 import { Heading, Pane, Paragraph, Tab, Tablist } from 'evergreen-ui';
 import React from 'react';
 import { useSelector } from 'react-redux';
-import styled from "styled-components";
 import useLocalStorageState from "use-local-storage-state";
 import { RootState } from '../state/store';
 import Pulse from './Pulse';
 import SearchHistory from './SearchHistory';
 import ServerList from './ServerList';
 
-const SidebarContent = styled(Pane)`
-    max-height: calc(100vh - 78px - 44px);
-`;
 
 const Sidebar: React.FC = () => {
     const [selectedIndex, setIndex] = useLocalStorageState("index", 0);
@@ -47,9 +43,9 @@ const Sidebar: React.FC = () => {
                         </Tablist>
                     </Pane>
                 </Pane>
-                <SidebarContent flex="1" overflowY={selectedIndex === 0 ? 'hidden' : 'scroll'} padding={8}>
+                <Pane flex="1" overflowY={selectedIndex === 0 ? 'hidden' : 'scroll'} padding={8} maxHeight="calc(100vh - 78px - 44px)">
                     {selectedIndex === 0 ? <SearchHistory /> : <ServerList />}
-                </SidebarContent>
+                </Pane>
             </Pane>
         </>
     )
