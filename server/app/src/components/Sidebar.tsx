@@ -53,17 +53,19 @@ const Sidebar: React.FC = () => {
 
 const Pulse = ({ enabled = false }) => {
     return (
-        <Tooltip
-            position={Position.BOTTOM}
-            content={`OpenBooks server ${enabled ? 'connected' : 'disconnected'}.`}>
-            <div className="flex justify-evenly items-center">
-                <div className={clsx([
-                    'w-2 h-2 rounded-full',
-                    { 'bg-blue-600 animate-custom-pulse': enabled },
-                    { 'animate-none bg-gray-500': !enabled }
-                ])} />
-            </div>
-        </Tooltip>
+      <Tooltip
+        position={Position.BOTTOM}
+        content={`OpenBooks server ${enabled ? "connected" : "disconnected"}.`}>
+        <div className="flex justify-evenly items-center">
+          <div
+            className={clsx([
+              "w-2 h-2 rounded-full",
+              { "bg-custom-blue animate-custom-pulse": enabled },
+              { "animate-none bg-gray-500": !enabled }
+            ])}
+          />
+        </div>
+      </Tooltip>
     );
 }
 

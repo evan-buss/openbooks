@@ -6,3 +6,5 @@
 - Update screenshots in readme
 - Refreshing the page should show selected search results.
 - Send HTTP link to static file on disk instead of sending binary via webosocket
+- Copy the evergreen side border rounding method. Not sure how they do it but 
+  it looks nicer than just increasing the width on one side...
