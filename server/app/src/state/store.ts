@@ -2,21 +2,11 @@ import { Action, configureStore, ThunkAction } from "@reduxjs/toolkit";
 import throttle from "lodash/throttle";
 import historyReducer from "./historySlice";
 import { websocketConn } from "./socketMiddleware";
-import serverReducer from "./serverSlice";
 import stateReducer from "./stateSlice";
 import { enableMapSet } from "immer";
-import { env } from "process";
-
-const websocketURL = new URL(window.location.href + "ws")
-if (websocketURL.protocol.startsWith("https")) {
-    websocketURL.protocol = websocketURL.protocol.replace("https", "wss");
-} else {
-    websocketURL.protocol = websocketURL.protocol.replace("http", "ws");
-}
-
-if (import.meta.env.DEV) {
-    websocketURL.port = "5228";
-}
+import { getWebsocketURL } from "./util";
+import { openbooksApi } from "./api";
+import { setupListeners } from "@reduxjs/toolkit/dist/query";
 
 enableMapSet();
 
@@ -24,10 +14,14 @@ export const store = configureStore({
     reducer: {
         state: stateReducer,
         history: historyReducer,
-        servers: serverReducer
+        [openbooksApi.reducerPath]: openbooksApi.reducer
     },
-    middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(websocketConn(websocketURL.href))
+    middleware: (getDefaultMiddleware) =>
+        getDefaultMiddleware()
+            .concat(websocketConn(getWebsocketURL().href), openbooksApi.middleware)
 });
+
+setupListeners(store.dispatch);
 
 const saveState = (key: string, state: any): void => {
     try {

@@ -14,8 +14,8 @@ var prefixes = map[byte]struct{}{
 }
 
 type IrcServers struct {
-	ElevatedUsers []string
-	RegularUsers  []string
+	ElevatedUsers []string `json:"elevatedUsers"`
+	RegularUsers  []string `json:"regularUsers"`
 }
 
 // ParseServers parses the complete list of IRC users to get the elevated users which in

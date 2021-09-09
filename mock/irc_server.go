@@ -38,6 +38,8 @@ func handler(conn net.Conn) {
 	logger.Printf("Connection received from %s", conn.RemoteAddr().String())
 	scanner := bufio.NewScanner(conn)
 
+	serverHandler(conn)
+
 	for scanner.Scan() {
 		request := scanner.Text()
 		if err := scanner.Err(); err != nil {
@@ -56,6 +58,11 @@ func handler(conn net.Conn) {
 	}
 
 	logger.Println("Connection closed.")
+}
+
+func serverHandler(conn net.Conn) {
+	fmt.Fprintf(conn, "353 +server1 ~server2 ~evan_irc\r\n")
+	fmt.Fprintf(conn, "end_list 366\r\n")
 }
 
 func searchHandler(request string, conn net.Conn) {
