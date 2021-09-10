@@ -70,7 +70,7 @@ type DownloadRequest struct {
 type DownloadResponse struct {
 	MessageType int    `json:"type"`
 	Name        string `json:"name"`
-	File        []byte `json:"file"`
+	DownloadLink string `json:"downloadLink"`
 }
 
 // WaitResponse is a response that reports status updates to the client. IRC is asynchronous

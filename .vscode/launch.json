@@ -10,7 +10,12 @@
       "request": "launch",
       "mode": "debug",
       "program": "cmd/openbooks",
-      "args": ["server", "--log", "--server localhost"],
+      "args": [
+        "server",
+        "--log",
+        "--server",
+        "localhost"
+      ],
     }
   ]
 }

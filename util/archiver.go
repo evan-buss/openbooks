@@ -55,3 +55,10 @@ func ExtractArchive(archivePath string) (string, error) {
 		return archivePath, nil
 	}
 }
+
+// IsArchive returns true if the file at the given path is an archive that can
+// be extracted. Returns false otherwise.
+func IsArchive(path string) bool {
+	_, err := archiver.ByExtension(path)
+	return err == nil
+}

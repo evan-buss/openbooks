@@ -1,14 +1,34 @@
-import { Pane } from 'evergreen-ui';
-import React from 'react';
-import Sidebar from './components/Sidebar';
-import SearchPage from './pages/SearchPage';
+import {
+  Alert,
+  Heading,
+  IconButton,
+  majorScale,
+  NotificationsIcon,
+  Pane,
+  Paragraph,
+  SideSheet
+} from "evergreen-ui";
+import React from "react";
+import Sidebar from "./components/Sidebar";
+import SearchPage from "./pages/SearchPage";
+import { BrowserRouter, Switch, Route } from "react-router-dom";
+import LibraryPage from "./pages/LibraryPage";
 
 function App() {
   return (
-    <Pane clearfix display="flex" flexFlow="row nowrap" background="tint1" minHeight="100vh" maxHeight="100vh">
-      <Sidebar />
-      <SearchPage />
-    </Pane>
+    <BrowserRouter>
+      <div className="flex flex-row flex-nowrap bg-tint1 min-h-screen max-h-screen">
+        <Sidebar />
+        <Switch>
+          <Route path="/library">
+            <LibraryPage />
+          </Route>
+          <Route path="/">
+            <SearchPage />
+          </Route>
+        </Switch>
+      </div>
+    </BrowserRouter>
   );
 }
 

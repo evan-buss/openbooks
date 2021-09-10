@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path"
 	"time"
 
 	"github.com/evan-buss/openbooks/irc"
@@ -28,6 +29,8 @@ func (server *server) registerRoutes() *chi.Mux {
 
 	router.Group(func(r chi.Router) {
 		r.Use(server.requireUser)
+		r.Get("/library", server.libraryHandler())
+		r.Get("/static/library/*", server.libraryFileHandler("/static/library").ServeHTTP)
 		r.Get("/test", server.testHandler())
 	})
 
@@ -124,6 +127,18 @@ func (server *server) serverListHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(server.repository.servers)
 	}
+}
+
+func (server *server) libraryHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "Library page")
+	}
+}
+
+func (server *server) libraryFileHandler(route string) http.Handler {
+	libraryPath := path.Join(server.config.DownloadDir, "books")
+	fs := http.FileServer(http.Dir(libraryPath))
+	return server.fileDeleter(http.StripPrefix(route, fs))
 }
 
 func (server *server) testHandler() http.HandlerFunc {

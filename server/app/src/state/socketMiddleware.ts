@@ -1,8 +1,8 @@
 import { AnyAction, PayloadAction, Store } from "@reduxjs/toolkit";
 import { BookDetail, BookResponse, MessageType } from "../models/messages";
 import { displayNotification, NotificationType } from "./notifications";
-import { setServers } from "./serverSlice";
 import { sendMessage, setConnectionState, setSearchResults } from "./stateSlice";
+import { getApiURL } from "./util";
 
 // Web socket redux middleware. 
 // Listens to socket and dispatches handlers. 
@@ -32,6 +32,17 @@ export const websocketConn = (wsUrl: string): any => {
     }
 }
 
+const onOpen = (store: Store): void => {
+    console.log("WebSocket connected.");
+    store.dispatch(setConnectionState(true));
+    store.dispatch(sendMessage({ type: MessageType.CONNECT, payload: {} }));
+}
+
+const onClose = (store: Store): void => {
+    console.log("WebSocket closed.");
+    store.dispatch(setConnectionState(false));
+}
+
 const route = (store: Store, msg: MessageEvent<any>): void => {
     console.log(msg);
 
@@ -43,20 +54,15 @@ const route = (store: Store, msg: MessageEvent<any>): void => {
             break;
         case MessageType.CONNECT:
             displayNotification(NotificationType.SUCCESS, "Welcome, connection established.");
-            // store.dispatch(sendMessage({ type: MessageType.SERVERS, payload: {} }));
             break;
         case MessageType.SEARCH:
-            console.log("search results")
             store.dispatch((setSearchResults(response.books as BookDetail[]) as unknown) as AnyAction);
             displayNotification(NotificationType.SUCCESS, "Search results received.")
             break;
         case MessageType.DOWNLOAD:
             displayNotification(NotificationType.SUCCESS, "Book file received.", response.name);
-            saveByteArray(response.name, response.file);
+            downloadFile(response.downloadLink)
             break;
-        // case MessageType.SERVERS:
-        //     store.dispatch(setServers(response.servers))
-        //     break;
         case MessageType.WAIT:
             console.log("returned a wait response.")
             displayNotification(NotificationType.SUCCESS, response.status)
@@ -66,25 +72,17 @@ const route = (store: Store, msg: MessageEvent<any>): void => {
             break;
         default:
             console.error(response);
-            displayNotification(NotificationType.DANGER, "Unknown error type. See console.")
+            displayNotification(NotificationType.DANGER, "Unknown message type. See console.")
     }
 }
 
-const onOpen = (store: Store): void => {
-    console.log("WebSocket connected.");
-    store.dispatch(setConnectionState(true));
-    store.dispatch(sendMessage({ type: MessageType.CONNECT, payload: {} }));
-}
+const downloadFile = (relativeURL: string) => {
+    let url = getApiURL();
+    url.pathname = relativeURL;
 
-// saveByteArray creates a link and download popup for the returned file
-function saveByteArray(fileName: string, byte: Blob) {
     let link = document.createElement('a');
-    link.href = `data:application/octet-stream;base64,${byte}`;
-    link.download = fileName;
+    link.target = "_blank";
+    link.href = url.href;
     link.click();
-};
-
-const onClose = (store: Store): void => {
-    console.log("WebSocket closed.");
-    store.dispatch(setConnectionState(false));
+    link.remove();
 }

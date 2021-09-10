@@ -21,7 +21,7 @@ func init() {
 	serverCmd.Flags().BoolP("browser", "b", false, "Open the browser on server start.")
 	serverCmd.Flags().StringP("name", "n", userName, "Use a name that isn't randomly generated. One word only.")
 	serverCmd.Flags().StringP("port", "p", "5228", "Set the local network port for browser mode.")
-	serverCmd.Flags().StringP("dir", "d", os.TempDir(), "The directory where eBooks are saved when persist enabled.")
+	serverCmd.Flags().StringP("dir", "d", path.Join(os.TempDir(), "openbooks"), "The directory where eBooks are saved when persist enabled.")
 	serverCmd.Flags().Bool("persist", false, "Persist eBooks in 'dir'. Default is to delete after sending.")
 	serverCmd.Flags().String("basepath", "/", `Base path where the application is accessible. For example "/openbooks/".`)
 	serverCmd.Flags().StringP("server", "s", "irc.irchighway.net", "IRC server to connect to.")

@@ -1,10 +1,8 @@
 package server
 
 import (
-	"io/ioutil"
 	"os"
 	"path"
-	"path/filepath"
 
 	"github.com/evan-buss/openbooks/core"
 	"github.com/evan-buss/openbooks/dcc"
@@ -20,34 +18,9 @@ type IrcHandler struct {
 
 // DownloadSearchResults downloads from DCC server, parses data, and sends data to client
 func (c *IrcHandler) DownloadSearchResults(text string) {
-	// Download the file and wait until it is completed
-	download, err := dcc.ParseString(text)
+	extractedPath, err := handleDCC(c.config.DownloadDir, text)
 	if err != nil {
 		c.log.Println(err)
-		return
-	}
-
-	// Create a new file based on the DCC file name
-	dccPath := path.Clean(path.Join(c.config.DownloadDir, download.Filename))
-	file, err := os.Create(dccPath)
-	if err != nil {
-		c.log.Println(err)
-		return
-	}
-
-	// Download DCC data to the file
-	err = download.Download(file)
-	if err != nil {
-		c.log.Println(err)
-		return
-	}
-	file.Close()
-
-	extractedPath, err := util.ExtractArchive(dccPath)
-	c.log.Printf("New Path: %s\n", extractedPath)
-	if err != nil {
-		c.log.Println(err)
-		return
 	}
 
 	results, errors := core.ParseSearchFile(extractedPath)
@@ -78,57 +51,23 @@ func (c *IrcHandler) DownloadSearchResults(text string) {
 
 // DownloadBookFile downloads the book file and sends it over the websocket
 func (c *IrcHandler) DownloadBookFile(text string) {
-	download, err := dcc.ParseString(text)
+	extractedPath, err := handleDCC(c.config.DownloadDir, text)
 	if err != nil {
 		c.log.Println(err)
-		return
-	}
-
-	file, err := os.Create(path.Join(c.config.DownloadDir, download.Filename))
-	if err != nil {
-		c.log.Println(err)
-		return
-	}
-
-	filePath, err := filepath.Abs(file.Name())
-	if err != nil {
-		c.log.Println(err)
-		return
-	}
-
-	err = download.Download(file)
-	if err != nil {
-		c.log.Println(err)
-		return
-	}
-
-	// TODO: Enable browsing downloaded books and send an HTTP URL with this response
-	// instead of base 64 encoding it.
-
-	extractedPath, err := util.ExtractArchive(filePath)
-	c.log.Printf("New Path: %s\n", extractedPath)
-	// If we can't extract it, log the error and send the raw file.
-	if err != nil {
-		c.log.Println(err)
-	}
-
-	data, err := ioutil.ReadFile(filePath)
-	if err != nil {
-		c.log.Printf("%s: Error reading book file: %v.\n", c.uuid, err)
-	}
-
-	c.log.Printf("Sending book entitled '%s'.\n", download.Filename)
-	c.send <- DownloadResponse{
-		MessageType: DOWNLOAD,
-		Name:        download.Filename,
-		File:        data,
-	}
-
-	if !c.config.Persist {
-		err = os.Remove(filePath)
-		if err != nil {
-			c.log.Printf("Error deleting search results file %s.\n", err)
+		c.send <- ErrorResponse{
+			Error:   ERROR,
+			Details: err.Error(),
 		}
+		return
+	}
+
+	fileName := path.Base(extractedPath)
+
+	c.log.Printf("Sending book entitled '%s'.\n", fileName)
+	c.send <- DownloadResponse{
+		MessageType:  DOWNLOAD,
+		Name:         fileName,
+		DownloadLink: path.Join("/static/library", fileName),
 	}
 }
 
@@ -170,4 +109,43 @@ func (c *IrcHandler) Ping() {
 
 func (c *IrcHandler) ServerList(servers core.IrcServers) {
 	c.repo.servers = servers
+}
+
+func handleDCC(baseDir, dccStr string) (string, error) {
+	// Download the file and wait until it is completed
+	download, err := dcc.ParseString(dccStr)
+	if err != nil {
+		return "", err
+	}
+
+	// Create a new file based on the DCC file name
+	dccPath := path.Join(baseDir, "books")
+	err = os.MkdirAll(dccPath, 0755)
+	if err != nil {
+		return "", err
+	}
+
+	dccPath = path.Join(dccPath, download.Filename)
+	file, err := os.Create(dccPath)
+	if err != nil {
+		return "", err
+	}
+
+	// Download DCC data to the file
+	err = download.Download(file)
+	if err != nil {
+		return "", err
+	}
+	file.Close()
+
+	if !util.IsArchive(dccPath) {
+		return dccPath, nil
+	}
+
+	extractedPath, err := util.ExtractArchive(dccPath)
+	if err != nil {
+		return "", err
+	}
+
+	return extractedPath, nil
 }

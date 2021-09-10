@@ -14,7 +14,9 @@ module.exports = {
         }
       },
       colors: {
-        'custom-blue': '#1070CA'
+        // "custom-blue": "#1070CA",
+        "custom-blue": "#3366ff",
+        "tint1": "#FAFBFF"
       }
     }
   },

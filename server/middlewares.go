@@ -4,6 +4,8 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"os"
+	"path"
 
 	"github.com/google/uuid"
 )
@@ -57,4 +59,20 @@ func getUUID(ctx context.Context) uuid.UUID {
 		log.Println("Unable to find user.")
 	}
 	return uid
+}
+
+// fileDeleter handles deleting files after a download is successful.
+func (server *server) fileDeleter(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		next.ServeHTTP(w, r)
+
+		if !server.config.Persist {
+			_, fileName := path.Split(r.URL.Path)
+			bookPath := path.Join(server.config.DownloadDir, "books", fileName)
+			err := os.Remove(bookPath)
+			if err != nil {
+				server.log.Printf("Error when deleting book file. %s", err)
+			}
+		}
+	})
 }

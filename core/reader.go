@@ -113,7 +113,7 @@ func (r *ReadDaemon) Start() {
 	}
 }
 
-// createLogFile returns a loger for persisting IRC history. If enable is true,
+// createLogFile returns a logger for persisting IRC history. If enable is true,
 // the messages are logged to a file in the "logs" folder of the provided path.
 // If logging is disabled, the logs aren't written anywhere, but the returned
 // logger can be called like normal. Check the returned io.Closer for nil and
