@@ -1,6 +1,8 @@
+import { toaster } from "evergreen-ui";
+import { Notification, NotificationType } from "./notificationSlice";
 
 export const getWebsocketURL = (): URL => {
-  const websocketURL = new URL(window.location.href + "ws")
+  const websocketURL = new URL(window.location.href + "ws");
   if (websocketURL.protocol.startsWith("https")) {
     websocketURL.protocol = websocketURL.protocol.replace("https", "wss");
   } else {
@@ -12,13 +14,42 @@ export const getWebsocketURL = (): URL => {
   }
 
   return websocketURL;
-}
+};
 
 export const getApiURL = (): URL => {
-  const apiURL = new URL(window.location.href)
+  const apiURL = new URL(window.location.href);
   if (import.meta.env.DEV) {
     apiURL.port = "5228";
   }
 
   return apiURL;
-}
+};
+
+export const displayNotification = ({
+  type = NotificationType.NOTIFY,
+  title,
+  detail
+}: Notification) => {
+  switch (type) {
+    case NotificationType.NOTIFY:
+      toaster.notify(title, {
+        description: detail
+      });
+      break;
+    case NotificationType.SUCCESS:
+      toaster.success(title, {
+        description: detail
+      });
+      break;
+    case NotificationType.WARNING:
+      toaster.warning(title, {
+        description: detail
+      });
+      break;
+    case NotificationType.DANGER:
+      toaster.danger(title, {
+        description: detail
+      });
+      break;
+  }
+};

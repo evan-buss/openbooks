@@ -1,18 +1,7 @@
-import {
-  Alert,
-  Heading,
-  IconButton,
-  majorScale,
-  NotificationsIcon,
-  Pane,
-  Paragraph,
-  SideSheet
-} from "evergreen-ui";
 import React from "react";
-import Sidebar from "./components/Sidebar";
+import Sidebar from "./components/SideBar/Sidebar";
 import SearchPage from "./pages/SearchPage";
 import { BrowserRouter, Switch, Route } from "react-router-dom";
-import LibraryPage from "./pages/LibraryPage";
 
 function App() {
   return (
@@ -20,9 +9,6 @@ function App() {
       <div className="flex flex-row flex-nowrap bg-tint1 min-h-screen max-h-screen">
         <Sidebar />
         <Switch>
-          <Route path="/library">
-            <LibraryPage />
-          </Route>
           <Route path="/">
             <SearchPage />
           </Route>

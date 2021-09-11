@@ -19,9 +19,9 @@ import {
   deleteHistoryItem,
   HistoryItem,
   selectHistory
-} from "../state/historySlice";
-import { setActiveItem } from "../state/stateSlice";
-import { RootState } from "../state/store";
+} from "../../state/historySlice";
+import { setActiveItem } from "../../state/stateSlice";
+import { RootState } from "../../state/store";
 
 const SearchHistory: React.FC = () => {
   const history = useSelector(selectHistory);
@@ -113,7 +113,5 @@ const HistoryCard: React.FC<Props> = ({ activeTS, item, dispatch }: Props) => {
     </Popover>
   );
 };
-
-
 
 export default SearchHistory;

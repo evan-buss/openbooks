@@ -1,6 +1,7 @@
 import { Action, configureStore, ThunkAction } from "@reduxjs/toolkit";
 import throttle from "lodash/throttle";
 import historyReducer from "./historySlice";
+import notificationReducer from "./notificationSlice";
 import { websocketConn } from "./socketMiddleware";
 import stateReducer from "./stateSlice";
 import { enableMapSet } from "immer";
@@ -14,6 +15,7 @@ export const store = configureStore({
     reducer: {
         state: stateReducer,
         history: historyReducer,
+        notifications: notificationReducer,
         [openbooksApi.reducerPath]: openbooksApi.reducer
     },
     middleware: (getDefaultMiddleware) =>

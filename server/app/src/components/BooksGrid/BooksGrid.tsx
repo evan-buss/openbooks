@@ -128,16 +128,14 @@ export const BooksGrid: React.FC = () => {
         />
         <Table.SearchHeaderCell
           onChange={(e) => setAuthorFilter(e)}
-          placeholder="Author"
+          placeholder="AUTHOR"
           flexBasis={250}
           flexGrow={0}
           flexShrink={0}>
-          Author
         </Table.SearchHeaderCell>
         <Table.SearchHeaderCell
           onChange={(e) => setTitleFilter(e)}
-          placeholder="Title">
-          Title
+          placeholder="TITLE">
         </Table.SearchHeaderCell>
         <SelectMenuHeader
           columnTitle="Formats"
