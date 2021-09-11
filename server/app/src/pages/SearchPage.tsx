@@ -1,7 +1,7 @@
 import { Button, majorScale, Pane, SearchInput } from "evergreen-ui";
 import React, { FormEvent, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { BooksGrid } from "../components/BooksGrid";
+import { BooksGrid } from "../components/BooksGrid/BooksGrid";
 import { sendSearch } from "../state/stateSlice";
 import { RootState } from "../state/store";
 
