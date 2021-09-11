@@ -1,20 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { Notification } from "./models";
 
-export enum NotificationType {
-  NOTIFY,
-  SUCCESS,
-  WARNING,
-  DANGER
-}
-
-export interface Notification {
-  type: NotificationType;
-  title: string;
-  detail?: string;
-  timestamp: number;
-}
-
-export interface NotificationState {
+interface NotificationState {
   isOpen: boolean;
   notifications: Notification[];
 }
@@ -29,7 +16,7 @@ const notificationSlice = createSlice({
   initialState,
   reducers: {
     addNotification(state, action: PayloadAction<Notification>) {
-      state.notifications.push(action.payload);
+      state.notifications = [action.payload, ...state.notifications];
     },
     dismissNotification(state, action: PayloadAction<Notification>) {
       state.notifications = state.notifications.filter(

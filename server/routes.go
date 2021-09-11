@@ -30,6 +30,7 @@ func (server *server) registerRoutes() *chi.Mux {
 	router.Group(func(r chi.Router) {
 		r.Use(server.requireUser)
 		r.Get("/library", server.libraryHandler())
+		r.Delete("/library/{fileName}", server.deleteLibraryFileHandler())
 		r.Get("/static/library/*", server.libraryFileHandler("/static/library").ServeHTTP)
 		r.Get("/test", server.testHandler())
 	})
@@ -130,8 +131,39 @@ func (server *server) serverListHandler() http.HandlerFunc {
 }
 
 func (server *server) libraryHandler() http.HandlerFunc {
+	type download struct {
+		Name         string    `json:"name"`
+		DownloadLink string    `json:"downloadLink"`
+		Time         time.Time `json:"time"`
+	}
+
 	return func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Library page")
+		libraryDir := path.Join(server.config.DownloadDir, "books")
+		books, err := os.ReadDir(libraryDir)
+		if err != nil {
+			server.log.Printf("Unable to list books. %s\n", err)
+		}
+
+		output := make([]download, 0)
+		for _, book := range books {
+			if !book.IsDir() {
+				info, err := book.Info()
+				if err != nil {
+					server.log.Println(err)
+				}
+
+				dl := download{
+					Name:         book.Name(),
+					DownloadLink: path.Join("/static/library", book.Name()),
+					Time:         info.ModTime(),
+				}
+
+				output = append(output, dl)
+			}
+		}
+
+		w.Header().Add("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(output)
 	}
 }
 
@@ -139,6 +171,18 @@ func (server *server) libraryFileHandler(route string) http.Handler {
 	libraryPath := path.Join(server.config.DownloadDir, "books")
 	fs := http.FileServer(http.Dir(libraryPath))
 	return server.fileDeleter(http.StripPrefix(route, fs))
+}
+
+func (server *server) deleteLibraryFileHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		fileName := chi.URLParam(r, "fileName")
+
+		err := os.Remove(path.Join(server.config.DownloadDir, "books", fileName))
+		if err != nil {
+			server.log.Printf("Error deleting book file... %s\n", err)
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+	}
 }
 
 func (server *server) testHandler() http.HandlerFunc {

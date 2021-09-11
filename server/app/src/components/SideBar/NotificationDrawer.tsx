@@ -3,10 +3,10 @@ import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   dismissNotification,
-  toggleDrawer,
-  NotificationType
+  toggleDrawer
 } from "../../state/notificationSlice";
 import { RootState } from "../../state/store";
+import { NotificationType } from "../../state/models";
 
 const NotificationDrawer = () => {
   const { isOpen, notifications } = useSelector(
@@ -17,7 +17,7 @@ const NotificationDrawer = () => {
   const getIntent = (type: NotificationType): IntentTypes => {
     switch (type) {
       case NotificationType.NOTIFY:
-        return "info";
+        return "none";
       case NotificationType.DANGER:
         return "danger";
       case NotificationType.SUCCESS:

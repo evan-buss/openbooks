@@ -1,24 +1,20 @@
 import { AnyAction, PayloadAction, Store } from "@reduxjs/toolkit";
 import { BookDetail, BookResponse, MessageType } from "../models/messages";
-import { displayNotification } from "./util";
+import { displayNotification, downloadFile } from "./util";
 import {
   sendMessage,
   setConnectionState,
   setSearchResults
 } from "./stateSlice";
-import { getApiURL } from "./util";
-import {
-  addNotification,
-  Notification,
-  NotificationType
-} from "./notificationSlice";
+import { addNotification } from "./notificationSlice";
+import { Notification, NotificationType } from "./models";
+import { openbooksApi } from "./api";
 
 // Web socket redux middleware.
 // Listens to socket and dispatches handlers.
 // Handles send_message actions by sending to socket.
 export const websocketConn = (wsUrl: string): any => {
   return (store: Store) => {
-    console.log(store);
     const socket = new WebSocket(wsUrl);
 
     socket.onopen = () => onOpen(store);
@@ -86,6 +82,7 @@ const route = (store: Store, msg: MessageEvent<any>): void => {
         };
       case MessageType.DOWNLOAD:
         downloadFile(response.downloadLink);
+        store.dispatch(openbooksApi.util.invalidateTags(["books"]));
         return {
           type: NotificationType.SUCCESS,
           title: "Book file received.",
@@ -117,15 +114,4 @@ const route = (store: Store, msg: MessageEvent<any>): void => {
   const notif = getNotif();
   store.dispatch(addNotification(notif));
   displayNotification(notif);
-};
-
-const downloadFile = (relativeURL: string) => {
-  let url = getApiURL();
-  url.pathname = relativeURL;
-
-  let link = document.createElement("a");
-  link.target = "_blank";
-  link.href = url.href;
-  link.click();
-  link.remove();
 };

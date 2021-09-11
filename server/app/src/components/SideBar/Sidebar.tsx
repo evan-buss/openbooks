@@ -48,11 +48,7 @@ const Sidebar: React.FC = () => {
             </Tablist>
           </Pane>
         </Pane>
-        <Pane
-          flex="1"
-          overflowY={selectedIndex === 0 ? "hidden" : "scroll"}
-          padding={8}
-          maxHeight="calc(100vh - 78px - 44px)">
+        <Pane flex="1" padding={8} maxHeight="calc(100vh - 78px - 44px)">
           {selectedIndex === 0 ? <SearchHistory /> : <BookList />}
         </Pane>
       </Pane>

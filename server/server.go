@@ -65,7 +65,16 @@ func Start(config Config) {
 	router.Use(middleware.RequestID)
 	router.Use(middleware.RealIP)
 	router.Use(middleware.Recoverer)
-	router.Use(cors.Default().Handler)
+
+	corsConfig := cors.Options{
+		AllowCredentials: true,
+		AllowedOrigins:   []string{"http://localhost:3000"},
+		AllowedHeaders:   []string{"*"},
+		AllowedMethods:   []string{"GET", "DELETE"},
+		Debug:            true,
+	}
+	router.Use(cors.New(corsConfig).Handler)
+
 	server := New(config)
 	routes := server.registerRoutes()
 

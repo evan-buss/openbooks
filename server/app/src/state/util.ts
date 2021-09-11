@@ -1,5 +1,5 @@
 import { toaster } from "evergreen-ui";
-import { Notification, NotificationType } from "./notificationSlice";
+import { Notification, NotificationType } from "./models";
 
 export const getWebsocketURL = (): URL => {
   const websocketURL = new URL(window.location.href + "ws");
@@ -52,4 +52,15 @@ export const displayNotification = ({
       });
       break;
   }
+};
+
+export const downloadFile = (relativeURL: string) => {
+  let url = getApiURL();
+  url.pathname = relativeURL;
+
+  let link = document.createElement("a");
+  link.target = "_blank";
+  link.href = url.href;
+  link.click();
+  link.remove();
 };
