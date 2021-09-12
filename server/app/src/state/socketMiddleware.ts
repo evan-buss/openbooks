@@ -84,7 +84,7 @@ const route = (store: Store, msg: MessageEvent<any>): void => {
           timestamp
         };
       case MessageType.DOWNLOAD:
-        downloadFile(response.downloadLink);
+        downloadFile(response.name, response.downloadLink);
         store.dispatch(openbooksApi.util.invalidateTags(["books"]));
         return {
           type: NotificationType.SUCCESS,

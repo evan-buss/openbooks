@@ -49,12 +49,6 @@ type Client struct {
 	log *log.Logger
 }
 
-func (s *server) closeClient(c *Client) {
-	c.irc.Disconnect()
-	c.conn.Close()
-	s.unregister <- c
-}
-
 // readPump pumps messages from the websocket connection to the hub.
 //
 // The application runs readPump in a per-connection goroutine. The application
@@ -62,7 +56,9 @@ func (s *server) closeClient(c *Client) {
 // reads from this goroutine.
 func (s *server) readPump(c *Client) {
 	defer func() {
-		s.closeClient(c)
+		c.irc.Disconnect()
+		c.conn.Close()
+		s.unregister <- c
 	}()
 	c.conn.SetReadLimit(maxMessageSize)
 	c.conn.SetReadDeadline(time.Now().Add(pongWait))
@@ -96,7 +92,6 @@ func (s *server) writePump(c *Client) {
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
 		ticker.Stop()
-		s.closeClient(c)
 	}()
 
 	for {

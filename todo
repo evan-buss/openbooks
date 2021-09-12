@@ -1,2 +1,5 @@
 - Show raw IRC logs in web interface
 - Update screenshots in readme
+- Don't disconnect irc client immediately, allow reconnecting after disconnect / page refresh
+- Fix sidebar text overflow styling
+- Come up with solution to servers not refreshing until you visit another history result

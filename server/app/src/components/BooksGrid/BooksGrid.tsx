@@ -1,5 +1,5 @@
 import { Button, majorScale, Pane, Spinner, Table, Text } from "evergreen-ui";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { MessageType } from "../../models/messages";
 import { sendMessage } from "../../state/stateSlice";
@@ -13,14 +13,17 @@ const stringContains = (first: string, second: string): boolean => {
 };
 
 export const BooksGrid: React.FC = () => {
-  const activeItem = useSelector((store: RootState) => store.state.activeItem);
-  const { data: allServers } = useGetServersQuery(null);
-
   const dispatch = useDispatch();
+  const activeItem = useSelector((store: RootState) => store.state.activeItem);
+  const { data: allServers, refetch } = useGetServersQuery(null);
   const [titleFilter, setTitleFilter] = useState<string>("");
   const [authorFilter, setAuthorFilter] = useState<string>("");
   const [formatFilter, setFormatFilter] = useState<string[]>([]);
   const [serverFilter, setServerFilter] = useState<string[]>([]);
+
+  useEffect(() => {
+    refetch();
+  }, [activeItem]);
 
   const filteredBooks = useMemo(() => {
     const books = activeItem?.results ?? [];

@@ -54,12 +54,12 @@ export const displayNotification = ({
   }
 };
 
-export const downloadFile = (relativeURL: string) => {
+export const downloadFile = (filename: string, relativeURL: string) => {
   let url = getApiURL();
   url.pathname = relativeURL;
 
   let link = document.createElement("a");
-  link.target = "_blank";
+  link.download = filename;
   link.href = url.href;
   link.click();
   link.remove();

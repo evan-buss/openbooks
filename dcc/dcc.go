@@ -4,9 +4,11 @@ import (
 	"encoding/binary"
 	"errors"
 	"io"
+	"log"
 	"net"
 	"regexp"
 	"strconv"
+	"time"
 )
 
 // There are two types of DCC strings this program accepts.
@@ -58,14 +60,39 @@ func (download Download) Download(writer io.Writer) error {
 	if err != nil {
 		return err
 	}
-	defer conn.Close()
 
-	written, err := io.Copy(writer, conn)
-	if err != nil {
-		return err
+	start := time.Now()
+	defer func() {
+		log.Printf("DCC: %d bytes took %s\n to download.\n", download.Size, time.Since(start))
+		conn.Close()
+	}()
+
+	// NOTE: Not using the idiomatic io.Copy or io.CopyBuffer because they are
+	// much slower in real world tests than the manual way. I suspect it has to
+	// do with the way the DCC server is sending data. I don't think it ever sends
+	// an EOF like the io.* methods expect.
+
+	// Benchmark: 2.36MB File
+	// CopyBuffer - 4096 - 2m32s, 2m18s, 2m32s
+	// Copy - 2m35s
+	// Custom - 1024 - 35s
+	// Custom - 4096 - 46s, 14s
+	received := 0
+	bytes := make([]byte, 4096)
+	for int64(received) < download.Size {
+		n, err := conn.Read(bytes)
+
+		if err != nil {
+			log.Fatal("Error Downloading Data", err)
+		}
+		_, err = writer.Write(bytes[:n])
+		if err != nil {
+			log.Println(err)
+		}
+		received += n
 	}
 
-	if written != download.Size {
+	if int64(received) != download.Size {
 		return ErrMissingBytes
 	}
 

@@ -8,6 +8,7 @@ import (
 	"io/fs"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"path"
 	"time"
@@ -175,11 +176,15 @@ func (server *server) libraryFileHandler(route string) http.Handler {
 
 func (server *server) deleteLibraryFileHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		fileName := chi.URLParam(r, "fileName")
-
-		err := os.Remove(path.Join(server.config.DownloadDir, "books", fileName))
+		fileName, err := url.PathUnescape(chi.URLParam(r, "fileName"))
 		if err != nil {
-			server.log.Printf("Error deleting book file... %s\n", err)
+			server.log.Printf("Error unescaping path: %s\n", err)
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+
+		err = os.Remove(path.Join(server.config.DownloadDir, "books", fileName))
+		if err != nil {
+			server.log.Printf("Error deleting book file: %s\n", err)
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 	}
