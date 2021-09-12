@@ -1,5 +1,6 @@
 import clsx from "clsx";
-import { Tooltip, Position, NotificationsIcon } from "evergreen-ui";
+import { Tooltip, Position } from "evergreen-ui";
+import { Bell } from "phosphor-react";
 import React from "react";
 
 interface PulseProps {
@@ -10,23 +11,19 @@ interface PulseProps {
 const Pulse = ({ enabled, onClick }: PulseProps) => {
   return (
     <Tooltip
+      showDelay={500}
       position={Position.BOTTOM}
       content={`OpenBooks server ${enabled ? "connected" : "disconnected"}.`}>
       <div onClick={onClick} className="flex justify-evenly items-center">
-        <NotificationsIcon
+        <Bell
+          size={18}
+          weight="bold"
           className={clsx([
-            "w-3 h-3 rounded-full cursor-pointer",
+            "rounded-full cursor-pointer hover:text-blue-800",
             { "text-custom-blue animate-custom-pulse": enabled },
             { "animate-none text-gray-500": !enabled }
           ])}
         />
-        {/* <div
-          className={clsx([
-            "w-2 h-2 rounded-full",
-            { "bg-custom-blue animate-custom-pulse": enabled },
-            { "animate-none bg-gray-500": !enabled }
-          ])}
-        /> */}
       </div>
     </Tooltip>
   );

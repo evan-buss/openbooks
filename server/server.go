@@ -71,7 +71,6 @@ func Start(config Config) {
 		AllowedOrigins:   []string{"http://localhost:3000"},
 		AllowedHeaders:   []string{"*"},
 		AllowedMethods:   []string{"GET", "DELETE"},
-		Debug:            true,
 	}
 	router.Use(cors.New(corsConfig).Handler)
 

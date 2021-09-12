@@ -12,34 +12,39 @@ import { setupListeners } from "@reduxjs/toolkit/dist/query";
 enableMapSet();
 
 export const store = configureStore({
-    reducer: {
-        state: stateReducer,
-        history: historyReducer,
-        notifications: notificationReducer,
-        [openbooksApi.reducerPath]: openbooksApi.reducer
-    },
-    middleware: (getDefaultMiddleware) =>
-        getDefaultMiddleware()
-            .concat(websocketConn(getWebsocketURL().href), openbooksApi.middleware)
+  reducer: {
+    state: stateReducer,
+    history: historyReducer,
+    notifications: notificationReducer,
+    [openbooksApi.reducerPath]: openbooksApi.reducer
+  },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware().concat(
+      websocketConn(getWebsocketURL().href),
+      openbooksApi.middleware
+    )
 });
 
 setupListeners(store.dispatch);
 
 const saveState = (key: string, state: any): void => {
-    try {
-        const serialized = JSON.stringify(state);
-        localStorage.setItem(key, serialized);
-    } catch (err) { }
-}
+  try {
+    const serialized = JSON.stringify(state);
+    localStorage.setItem(key, serialized);
+  } catch (err) {}
+};
 
-store.subscribe(throttle(() => {
+store.subscribe(
+  throttle(() => {
     saveState("history", store.getState().history.items);
-}, 1000));
+    saveState("active", store.getState().state.activeItem);
+  }, 1000)
+);
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppThunk<ReturnType = void> = ThunkAction<
-    ReturnType,
-    RootState,
-    unknown,
-    Action<string>
+  ReturnType,
+  RootState,
+  unknown,
+  Action<string>
 >;

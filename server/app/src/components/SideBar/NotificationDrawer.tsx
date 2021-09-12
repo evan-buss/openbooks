@@ -32,8 +32,8 @@ const NotificationDrawer = () => {
       isShown={isOpen}
       width={400}
       onCloseComplete={() => dispatch(toggleDrawer())}>
-      <div className="p-2 font-medium border-b border-gray-300">
-        <h2 className="text-2xl">Notifications</h2>
+      <div className="p-2 border-b border-gray-300">
+        <h2 className="text-2xl font-medium">Notifications</h2>
       </div>
       <div className="flex flex-col p-2 gap-2">
         {notifications.map((notif) => (

@@ -6,11 +6,21 @@ import { AppThunk } from "./store";
 interface AppState {
   isConnected: boolean;
   activeItem: HistoryItem | null;
+  username?: string;
 }
+
+const loadActive = (): HistoryItem | null => {
+  try {
+    return JSON.parse(localStorage.getItem("active")!) ?? null;
+  } catch (err) {
+    return null;
+  }
+};
 
 const initialState: AppState = {
   isConnected: false,
-  activeItem: null
+  activeItem: loadActive(),
+  username: undefined
 };
 
 const stateSlice = createSlice({
@@ -22,6 +32,9 @@ const stateSlice = createSlice({
     },
     setConnectionState(state, action: PayloadAction<boolean>) {
       state.isConnected = action.payload;
+    },
+    setUsername(state, action: PayloadAction<string>) {
+      state.username = action.payload;
     }
   }
 });
@@ -68,7 +81,7 @@ const setSearchResults =
     dispatch(setActiveItem(updatedItem));
     dispatch(updateHistoryItem(updatedItem));
   };
-const { setActiveItem, setConnectionState } = stateSlice.actions;
+const { setActiveItem, setConnectionState, setUsername } = stateSlice.actions;
 
 export {
   stateSlice,
@@ -76,7 +89,8 @@ export {
   setActiveItem,
   setConnectionState,
   sendSearch,
-  setSearchResults
+  setSearchResults,
+  setUsername
 };
 
 export default stateSlice.reducer;

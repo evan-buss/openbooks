@@ -1,24 +1,37 @@
 import {
   Text,
-  BookIcon,
   Badge,
   Spinner,
   Popover,
   Position,
-  TrashIcon,
   Menu,
-  DownloadIcon
+  Pane
 } from "evergreen-ui";
+import { Book, Download, Trash } from "phosphor-react";
 import React from "react";
 import { useDeleteBookMutation, useGetBooksQuery } from "../../state/api";
 import { downloadFile } from "../../state/util";
 
 export default function BookList() {
-  const { data, isLoading } = useGetBooksQuery(null);
+  const { data, isLoading, isSuccess } = useGetBooksQuery(null);
   const [deleteBook] = useDeleteBookMutation();
 
   if (isLoading) {
-    return <Spinner></Spinner>;
+    return (
+      <div className="flex justify-center m-4">
+        <Spinner></Spinner>
+      </div>
+    );
+  }
+
+  if (isSuccess && data?.length === 0) {
+    return (
+      <Pane display="flex" justifyContent="center">
+        <Text marginX="auto" marginY={16} color="muted">
+          No previous downloads.
+        </Text>
+      </Pane>
+    );
   }
 
   return (
@@ -30,13 +43,12 @@ export default function BookList() {
           content={
             <Menu>
               <Menu.Item
-                icon={DownloadIcon}
-                intent="info"
+                icon={<Download color="black" size={18} weight="bold" />}
                 onClick={() => downloadFile(book.downloadLink)}>
                 Download
               </Menu.Item>
               <Menu.Item
-                icon={TrashIcon}
+                icon={<Trash color="#d45050" size={18} weight="bold" />}
                 intent="danger"
                 onClick={() => deleteBook(book.name)}>
                 Delete
@@ -44,7 +56,7 @@ export default function BookList() {
             </Menu>
           }>
           <div className="border cursor-pointer p-2 m-1 shadow flex justify-between items-center">
-            <BookIcon size={15} color="#234361" />
+            <Book size={18} />
             <Text
               width={140}
               marginLeft={24}

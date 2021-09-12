@@ -50,7 +50,7 @@ export const BooksGrid: React.FC = () => {
         <Text fontSize="2em" margin="3em">
           Search a book to get started.
         </Text>
-        <img width="40%" src={image} alt="person reading" />
+        <img className="w-96 xl:w-1/3" src={image} alt="person reading" />
       </>
     );
   }
@@ -131,12 +131,10 @@ export const BooksGrid: React.FC = () => {
           placeholder="AUTHOR"
           flexBasis={250}
           flexGrow={0}
-          flexShrink={0}>
-        </Table.SearchHeaderCell>
+          flexShrink={0}></Table.SearchHeaderCell>
         <Table.SearchHeaderCell
           onChange={(e) => setTitleFilter(e)}
-          placeholder="TITLE">
-        </Table.SearchHeaderCell>
+          placeholder="TITLE"></Table.SearchHeaderCell>
         <SelectMenuHeader
           columnTitle="Formats"
           menuTitle="Select Book Formats"

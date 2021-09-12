@@ -4,7 +4,8 @@ import { displayNotification, downloadFile } from "./util";
 import {
   sendMessage,
   setConnectionState,
-  setSearchResults
+  setSearchResults,
+  setUsername
 } from "./stateSlice";
 import { addNotification } from "./notificationSlice";
 import { Notification, NotificationType } from "./models";
@@ -64,9 +65,11 @@ const route = (store: Store, msg: MessageEvent<any>): void => {
           timestamp
         };
       case MessageType.CONNECT:
+        store.dispatch(setUsername(response.name));
         return {
           type: NotificationType.NOTIFY,
           title: "Welcome, connection established.",
+          detail: `IRC username ${response.name}`,
           timestamp
         };
       case MessageType.SEARCH:

@@ -2,17 +2,14 @@ import { Dispatch } from "@reduxjs/toolkit";
 import clsx from "clsx";
 import {
   Badge,
-  EyeOffIcon,
-  EyeOpenIcon,
   Menu,
   Pane,
   Popover,
   Position,
-  SearchIcon,
   Spinner,
-  Text,
-  TrashIcon
+  Text
 } from "evergreen-ui";
+import { Eye, EyeSlash, MagnifyingGlass, Trash } from "phosphor-react";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -67,20 +64,20 @@ const HistoryCard: React.FC<Props> = ({ activeTS, item, dispatch }: Props) => {
         <Menu>
           {!isActive && (
             <Menu.Item
-              icon={EyeOpenIcon}
+              icon={<Eye color="black" size={18} weight="bold" />}
               onClick={() => dispatch(setActiveItem(item))}>
               Show
             </Menu.Item>
           )}
           {isActive && (
             <Menu.Item
-              icon={EyeOffIcon}
+              icon={<EyeSlash color="black" size={18} weight="bold" />}
               onClick={() => dispatch(setActiveItem(null))}>
               Hide
             </Menu.Item>
           )}
           <Menu.Item
-            icon={TrashIcon}
+            icon={<Trash color="#d45050" size={18} weight="bold" />}
             onClick={() => dispatch(deleteHistoryItem(item.timestamp))}
             intent="danger">
             Delete
@@ -92,7 +89,7 @@ const HistoryCard: React.FC<Props> = ({ activeTS, item, dispatch }: Props) => {
           "border cursor-pointer p-2 m-1 shadow flex justify-between items-center",
           { "border-l-custom-blue border-l-[3px]": isActive }
         )}>
-        <SearchIcon size={15} color="#234361" />
+        <MagnifyingGlass size={18} weight="bold" />
         <Text
           width={140}
           marginLeft={24}

@@ -47,6 +47,7 @@ type ConnectionRequest struct{}
 type ConnectionResponse struct {
 	MessageType int    `json:"type"`
 	Status      string `json:"status"`
+	Name        string `json:"name"`
 	Wait        int    `json:"wait"`
 }
 
@@ -68,8 +69,8 @@ type DownloadRequest struct {
 
 // DownloadResponse is a response that sends the requested book to the client
 type DownloadResponse struct {
-	MessageType int    `json:"type"`
-	Name        string `json:"name"`
+	MessageType  int    `json:"type"`
+	Name         string `json:"name"`
 	DownloadLink string `json:"downloadLink"`
 }
 

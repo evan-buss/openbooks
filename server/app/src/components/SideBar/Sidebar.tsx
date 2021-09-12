@@ -1,4 +1,4 @@
-import { Heading, Pane, Paragraph, Tab, Tablist } from "evergreen-ui";
+import { Heading, Pane, Paragraph, Tab, Tablist, Tooltip } from "evergreen-ui";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import useLocalStorageState from "use-local-storage-state";
@@ -8,10 +8,12 @@ import Pulse from "./Pulse";
 import NotificationDrawer from "./NotificationDrawer";
 import BookList from "./BookList";
 import { toggleDrawer } from "../../state/notificationSlice";
+import { IdentificationBadge } from "phosphor-react";
 
 const Sidebar: React.FC = () => {
   const [selectedIndex, setIndex] = useLocalStorageState("index", 0);
   const connected = useSelector((store: RootState) => store.state.isConnected);
+  const username = useSelector((store: RootState) => store.state.username);
   const dispatch = useDispatch();
 
   return (
@@ -48,9 +50,15 @@ const Sidebar: React.FC = () => {
             </Tablist>
           </Pane>
         </Pane>
-        <Pane flex="1" padding={8} maxHeight="calc(100vh - 78px - 44px)">
+        <Pane flex="1" padding={8} flexGrow={1}>
           {selectedIndex === 0 ? <SearchHistory /> : <BookList />}
         </Pane>
+        {username && (
+          <div className="z-10 fixed bottom-0 left-0 flex w-[325px] border-t bg-white border-gray-200 p-4 text-sm">
+            <IdentificationBadge size={24} className="mr-4" />
+            {username}
+          </div>
+        )}
       </Pane>
 
       <NotificationDrawer />

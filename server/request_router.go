@@ -69,6 +69,7 @@ func (c *Client) handleConnectionRequest(server *server) {
 	c.send <- ConnectionResponse{
 		MessageType: CONNECT,
 		Status:      "IRC Server Ready",
+		Name:        c.irc.Username,
 		Wait:        0,
 	}
 }
