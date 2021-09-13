@@ -1,6 +1,7 @@
 package server
 
 import (
+	"log"
 	"os"
 	"path"
 
@@ -113,11 +114,13 @@ func (c *IrcHandler) ServerList(servers core.IrcServers) {
 
 func handleDCC(baseDir, dccStr string) (string, error) {
 	// Download the file and wait until it is completed
+	log.Println("before parse")
 	download, err := dcc.ParseString(dccStr)
 	if err != nil {
 		return "", err
 	}
 
+	log.Println("before mkdirall")
 	// Create a new file based on the DCC file name
 	dccPath := path.Join(baseDir, "books")
 	err = os.MkdirAll(dccPath, 0755)
@@ -125,23 +128,28 @@ func handleDCC(baseDir, dccStr string) (string, error) {
 		return "", err
 	}
 
+	log.Println("before file create")
 	dccPath = path.Join(dccPath, download.Filename)
 	file, err := os.Create(dccPath)
 	if err != nil {
 		return "", err
 	}
 
+	log.Println("before dcc download to file")
 	// Download DCC data to the file
 	err = download.Download(file)
 	if err != nil {
 		return "", err
 	}
 	file.Close()
+	log.Println("after dcc download to file")
 
+	log.Println("before archive check")
 	if !util.IsArchive(dccPath) {
 		return dccPath, nil
 	}
 
+	log.Println("before archive extract")
 	extractedPath, err := util.ExtractArchive(dccPath)
 	if err != nil {
 		return "", err

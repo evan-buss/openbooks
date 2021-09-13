@@ -54,8 +54,9 @@ func ParseString(text string) (*Download, error) {
 	}, nil
 }
 
-// downloadDCC downloads the data contained in the Data object
+// Download writes the data contained in the DCC Download
 func (download Download) Download(writer io.Writer) error {
+	// TODO: Maybe specify deadline?
 	conn, err := net.Dial("tcp", download.IP+":"+download.Port)
 	if err != nil {
 		return err
