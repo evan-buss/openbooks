@@ -2,19 +2,15 @@
 
 # [Choice] Go version: 1, 1.16, 1.15
 ARG VARIANT="1.17"
-# NOTE: Temporary workaround because Microsoft doesn't publish
-#       ARM images for their devcontainers yet. AMD64 containers
-#       use way too much CPU on M1 so I've built the image for ARM.
-# FROM mcr.microsoft.com/vscode/devcontainers/go:1.17
-FROM evanbuss/devcontainers-go:latest
+FROM mcr.microsoft.com/vscode/devcontainers/go:${VARIANT}
 
 # [Choice] Node.js version: none, lts, 16, 14, 12, 10
 ARG NODE_VERSION="none"
 RUN if [ "${NODE_VERSION}" != "none" ]; then su vscode -c "umask 0002 && . /usr/local/share/nvm/nvm.sh && nvm install ${NODE_VERSION} 2>&1"; fi
 
 # [Optional] Uncomment this section to install additional OS packages.
-# RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
-#     && apt-get -y install --no-install-recommends <your-package-list-here>
+RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
+    && apt-get -y install --no-install-recommends tmux
 
 # [Optional] Uncomment the next line to use go get to install anything else you need
 # RUN go get -x <your-dependency-or-tool>
