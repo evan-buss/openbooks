@@ -86,8 +86,8 @@ const HistoryCard: React.FC<Props> = ({ activeTS, item, dispatch }: Props) => {
       }>
       <div
         className={clsx(
-          "border cursor-pointer p-2 m-1 shadow flex justify-between items-center",
-          { "border-l-custom-blue border-l-[3px]": isActive }
+          "border cursor-pointer p-2 m-1 rounded hover:bg-hover-blue flex justify-between items-center",
+          { "shadow border-active-text-blue": isActive }
         )}>
         <MagnifyingGlass size={18} weight="bold" />
         <Text
@@ -102,9 +102,9 @@ const HistoryCard: React.FC<Props> = ({ activeTS, item, dispatch }: Props) => {
           {item.query}
         </Text>
         {!item.results?.length ? (
-          <Spinner size={24} marginRight={5} />
+          <Spinner size={20} marginRight={5} />
         ) : (
-          <Badge color="green">{`${item.results?.length} RESULTS`}</Badge>
+          <Badge color="blue">{`${item.results?.length} RESULTS`}</Badge>
         )}
       </div>
     </Popover>

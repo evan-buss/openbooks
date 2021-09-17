@@ -120,8 +120,13 @@ export const BooksGrid: React.FC = () => {
   };
 
   return (
-    <Table flex={1} display="flex" flexDirection="column" width="100%">
-      <Table.Head background="white">
+    <Table
+      flex={1}
+      display="flex"
+      flexDirection="column"
+      width="100%"
+      className="rounded-lg">
+      <Table.Head background="white" className="rounded-t-md">
         <SelectMenuHeader
           options={allServers ?? []}
           columnTitle="Servers"

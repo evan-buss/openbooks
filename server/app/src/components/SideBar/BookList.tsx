@@ -5,7 +5,8 @@ import {
   Popover,
   Position,
   Menu,
-  Pane
+  Pane,
+  Tooltip
 } from "evergreen-ui";
 import { Book, Download, Trash } from "phosphor-react";
 import React from "react";
@@ -55,20 +56,26 @@ export default function BookList() {
               </Menu.Item>
             </Menu>
           }>
-          <div className="border cursor-pointer p-2 m-1 shadow flex justify-between items-center">
+          <div className="border cursor-pointer p-2 m-1 rounded hover:bg-hover-blue flex justify-between items-center">
             <Book size={18} />
-            <Text
-              width={140}
-              marginLeft={24}
-              flex={1}
-              whiteSpace="nowrap"
-              display="block"
-              fontWeight={500}
-              overflow="hidden"
-              textOverflow="ellipsis">
-              {book.name}
-            </Text>
-            <Badge color="green">
+            <Tooltip
+              position={Position.RIGHT}
+              showDelay={500}
+              hideDelay={0}
+              content={book.name}>
+              <Text
+                width={140}
+                marginLeft={24}
+                flex={1}
+                whiteSpace="nowrap"
+                display="block"
+                fontWeight={500}
+                overflow="hidden"
+                textOverflow="ellipsis">
+                {book.name}
+              </Text>
+            </Tooltip>
+            <Badge color="blue">
               {new Date(book.time).toLocaleDateString("en-US")}
             </Badge>
           </div>

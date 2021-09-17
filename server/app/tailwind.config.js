@@ -14,9 +14,11 @@ module.exports = {
         }
       },
       colors: {
-        // "custom-blue": "#1070CA",
         "custom-blue": "#3366ff",
-        "tint1": "#FAFBFF"
+        "tint1": "#FAFBFF",
+        "active-blue": "#ebf0ff",
+        "active-text-blue": "#3366FF",
+        "hover-blue": "#f4f5f9"
       }
     }
   },

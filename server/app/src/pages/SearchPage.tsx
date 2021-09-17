@@ -40,10 +40,12 @@ const SearchPage = () => {
           onChange={(e: any) => setSearchQuery(e.target.value)}
           placeholder="Search for a book."
           height={majorScale(5)}
+          className="rounded-md"
           marginRight={majorScale(4)}
           width="100%"></SearchInput>
         <Button
           type="submit"
+          className="rounded-md"
           width={majorScale(16)}
           height={majorScale(5)}
           appearance="primary"

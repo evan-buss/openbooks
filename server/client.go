@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"log"
 	"time"
 
@@ -38,7 +39,7 @@ type Client struct {
 	conn *websocket.Conn
 
 	// Signal to indicate the connection should be terminated.
-	disconnect chan struct{}
+	// disconnect chan struct{}
 
 	// Message to send to the client ws connection
 	send chan interface{}
@@ -47,6 +48,9 @@ type Client struct {
 	irc *irc.Conn
 
 	log *log.Logger
+
+	// Context is used to signal when this client should close.
+	ctx context.Context
 }
 
 // readPump pumps messages from the websocket connection to the hub.
@@ -65,7 +69,7 @@ func (s *server) readPump(c *Client) {
 	c.conn.SetPongHandler(func(string) error { c.conn.SetReadDeadline(time.Now().Add(pongWait)); return nil })
 	for {
 		select {
-		case <-c.disconnect:
+		case <-c.ctx.Done():
 			return
 		default:
 			var request Request
@@ -109,7 +113,7 @@ func (s *server) writePump(c *Client) {
 				c.log.Printf("Error writing JSON to websocket: %s\n", err)
 				return
 			}
-		case <-c.disconnect:
+		case <-c.ctx.Done():
 			return
 		case <-ticker.C:
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))

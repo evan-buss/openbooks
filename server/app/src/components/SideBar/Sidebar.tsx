@@ -19,7 +19,7 @@ const Sidebar: React.FC = () => {
   return (
     <>
       <Pane minWidth={325} background="white">
-        <Pane zIndex={1} flexShrink={0} elevation={0}>
+        <Pane zIndex={1} flexShrink={0} className="resize">
           <Pane padding={16} borderBottom="muted">
             <Heading
               size={600}
@@ -36,7 +36,7 @@ const Sidebar: React.FC = () => {
               Download eBooks from IRC Highway
             </Paragraph>
           </Pane>
-          <Pane display="flex" padding={8}>
+          <Pane display="flex" padding={8} borderBottom="muted">
             <Tablist display="flex" flex={1} justifyContent="space-between">
               {["Book Search", "Past Downloads"].map((tab, index) => (
                 <Tab

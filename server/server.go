@@ -1,7 +1,7 @@
 package server
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"net/http"
 	"os"
@@ -77,9 +77,9 @@ func Start(config Config) {
 	server := New(config)
 	routes := server.registerRoutes()
 
-	shutdown := make(chan struct{}, 1)
-	go server.startClientHub(shutdown)
-	server.registerGracefulShutdown(shutdown)
+	ctx, cancel := context.WithCancel(context.Background())
+	go server.startClientHub(ctx)
+	server.registerGracefulShutdown(cancel)
 	router.Mount(config.Basepath, routes)
 
 	server.log.Printf("Base Path: %v\n", config.Basepath)
@@ -94,22 +94,23 @@ func Start(config Config) {
 
 // The client hub is to be run in a goroutine and handles management of
 // websocket client registrations.
-func (s *server) startClientHub(shutdown <-chan struct{}) {
+func (s *server) startClientHub(ctx context.Context) {
 	for {
 		select {
 		case client := <-s.register:
 			s.clients[client.uuid] = client
 		case client := <-s.unregister:
 			if _, ok := s.clients[client.uuid]; ok {
+				_, cancel := context.WithCancel(client.ctx)
 				close(client.send)
-				close(client.disconnect)
+				cancel()
 				delete(s.clients, client.uuid)
 			}
-		case <-shutdown:
-			fmt.Println("Graceful shutdown received.")
+		case <-ctx.Done():
 			for _, client := range s.clients {
+				_, cancel := context.WithCancel(client.ctx)
 				close(client.send)
-				close(client.disconnect)
+				cancel()
 				delete(s.clients, client.uuid)
 			}
 			return
@@ -117,15 +118,15 @@ func (s *server) startClientHub(shutdown <-chan struct{}) {
 	}
 }
 
-func (server *server) registerGracefulShutdown(shutdown chan<- struct{}) {
+func (server *server) registerGracefulShutdown(cancel context.CancelFunc) {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-c
 		server.log.Println("Graceful shutdown.")
 		// Close the shutdown channel. Triggering all reader/writer WS handlers to close.
-		close(shutdown)
+		cancel()
 		time.Sleep(time.Second)
-		os.Exit(1)
+		os.Exit(0)
 	}()
 }

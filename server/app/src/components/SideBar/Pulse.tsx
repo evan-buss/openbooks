@@ -20,7 +20,10 @@ const Pulse = ({ enabled, onClick }: PulseProps) => {
           weight="bold"
           className={clsx([
             "rounded-full cursor-pointer hover:text-blue-800",
-            { "text-custom-blue animate-custom-pulse": enabled },
+            {
+              "text-active-text-blue animate-custom-pulse hover:text-gray-500":
+                enabled
+            },
             { "animate-none text-gray-500": !enabled }
           ])}
         />

@@ -17,7 +17,7 @@ func init() {
 	rootCmd.AddCommand(serverCmd)
 	userName := generateUserName()
 
-	serverCmd.Flags().BoolP("log", "l", false, "Save IRC logs to irc_log.txt.")
+	serverCmd.Flags().BoolP("log", "l", false, "Save raw IRC logs for each client connection.")
 	serverCmd.Flags().BoolP("browser", "b", false, "Open the browser on server start.")
 	serverCmd.Flags().StringP("name", "n", userName, "Use a name that isn't randomly generated. One word only.")
 	serverCmd.Flags().StringP("port", "p", "5228", "Set the local network port for browser mode.")

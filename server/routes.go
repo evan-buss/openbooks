@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"embed"
 	"encoding/json"
 	"errors"
@@ -70,12 +71,13 @@ func (server *server) serveWs() http.HandlerFunc {
 		// Each client gets its own connection, so use different usernames by appending count
 		name := fmt.Sprintf("%s-%d", server.config.UserName, len(server.clients)+1)
 		client := &Client{
-			conn:       conn,
-			send:       make(chan interface{}, 128),
-			disconnect: make(chan struct{}),
-			uuid:       userId,
-			irc:        irc.New(name, "OpenBooks - Search and download eBooks"),
-			log:        log.New(os.Stdout, fmt.Sprintf("CLIENT (%s): ", name), log.LstdFlags|log.Lmsgprefix),
+			conn: conn,
+			send: make(chan interface{}, 128),
+			// disconnect: make(chan struct{}),
+			uuid: userId,
+			irc:  irc.New(name, "OpenBooks - Search and download eBooks"),
+			log:  log.New(os.Stdout, fmt.Sprintf("CLIENT (%s): ", name), log.LstdFlags|log.Lmsgprefix),
+			ctx:  context.Background(),
 		}
 
 		server.log.Printf("Client connected from %s\n", conn.RemoteAddr().String())
@@ -171,7 +173,24 @@ func (server *server) libraryHandler() http.HandlerFunc {
 func (server *server) libraryFileHandler(route string) http.Handler {
 	libraryPath := path.Join(server.config.DownloadDir, "books")
 	fs := http.FileServer(http.Dir(libraryPath))
-	return server.fileDeleter(http.StripPrefix(route, fs))
+
+	// Inline middleware that deletes files after sending to user if "Persist"
+	// config option is disabled.
+	fileDeleter := func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			next.ServeHTTP(w, r)
+
+			if !server.config.Persist {
+				_, fileName := path.Split(r.URL.Path)
+				bookPath := path.Join(server.config.DownloadDir, "books", fileName)
+				err := os.Remove(bookPath)
+				if err != nil {
+					server.log.Printf("Error when deleting book file. %s", err)
+				}
+			}
+		})
+	}
+	return fileDeleter(http.StripPrefix(route, fs))
 }
 
 func (server *server) deleteLibraryFileHandler() http.HandlerFunc {

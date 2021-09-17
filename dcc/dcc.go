@@ -22,6 +22,8 @@ var (
 
 var dccRegex = regexp.MustCompile(`DCC SEND "?(.+[^"])"?\s(\d+)\s+(\d+)\s+(\d+)\s*`)
 
+type ProgressFunc func(current, total int64)
+
 type Download struct {
 	Filename string
 	IP       string
@@ -55,18 +57,13 @@ func ParseString(text string) (*Download, error) {
 }
 
 // Download writes the data contained in the DCC Download
-func (download Download) Download(writer io.Writer) error {
+func (download Download) Download(writer io.Writer, progress ProgressFunc) error {
 	// TODO: Maybe specify deadline?
 	conn, err := net.Dial("tcp", download.IP+":"+download.Port)
 	if err != nil {
 		return err
 	}
-
-	start := time.Now()
-	defer func() {
-		log.Printf("DCC: %d bytes took %s\n to download.\n", download.Size, time.Since(start))
-		conn.Close()
-	}()
+	defer conn.Close()
 
 	// NOTE: Not using the idiomatic io.Copy or io.CopyBuffer because they are
 	// much slower in real world tests than the manual way. I suspect it has to
@@ -91,6 +88,11 @@ func (download Download) Download(writer io.Writer) error {
 			log.Println(err)
 		}
 		received += n
+
+		if progress != nil {
+			progress(int64(received), download.Size)
+			time.Sleep(time.Millisecond * 50)
+		}
 	}
 
 	if int64(received) != download.Size {
