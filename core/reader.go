@@ -3,7 +3,6 @@ package core
 import (
 	"bufio"
 	"context"
-	"fmt"
 	"log"
 	"strings"
 
@@ -13,6 +12,7 @@ import (
 type event int
 
 const (
+	noOp           = event(0)
 	Message        = event(1)
 	SearchResult   = event(2)
 	BookResult     = event(3)
@@ -48,7 +48,6 @@ func StartReader(ctx context.Context, irc *irc.Conn, handler EventHandler) {
 	for scanner.Scan() {
 		select {
 		case <-ctx.Done():
-			fmt.Println("reader cancel called")
 			return
 		default:
 			text := scanner.Text()
@@ -61,7 +60,7 @@ func StartReader(ctx context.Context, irc *irc.Conn, handler EventHandler) {
 				invoke(text)
 			}
 
-			var event event
+			event := noOp
 			if strings.Contains(text, sendMessage) {
 				if strings.Contains(text, searchResultIdentifier) {
 					event = SearchResult
