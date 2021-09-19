@@ -6,141 +6,105 @@ import (
 	"io"
 	"log"
 	"net"
-	"os"
-	"path/filepath"
 	"regexp"
 	"strconv"
-
-	"github.com/mholt/archiver"
 )
 
 // There are two types of DCC strings this program accepts.
-// Search Results
-// 	- A text file containing a list of search results returned from a search
-//    query.
-// Book Files
-//  - The actual book file itself. You get the download string from the search
-//    results, enter it, then the book is sent to you.
+// Download contains all of the necessary DCC info parsed from the DCC SEND string
 
-// Data contains all of the necessary DCC info parsed from the DCC SEND string
-type Data struct {
-	filename string
-	ip       string
-	port     string
-	size     int
+var (
+	ErrInvalidDCCString = errors.New("invalid dcc send string")
+	ErrInvalidIP        = errors.New("unable to convert int IP to string")
+	ErrMissingBytes     = errors.New("download size didn't match dcc file size. data could be missing")
+)
+
+var dccRegex = regexp.MustCompile(`DCC SEND "?(.+[^"])"?\s(\d+)\s+(\d+)\s+(\d+)\s*`)
+
+type Download struct {
+	Filename string
+	IP       string
+	Port     string
+	Size     int64
 }
 
-// NewDownload parses the DCC SEND string and downloads the file
-func NewDownload(text string, downloadDir string, doneChan chan<- string) {
-	dcc := Data{}
-	err := dcc.ParseDCC(text)
-	if err != nil {
-		log.Fatal("ParseDCC Error: ", err)
+func ParseString(text string) (*Download, error) {
+	groups := dccRegex.FindStringSubmatch(text)
+
+	if len(groups) == 0 {
+		return nil, ErrInvalidDCCString
 	}
 
-	dcc.filename = filepath.Join(downloadDir, dcc.filename)
+	ip, err := stringToIP(groups[2])
+	if err != nil {
+		return nil, err
+	}
 
-	downloadDCC(dcc, doneChan)
+	size, err := strconv.ParseInt(groups[4], 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Download{
+		Filename: groups[1],
+		IP:       ip,
+		Port:     groups[3],
+		Size:     size,
+	}, nil
 }
 
-// downloadDCC downloads the data contained in the Data object
-func downloadDCC(dcc Data, doneChan chan<- string) {
-
-	file, err := os.OpenFile(dcc.filename, os.O_CREATE|os.O_WRONLY, 0644)
+// Download writes the data contained in the DCC Download
+func (download Download) Download(writer io.Writer) error {
+	// TODO: Maybe specify deadline?
+	conn, err := net.Dial("tcp", download.IP+":"+download.Port)
 	if err != nil {
-		log.Fatal(err)
-	}
-
-	conn, err := net.Dial("tcp", dcc.ip+":"+dcc.port)
-	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	defer conn.Close()
 
-	// Download the file
-	// NOTE: I tried the io.Copy utility but it EASILY took about 100x
-	// the amount of time as the manual method... Not sure why (windows)
+	// NOTE: Not using the idiomatic io.Copy or io.CopyBuffer because they are
+	// much slower in real world tests than the manual way. I suspect it has to
+	// do with the way the DCC server is sending data. I don't think it ever sends
+	// an EOF like the io.* methods expect.
+
+	// Benchmark: 2.36MB File
+	// CopyBuffer - 4096 - 2m32s, 2m18s, 2m32s
+	// Copy - 2m35s
+	// Custom - 1024 - 35s
+	// Custom - 4096 - 46s, 14s
 	received := 0
-	bytes := make([]byte, 1024)
-	for received < dcc.size {
+	bytes := make([]byte, 4096)
+	for int64(received) < download.Size {
 		n, err := conn.Read(bytes)
+
 		if err != nil {
 			log.Fatal("Error Downloading Data", err)
 		}
-		_, err = file.Write(bytes[:n])
+		_, err = writer.Write(bytes[:n])
 		if err != nil {
 			log.Println(err)
 		}
 		received += n
 	}
 
-	file.Close()
-
-	var newPath string
-	ext := filepath.Ext(dcc.filename)
-	if ext == ".rar" || ext == ".zip" {
-		err = archiver.Walk(dcc.filename, func(f archiver.File) error {
-			newPath = filepath.Join(filepath.Dir(dcc.filename), f.Name())
-
-			out, err := os.OpenFile(newPath, os.O_CREATE|os.O_RDWR, 0644)
-			if err != nil {
-				return err
-			}
-
-			_, err = io.Copy(out, f)
-			if err != nil {
-				return err
-			}
-
-			err = out.Close()
-			if err != nil {
-				log.Println("Error closing the archive output file", err)
-			}
-
-			return nil
-		})
-		if err != nil {
-			log.Println(err)
-		}
+	if int64(received) != download.Size {
+		return ErrMissingBytes
 	}
 
-	if newPath != "" { // If we extracted a file, send that file and remove the zip file
-		doneChan <- newPath
-		err = os.Remove(dcc.filename)
-		if err != nil {
-			log.Println("remove error", err)
-		}
-	} else {
-		doneChan <- dcc.filename
-	}
-}
-
-// ParseDCC parses the important data of a DCC SEND string
-func (dcc *Data) ParseDCC(text string) error {
-	re := regexp.MustCompile(`DCC SEND "?(.+[^"])"?\s(\d+)\s+(\d+)\s+(\d+)\s*`)
-	groups := re.FindStringSubmatch(text)
-
-	if len(groups) == 0 {
-		return errors.New("no match in string")
-	}
-
-	dcc.filename = groups[1]
-	dcc.ip = stringToIP(groups[2])
-	dcc.port = groups[3]
-	dcc.size, _ = strconv.Atoi(groups[4])
 	return nil
 }
 
+// ParseDCC parses the important data of a DCC SEND string
 // Convert a given 32 bit IP integer to an IP string
 // Ex) 2907707975 -> 192.168.1.1
-func stringToIP(nn string) string {
+func stringToIP(nn string) (string, error) {
 	temp, err := strconv.ParseUint(nn, 10, 32)
 	if err != nil {
-		log.Println("Error Parsing Int From Host String: ", err)
+		return "", ErrInvalidIP
 	}
 	intIP := uint32(temp)
 
 	ip := make(net.IP, 4)
 	binary.BigEndian.PutUint32(ip, intIP)
-	return ip.String()
+	return ip.String(), nil
 }

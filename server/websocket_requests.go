@@ -2,9 +2,9 @@ package server
 
 import (
 	"encoding/json"
-	"log"
 
 	"github.com/evan-buss/openbooks/core"
+	"github.com/evan-buss/openbooks/util"
 )
 
 // RequestHandler defines a generic handle() method that is called when a specific request type is made
@@ -13,48 +13,62 @@ type RequestHandler interface {
 }
 
 // messageRouter is used to parse the incoming request and respond appropriately
-func (c *Client) routeMessage(message Request) {
-	var obj RequestHandler
+func (s *server) routeMessage(message Request, c *Client) {
+	var obj interface{}
 
 	switch message.RequestType {
-	case CONNECT:
-		obj = new(ConnectionRequest)
 	case SEARCH:
 		obj = new(SearchRequest)
 	case DOWNLOAD:
 		obj = new(DownloadRequest)
-	case SERVERS:
-		obj = new(ServersRequest)
-	default:
-		log.Printf("%s: Unknown request type received.\n", c.uuid.String())
 	}
 
 	err := json.Unmarshal(message.Payload, &obj)
 	if err != nil {
-		log.Printf("%s: Invalid request payload.\n", c.uuid.String())
+		s.log.Println("Invalid request payload.")
 		c.send <- ErrorResponse{
 			Error:   message.RequestType,
 			Details: err.Error(),
 		}
 	}
-	obj.handle(c)
+
+	switch message.RequestType {
+	case CONNECT:
+		c.startIrcConnection(s)
+	case SEARCH:
+		c.sendSearchRequest(obj.(*SearchRequest))
+	case DOWNLOAD:
+		c.sendDownloadRequest(obj.(*DownloadRequest))
+	default:
+		s.log.Println("Unknown request type received.")
+	}
 }
 
 // handle ConnectionRequests and either connect to the server or do nothing
-func (ConnectionRequest) handle(c *Client) {
-	core.Join(c.irc)
-	// Start the Read Daemon
-	go core.ReadDaemon(c.irc, config.Log, Handler{Client: c}, c.disconnect)
+func (c *Client) startIrcConnection(server *server) {
+	core.Join(c.irc, server.config.Server)
+	handler := server.NewIrcEventHandler(c)
+
+	if server.config.Log {
+		logger, _, err := util.CreateLogFile(c.irc.Username, server.config.DownloadDir)
+		if err != nil {
+			server.log.Println(err)
+		}
+		handler[core.Message] = func(text string) { logger.Println(text) }
+	}
+
+	go core.StartReader(c.ctx, c.irc, handler)
 
 	c.send <- ConnectionResponse{
 		MessageType: CONNECT,
 		Status:      "IRC Server Ready",
+		Name:        c.irc.Username,
 		Wait:        0,
 	}
 }
 
 // handle SearchRequests and send the query to the book server
-func (s SearchRequest) handle(c *Client) {
+func (c *Client) sendSearchRequest(s *SearchRequest) {
 	core.SearchBook(c.irc, s.Query)
 
 	c.send <- WaitResponse{
@@ -64,23 +78,11 @@ func (s SearchRequest) handle(c *Client) {
 }
 
 // handle DownloadRequests by sending the request to the book server
-func (d DownloadRequest) handle(c *Client) {
+func (c *Client) sendDownloadRequest(d *DownloadRequest) {
 	core.DownloadBook(c.irc, d.Book)
 
 	c.send <- WaitResponse{
 		MessageType: WAIT,
 		Status:      "Download request received",
-	}
-}
-
-// handle ServerRequests by sending the currently available book servers
-func (s ServersRequest) handle(c *Client) {
-	servers := make(chan []string, 1)
-	go core.GetServers(servers)
-	results := <-servers
-
-	c.send <- ServersResponse{
-		MessageType: SERVERS,
-		Servers:     results,
 	}
 }

@@ -13,13 +13,12 @@ const (
 	CONNECT
 	SEARCH
 	DOWNLOAD
-	SERVERS
 	WAIT
 	IRCERROR
 )
 
 func messageToString(s int) string {
-	name := []string{"INVALID", "ERROR", "CONNECT", "SEARCH", "DOWNLOAD", "SERVERS", "WAIT", "IRCERROR"}
+	name := []string{"INVALID", "ERROR", "CONNECT", "SEARCH", "DOWNLOAD", "WAIT", "IRCERROR"}
 	i := uint8(s)
 	switch {
 	case i <= uint8(IRCERROR):
@@ -48,6 +47,7 @@ type ConnectionRequest struct{}
 type ConnectionResponse struct {
 	MessageType int    `json:"type"`
 	Status      string `json:"status"`
+	Name        string `json:"name"`
 	Wait        int    `json:"wait"`
 }
 
@@ -62,15 +62,6 @@ type SearchResponse struct {
 	Books       []core.BookDetail `json:"books"`
 }
 
-// ServersRequest is a request that lists available IRC servers
-type ServersRequest struct{}
-
-// ServersResponse is a response that lists the IRC servers that are online and available
-type ServersResponse struct {
-	MessageType int      `json:"type"`
-	Servers     []string `json:"servers"`
-}
-
 // DownloadRequest is a request to download a specific book from the IRC server
 type DownloadRequest struct {
 	Book string `json:"book"`
@@ -78,9 +69,9 @@ type DownloadRequest struct {
 
 // DownloadResponse is a response that sends the requested book to the client
 type DownloadResponse struct {
-	MessageType int    `json:"type"`
-	Name        string `json:"name"`
-	File        []byte `json:"file"`
+	MessageType  int    `json:"type"`
+	Name         string `json:"name"`
+	DownloadLink string `json:"downloadLink"`
 }
 
 // WaitResponse is a response that reports status updates to the client. IRC is asynchronous

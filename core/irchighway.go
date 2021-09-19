@@ -6,14 +6,11 @@ import (
 	"github.com/evan-buss/openbooks/irc"
 )
 
-var ircConn *irc.Conn
-
 // Specific irc.irchighway.net commands
 
 // Join connects to the irc.irchighway.net server and joins the #ebooks channel
-func Join(irc *irc.Conn) {
-	ircConn = irc
-	irc.Connect("irc.irchighway.net")
+func Join(irc *irc.Conn, url string) {
+	irc.Connect(url)
 	// Wait before joining the ebooks room
 	// Often you recieve a private message from the server
 	time.Sleep(time.Second * 2)

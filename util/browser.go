@@ -1,4 +1,4 @@
-package server
+package util
 
 import (
 	"log"
@@ -6,7 +6,7 @@ import (
 	"runtime"
 )
 
-func openbrowser(url string) {
+func OpenBrowser(url string) {
 	var err error
 
 	switch runtime.GOOS {
