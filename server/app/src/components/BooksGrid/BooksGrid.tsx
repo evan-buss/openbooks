@@ -5,8 +5,9 @@ import { MessageType } from "../../models/messages";
 import { sendMessage } from "../../state/stateSlice";
 import { RootState } from "../../state/store";
 import image from "../../assets/reading.svg";
-import SelectMenuHeader from "./SelectMenuHeader";
+import SelectMenuHeader, { makeStatusMenuItem } from "./SelectMenuHeader";
 import { useGetServersQuery } from "../../state/api";
+import { HistoryItem } from "../../state/historySlice";
 
 const stringContains = (first: string, second: string): boolean => {
   return first.toLowerCase().includes(second.toLowerCase());
@@ -14,8 +15,10 @@ const stringContains = (first: string, second: string): boolean => {
 
 export const BooksGrid: React.FC = () => {
   const dispatch = useDispatch();
-  const activeItem = useSelector((store: RootState) => store.state.activeItem);
-  const { data: allServers, refetch } = useGetServersQuery(null);
+  const activeItem: HistoryItem | null = useSelector(
+    (store: RootState) => store.state.activeItem
+  );
+  const { data: onlineServers, refetch } = useGetServersQuery(null);
   const [titleFilter, setTitleFilter] = useState<string>("");
   const [authorFilter, setAuthorFilter] = useState<string>("");
   const [formatFilter, setFormatFilter] = useState<string[]>([]);
@@ -47,6 +50,13 @@ export const BooksGrid: React.FC = () => {
     return extensionTypes.filter((x, i, arr) => arr.indexOf(x) === i);
   }, [activeItem]);
 
+  const availableServers = useMemo(() => {
+    const servers =
+      onlineServers?.concat(activeItem?.results?.map((x) => x.server) ?? []) ??
+      [];
+    return servers.filter((x, i, arr) => arr.indexOf(x) === i);
+  }, [onlineServers, activeItem]);
+
   if (activeItem === null) {
     return (
       <>
@@ -70,7 +80,7 @@ export const BooksGrid: React.FC = () => {
     // Results length is zero. No results for query
     if (activeItem.results?.length === 0) {
       return (
-        <Text textAlign="center" margin={majorScale(3)}>
+        <Text textAlign="center" padding={majorScale(3)}>
           No results for search.
         </Text>
       );
@@ -79,7 +89,7 @@ export const BooksGrid: React.FC = () => {
     // FilteredRows length is zero. Filter not valid.
     if (filteredBooks.length === 0) {
       return (
-        <Text textAlign="center" margin={majorScale(3)}>
+        <Text textAlign="center" padding={majorScale(3)}>
           No books matching filter.
         </Text>
       );
@@ -128,11 +138,12 @@ export const BooksGrid: React.FC = () => {
       className="rounded-lg">
       <Table.Head background="white" className="rounded-t-md">
         <SelectMenuHeader
-          options={allServers ?? []}
+          options={availableServers}
           columnTitle="Servers"
-          menuTitle="Filter Online Servers"
+          menuTitle="Filter Servers"
           selected={serverFilter}
           setSelected={setServerFilter}
+          itemRenderer={makeStatusMenuItem(onlineServers ?? [])}
         />
         <Table.SearchHeaderCell
           onChange={(e) => setAuthorFilter(e)}
@@ -150,10 +161,18 @@ export const BooksGrid: React.FC = () => {
           selected={formatFilter}
           setSelected={setFormatFilter}
         />
-        <Table.TextHeaderCell flexBasis={100} flexGrow={0} flexShrink={0}>
+        <Table.TextHeaderCell
+          flexBasis={100}
+          flexGrow={0}
+          flexShrink={0}
+          className="font-normal text-gray-700">
           Size
         </Table.TextHeaderCell>
-        <Table.TextHeaderCell flexBasis={150} flexGrow={0} flexShrink={0}>
+        <Table.TextHeaderCell
+          flexBasis={150}
+          flexGrow={0}
+          flexShrink={0}
+          className="font-normal text-gray-700">
           Download?
         </Table.TextHeaderCell>
       </Table.Head>
