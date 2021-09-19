@@ -64,7 +64,7 @@ func TestDownload(t *testing.T) {
 	t.Log("After server start")
 
 	received := new(mock.WriteCloser)
-	err := textDownload.Download(received, nil)
+	err := textDownload.Download(received)
 	if err != nil {
 		t.Error(err)
 	}

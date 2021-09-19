@@ -2,35 +2,44 @@ package cli
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/evan-buss/openbooks/core"
+	"github.com/evan-buss/openbooks/dcc"
+	"github.com/schollz/progressbar/v3"
 )
-
-func progress(current, total int64) {
-	fmt.Printf("Progress %%%.2f\r", (float64(current)/float64(total))*100)
-}
 
 // DownloadSearchResults downloads the search results
 // and sends user a response message
 func (c Config) searchHandler(text string) {
-	fmt.Printf("Downloading... ")
-	extractedPath, err := core.DownloadExtractDCCString(c.Dir, text, progress)
+	download, err := dcc.ParseString(text)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	bar := progressbar.DefaultBytes(download.Size, download.Filename)
+
+	extractedPath, err := core.DownloadExtractDCCString(c.Dir, text, bar)
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Println("✅")
 	fmt.Println("Results location: " + extractedPath)
 }
 
 // DownloadBookFile downloads the search results and sends
 // a user a response message
 func (c Config) downloadHandler(text string) {
-	fmt.Printf("Downloading... ")
-	extractedPath, err := core.DownloadExtractDCCString(c.Dir, text, progress)
+	download, err := dcc.ParseString(text)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	bar := progressbar.DefaultBytes(download.Size, download.Filename)
+
+	extractedPath, err := core.DownloadExtractDCCString(c.Dir, text, bar)
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Println("✅")
 	fmt.Println("File location: " + extractedPath)
 }
 
@@ -55,11 +64,9 @@ func (c Config) searchAcceptedHandler(_ string) {
 // MatchesFound is called when the search returns the number of results
 // found. Server sends the client a status update
 func (c Config) matchesFoundHandler(num string) {
-	fmt.Println("📚 Search returned " + num + " matches.")
+	fmt.Printf("Found %s search results.", num)
 }
 
 func (c Config) pingHandler(_ string) {
 	c.irc.Pong(c.Server)
 }
-
-// func (h Handler) ServerList(servers core.IrcServers) {}

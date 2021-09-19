@@ -14,6 +14,8 @@ import (
 	"github.com/evan-buss/openbooks/util"
 )
 
+const clearLine = "\r\033[2K"
+
 func registerShutdown(conn *irc.Conn, cancel context.CancelFunc) {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
@@ -26,10 +28,10 @@ func registerShutdown(conn *irc.Conn, cancel context.CancelFunc) {
 }
 
 func instantiate(config Config) *irc.Conn {
-	fmt.Printf("Connecting to %s... ", config.Server)
+	fmt.Printf("Connecting to %s.", config.Server)
 	conn := irc.New(config.UserName, "OpenBooks CLI")
 	core.Join(conn, config.Server)
-	fmt.Println("✅")
+	fmt.Printf("%sConnected to %s.\n", clearLine, config.Server)
 	return conn
 }
 

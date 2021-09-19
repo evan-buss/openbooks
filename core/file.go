@@ -1,7 +1,7 @@
 package core
 
 import (
-	"fmt"
+	"io"
 	"os"
 	"path"
 
@@ -9,7 +9,7 @@ import (
 	"github.com/evan-buss/openbooks/util"
 )
 
-func DownloadExtractDCCString(baseDir, dccStr string, progress dcc.ProgressFunc) (string, error) {
+func DownloadExtractDCCString(baseDir, dccStr string, progress io.Writer) (string, error) {
 	// Download the file and wait until it is completed
 	download, err := dcc.ParseString(dccStr)
 	if err != nil {
@@ -21,10 +21,14 @@ func DownloadExtractDCCString(baseDir, dccStr string, progress dcc.ProgressFunc)
 	if err != nil {
 		return "", err
 	}
-	fmt.Println()
+
+	writer := io.Writer(file)
+	if progress != nil {
+		writer = io.MultiWriter(file, progress)
+	}
+
 	// Download DCC data to the file
-	err = download.Download(file, progress)
-	fmt.Println()
+	err = download.Download(writer)
 	if err != nil {
 		return "", err
 	}

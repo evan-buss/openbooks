@@ -8,7 +8,6 @@ import (
 	"net"
 	"regexp"
 	"strconv"
-	"time"
 )
 
 // There are two types of DCC strings this program accepts.
@@ -21,8 +20,6 @@ var (
 )
 
 var dccRegex = regexp.MustCompile(`DCC SEND "?(.+[^"])"?\s(\d+)\s+(\d+)\s+(\d+)\s*`)
-
-type ProgressFunc func(current, total int64)
 
 type Download struct {
 	Filename string
@@ -57,7 +54,7 @@ func ParseString(text string) (*Download, error) {
 }
 
 // Download writes the data contained in the DCC Download
-func (download Download) Download(writer io.Writer, progress ProgressFunc) error {
+func (download Download) Download(writer io.Writer) error {
 	// TODO: Maybe specify deadline?
 	conn, err := net.Dial("tcp", download.IP+":"+download.Port)
 	if err != nil {
@@ -88,11 +85,6 @@ func (download Download) Download(writer io.Writer, progress ProgressFunc) error
 			log.Println(err)
 		}
 		received += n
-
-		if progress != nil {
-			progress(int64(received), download.Size)
-			time.Sleep(time.Millisecond * 50)
-		}
 	}
 
 	if int64(received) != download.Size {

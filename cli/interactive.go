@@ -11,21 +11,26 @@ import (
 )
 
 func terminalMenu(irc *irc.Conn) {
-	fmt.Print("s)search\ng)et book\nd)one\n~> ")
+	fmt.Print("\ns)search\ng)et book\nd)one\n~> ")
+
+	// Trim user input so we don't send 2 messages
+	clean := func(message string) string { return strings.Trim(message, "\r\n") }
 
 	reader := bufio.NewReader(os.Stdin)
 	input, _ := reader.ReadString('\n')
-	input = strings.TrimSpace(input)
+	input = clean(input)
 
 	switch input {
 	case "s":
 		fmt.Print("@search ")
 		message, _ := reader.ReadString('\n')
-		core.SearchBook(irc, message)
+		core.SearchBook(irc, clean(message))
+		fmt.Println("\nSent search request.")
 	case "g":
 		fmt.Print("Download String: ")
 		message, _ := reader.ReadString('\n')
-		core.DownloadBook(irc, message)
+		core.DownloadBook(irc, clean(message))
+		fmt.Println("\nSent download request.")
 	case "d":
 		fmt.Println("Disconnecting.")
 		irc.Disconnect()

@@ -47,6 +47,7 @@ func StartDownload(config Config, download string) {
 
 	handler := core.EventHandler{}
 	handler[core.BookResult] = func(text string) {
+		fmt.Printf("%sReceived file response.\n", clearLine)
 		config.downloadHandler(text)
 		cancel()
 	}
@@ -55,10 +56,11 @@ func StartDownload(config Config, download string) {
 		defer file.Close()
 	}
 
+	fmt.Printf("Sending download request.")
 	go core.StartReader(ctx, conn, handler)
-	fmt.Printf("Sending download request... ")
 	core.DownloadBook(conn, download)
-	fmt.Println("✅")
+	fmt.Printf("%sSent download request.", clearLine)
+	fmt.Printf("Waiting for file response.")
 
 	registerShutdown(conn, cancel)
 	<-ctx.Done()
@@ -71,6 +73,7 @@ func StartSearch(config Config, query string) {
 
 	handler := core.EventHandler{}
 	handler[core.SearchResult] = func(text string) {
+		fmt.Printf("%sReceived file response.\n", clearLine)
 		config.searchHandler(text)
 		cancel()
 	}
@@ -80,10 +83,11 @@ func StartSearch(config Config, query string) {
 		defer file.Close()
 	}
 
+	fmt.Printf("Sending search request.")
 	go core.StartReader(ctx, conn, handler)
-	fmt.Printf("Sending search request... ")
 	core.SearchBook(conn, query)
-	fmt.Println("✅")
+	fmt.Printf("%sSent search request.", clearLine)
+	fmt.Printf("Waiting for file response.")
 
 	registerShutdown(conn, cancel)
 	<-ctx.Done()
