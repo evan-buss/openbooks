@@ -1,6 +1,9 @@
-- Don't disconnect irc client immediately, allow reconnecting after disconnect / page refresh
-- use react grid instead of evergreen grid. it is easier to style and manage
-  - Will keep a similar look to evergreen's native grid
-- add clear all button to notification drawer
-- send progress updates
-  - web interface -> via websocket
+Future:
+
+  - Allow reconnecting to same IRC connection if websocket disconnects.
+    - Currently we immediately terminate the IRC connection and remove the client
+    - Possible use a timer that keeps the Client around for a set period of time
+      after websocket disconnect.
+  - Convert grid to use React Grid instead of Evergreen's built in one.
+    - Things like styling are more difficult with Evergreen (ex. can't round the bottom corners)
+  - Send download progress updates to the browser like we show for the CLI

@@ -25,10 +25,17 @@ const notificationSlice = createSlice({
     },
     toggleDrawer(state) {
       state.isOpen = !state.isOpen;
+    },
+    clearNotifications(state) {
+      state.notifications = [];
     }
   }
 });
 
-export const { addNotification, dismissNotification, toggleDrawer } =
-  notificationSlice.actions;
+export const {
+  addNotification,
+  dismissNotification,
+  toggleDrawer,
+  clearNotifications
+} = notificationSlice.actions;
 export default notificationSlice.reducer;
