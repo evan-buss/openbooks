@@ -1,11 +1,8 @@
-- Show raw IRC logs in web interface
-- Update screenshots in readme
 - Don't disconnect irc client immediately, allow reconnecting after disconnect / page refresh
 - Come up with solution to servers not refreshing until you visit another history result
 - use react grid instead of evergreen grid. it is easier to style and manage
   - Will keep a similar look to evergreen's native grid
-- use fuse.js for fuzzy search
 - use custom status indicators on server list to show which ones are online (combine with all servers returned in search results)
+- add clear all button to notification drawer
 - send progress updates
   - web interface -> via websocket
-  - cli -> via progress bar
