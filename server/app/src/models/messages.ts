@@ -3,9 +3,9 @@ export enum MessageType {
     CONNECT = 2,
     SEARCH = 3,
     DOWNLOAD = 4,
-    SERVERS = 5,
-    WAIT = 6,
-    IRCERROR = 7
+    // SERVERS = 5,
+    WAIT = 5,
+    IRCERROR = 6
 }
 
 export interface BookResponse {

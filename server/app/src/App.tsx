@@ -1,14 +1,20 @@
-import { Pane } from 'evergreen-ui';
-import React from 'react';
-import Sidebar from './components/Sidebar';
-import SearchPage from './pages/SearchPage';
+import React from "react";
+import Sidebar from "./components/SideBar/Sidebar";
+import SearchPage from "./pages/SearchPage";
+import { BrowserRouter, Switch, Route } from "react-router-dom";
 
 function App() {
   return (
-    <Pane clearfix display="flex" flexFlow="row nowrap" minHeight="100vh" maxHeight="100vh">
-      <Sidebar />
-      <SearchPage />
-    </Pane>
+    <BrowserRouter>
+      <div className="flex flex-row flex-nowrap bg-tint1 min-h-screen max-h-screen">
+        <Sidebar />
+        <Switch>
+          <Route path="/">
+            <SearchPage />
+          </Route>
+        </Switch>
+      </div>
+    </BrowserRouter>
   );
 }
 

@@ -4,8 +4,7 @@
 
 Openbooks allows you to download ebooks from irc.irchighway.net quickly and easily.
 
-![home](https://raw.githubusercontent.com/evan-buss/openbooks/master/.github/home.png)
-![search results](https://raw.githubusercontent.com/evan-buss/openbooks/master/.github/search.png)
+![openbooks](https://raw.githubusercontent.com/evan-buss/openbooks/master/.github/home_v2.png)
 
 ## Getting Started
 
@@ -22,7 +21,7 @@ Openbooks allows you to download ebooks from irc.irchighway.net quickly and easi
 - Basic config
   - `docker run -p 8080:80 evanbuss/openbooks`
 - Config to perist all eBook files to disk
-  - `docker run -p 8080:80 -v /home/evan/Downloads/books:/books evanbuss/openbooks --persist`
+  - `docker run -p 8080:80 -v /home/evan/Downloads/openbooks:/books evanbuss/openbooks --persist`
 
 ### Setting the Base Path
 
@@ -32,6 +31,14 @@ OpenBooks server doesn't have to be hosted at the root of your webserver. The ba
   - `docker run -p 8080:80 -e BASE_PATH=/openbooks/ evanbuss/openbooks`
 - Binary
   - `./openbooks server --basepath /openbooks/`
+
+## Usage
+
+For a complete list of features use the `--help` flags on all subcommands.
+For example `openbooks cli --help or openbooks cli download --help`. There are
+two modes; Server or CLI. In CLI mode you interact and download books through
+a terminal interface. In server mode the application runs as a web application
+that you can visit in your browser.
 
 ## Development
 
@@ -50,6 +57,19 @@ OpenBooks server doesn't have to be hosted at the root of your webserver. The ba
 ### Build the go binary (if you haven't changed the frontend)
 
 - `go build`
+
+### Mock Development Server
+
+- The mock server allows you to debug responses and requests to simplified IRC / DCC
+  servers that mimic the responses received from IRC Highway.
+- 
+  ```bash
+  cd cmd/mock_server
+  go run .
+  # Another Terminal
+  cd cmd/openbooks
+  go run . server --server localhost --log
+  ```
 
 ## Why / How
 

@@ -3,52 +3,49 @@ package core
 import (
 	"sort"
 	"strings"
-	"time"
 )
 
-var prefixes = [...]string{
-	"~",
-	"&",
-	"@",
-	"%",
-	"+",
+var prefixes = map[byte]struct{}{
+	'~': {},
+	'&': {},
+	'@': {},
+	'%': {},
+	'+': {},
 }
 
-// ServerCache maintains a list of download servers that are available
-// Time ensures that the cache is never too far out of date
-type ServerCache struct {
-	Servers []string
-	Time    time.Time
+type IrcServers struct {
+	ElevatedUsers []string `json:"elevatedUsers"`
+	RegularUsers  []string `json:"regularUsers"`
 }
 
-// ParseServers parses the complete list of IRC users to get the elevates users which in
+// ParseServers parses the complete list of IRC users to get the elevated users which in
 // this case are the download servers
-func (s *ServerCache) ParseServers(data string) {
-	servers := strings.Split(data, " ")
-	output := make([]string, 0)
+func ParseServers(rawString string) IrcServers {
+	allServers := strings.Split(rawString, " ")
 
-	for _, user := range servers {
-		for _, prefix := range prefixes {
-			if strings.Contains(user, prefix) && strings.Index(user, prefix) == 0 && len(user) > 1 {
-				output = append(output, user[1:])
+	servers := IrcServers{
+		ElevatedUsers: make([]string, 0),
+		RegularUsers:  make([]string, 0),
+	}
+
+	for _, name := range allServers {
+		if len(name) > 1 {
+			if _, exists := prefixes[name[0]]; exists {
+				servers.ElevatedUsers = append(servers.ElevatedUsers, name[1:])
+			} else {
+				servers.RegularUsers = append(servers.RegularUsers, name)
 			}
 		}
 	}
-	sort.Strings(output)
-	s.Servers = output
-	s.Time = time.Now()
+
+	sort.Slice(servers.ElevatedUsers, ignoreCaseSort(servers.ElevatedUsers))
+	sort.Slice(servers.RegularUsers, ignoreCaseSort(servers.RegularUsers))
+
+	return servers
 }
 
-// GetServers returns the IRC book servers that are online
-// TODO: Look into a cleaner way of doing this
-func GetServers(servers chan<- []string) {
-	cacheIsOld := time.Now().Sub(serverCache.Time) > (time.Minute * 2)
-	if len(serverCache.Servers) == 0 || cacheIsOld {
-		ircConn.GetUsers("ebooks")
-		oldTime := serverCache.Time
-		for serverCache.Time.Equal(oldTime) {
-			time.Sleep(time.Millisecond * 500)
-		}
+func ignoreCaseSort(items []string) func(i, j int) bool {
+	return func(i, j int) bool {
+		return strings.ToLower(items[i]) < strings.ToLower(items[j])
 	}
-	servers <- serverCache.Servers
 }

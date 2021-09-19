@@ -1,12 +1,9 @@
-- Migrate as much communication from WebSocket to HTTP api as possible.
-    - We are overusing websocket communication and it just adds complexity
-    - Send files via HTTP instead of base64 encoding in the websocket JSON message
-- Use evergreen virtual scrolling grid that fits page size 
-- Add filtering to grid
-    - See: https://evergreen-storybook.netlify.app/?path=/story/table--advanced-sortable-table
-    - Server / Title - Search Text Box
-    - Format - Find unique formats and have clickable options
-- Use new Pulsar component instead of custom version
-- Make the "connected" indicator actually work...
-- Show IRC name in web interface
-- Show raw IRC logs in web interface
+Future:
+
+  - Allow reconnecting to same IRC connection if websocket disconnects.
+    - Currently we immediately terminate the IRC connection and remove the client
+    - Possible use a timer that keeps the Client around for a set period of time
+      after websocket disconnect.
+  - Convert grid to use React Grid instead of Evergreen's built in one.
+    - Things like styling are more difficult with Evergreen (ex. can't round the bottom corners)
+  - Send download progress updates to the browser like we show for the CLI

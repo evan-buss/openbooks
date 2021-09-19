@@ -1,4 +1,4 @@
-package cmd
+package main
 
 import (
 	"fmt"
@@ -12,8 +12,7 @@ var rootCmd = &cobra.Command{
 	Short: "Quickly and easily download eBooks from IRCHighway.",
 }
 
-// Execute starts the root command handler.
-func Execute() {
+func main() {
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)

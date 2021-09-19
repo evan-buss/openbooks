@@ -1,9 +1,10 @@
-package cmd
+package main
 
 import (
 	"fmt"
 	"math/rand"
 	"os"
+	"path"
 	"time"
 
 	"github.com/brianvoe/gofakeit/v5"
@@ -16,13 +17,14 @@ func init() {
 	rootCmd.AddCommand(serverCmd)
 	userName := generateUserName()
 
-	serverCmd.Flags().BoolP("log", "l", false, "Save IRC logs to irc_log.txt.")
+	serverCmd.Flags().BoolP("log", "l", false, "Save raw IRC logs for each client connection.")
 	serverCmd.Flags().BoolP("browser", "b", false, "Open the browser on server start.")
 	serverCmd.Flags().StringP("name", "n", userName, "Use a name that isn't randomly generated. One word only.")
 	serverCmd.Flags().StringP("port", "p", "5228", "Set the local network port for browser mode.")
-	serverCmd.Flags().StringP("dir", "d", os.TempDir(), "The directory where eBooks are saved when persist enabled.")
+	serverCmd.Flags().StringP("dir", "d", path.Join(os.TempDir(), "openbooks"), "The directory where eBooks are saved when persist enabled.")
 	serverCmd.Flags().Bool("persist", false, "Persist eBooks in 'dir'. Default is to delete after sending.")
 	serverCmd.Flags().String("basepath", "/", `Base path where the application is accessible. For example "/openbooks/".`)
+	serverCmd.Flags().StringP("server", "s", "irc.irchighway.net", "IRC server to connect to.")
 }
 
 var serverCmd = &cobra.Command{
@@ -37,6 +39,7 @@ var serverCmd = &cobra.Command{
 		dir, _ := cmd.Flags().GetString("dir")
 		persist, _ := cmd.Flags().GetBool("persist")
 		basepath, _ := cmd.Flags().GetString("basepath")
+		url, _ := cmd.Flags().GetString("server")
 
 		// If cli flag isn't set (default value) check for the presence of an
 		// environment variable and use it if found.
@@ -53,7 +56,8 @@ var serverCmd = &cobra.Command{
 			Port:        port,
 			DownloadDir: dir,
 			Persist:     persist,
-			Basepath:    basepath,
+			Basepath:    sanitizePath(basepath),
+			Server:      url,
 		}
 
 		server.Start(config)
@@ -66,4 +70,12 @@ func generateUserName() string {
 	rand.Seed(time.Now().UnixNano())
 	gofakeit.Seed(int64(rand.Int()))
 	return fmt.Sprintf("%s-%s", gofakeit.Adjective(), gofakeit.Noun())
+}
+
+func sanitizePath(basepath string) string {
+	cleaned := path.Clean(basepath)
+	if cleaned == "/" {
+		return cleaned
+	}
+	return cleaned + "/"
 }

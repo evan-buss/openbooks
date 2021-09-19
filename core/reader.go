@@ -2,113 +2,96 @@ package core
 
 import (
 	"bufio"
-	"fmt"
+	"context"
 	"log"
-	"os"
 	"strings"
-	"time"
 
 	"github.com/evan-buss/openbooks/irc"
 )
 
-// ReaderHandler handles and responds to different IRC events
-// Both the CLI and Server versions implement this interface
-type ReaderHandler interface {
-	DownloadSearchResults(text string)
-	DownloadBookFile(text string)
-	NoResults()
-	BadServer()
-	SearchAccepted()
-	MatchesFound(num string)
-}
+type event int
 
-// Possible messages that are sent by the server. We respond accordingly
 const (
-	pingMessage       = "PING"
-	sendMessage       = "DCC SEND"
-	noticeMessage     = "NOTICE"
-	noResults         = "Sorry"
-	serverUnavailable = "try another server"
-	searchAccepted    = "has been accepted"
-	numMatches        = "matches"
-	beginUserList     = "353"
-	endUserList       = "366"
+	noOp           = event(0)
+	Message        = event(1)
+	SearchResult   = event(2)
+	BookResult     = event(3)
+	NoResults      = event(4)
+	BadServer      = event(5)
+	SearchAccepted = event(6)
+	MatchesFound   = event(7)
+	ServerList     = event(8)
+	Ping           = event(9)
 )
 
-// Servers contains the cache of available download servers.
-var serverCache ServerCache
+// Unique identifiers found in the message for various different events.
+const (
+	pingMessage            = "PING"
+	sendMessage            = "DCC SEND"
+	noticeMessage          = "NOTICE"
+	noResults              = "Sorry"
+	serverUnavailable      = "try another server"
+	searchAccepted         = "has been accepted"
+	searchResultIdentifier = "_results_for"
+	numMatches             = "matches"
+	beginUserList          = "353"
+	endUserList            = "366"
+)
 
-// ReadDaemon is designed to be launched as a goroutine. Listens for
-// specific messages and dispatches appropriate handler functions
-// Params: irc - IRC connection
-//         handler - domain specific handler that responds to IRC events
-func ReadDaemon(irc *irc.Conn, logIrc bool, handler ReaderHandler, disconnect <-chan struct{}) {
+type HandlerFunc func(text string)
+type EventHandler map[event]HandlerFunc
 
-	var logFile *os.File
-	serverCache = ServerCache{Servers: []string{}, Time: time.Now()}
-	var users strings.Builder // Accumulate list of users and then flush
+func StartReader(ctx context.Context, irc *irc.Conn, handler EventHandler) {
+	var users strings.Builder
 	scanner := bufio.NewScanner(irc)
-
-	if logIrc {
-		var err error
-		logFile, err = os.OpenFile("irc_log.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-		if err != nil {
-			log.Fatal("Error Opening Log File.", err)
-		}
-		defer logFile.Close()
-
-		_, err = logFile.WriteString("\n==================== NEW LOG ======================\n")
-		if err != nil {
-			log.Println(err)
-		}
-	}
 
 	for scanner.Scan() {
 		select {
-		case <-disconnect:
-			fmt.Println("breaking out of scanner due to disconnect")
+		case <-ctx.Done():
 			return
-
 		default:
-
 			text := scanner.Text()
 			if err := scanner.Err(); err != nil {
-				log.Println("Scanner errror: ", err)
+				log.Println(err)
 			}
 
-			if logIrc {
-				_, err := logFile.WriteString(text + "\n")
-				if err != nil {
-					log.Println(err)
-				}
+			// Send raw message if they want to recieve it (logging purposes)
+			if invoke, ok := handler[Message]; ok {
+				invoke(text)
 			}
 
-			// Respond to Direct Client-to-Client downloads
+			event := noOp
 			if strings.Contains(text, sendMessage) {
-				if strings.Contains(text, "_results_for") {
-					go handler.DownloadSearchResults(text)
+				if strings.Contains(text, searchResultIdentifier) {
+					event = SearchResult
 				} else {
-					go handler.DownloadBookFile(text)
+					event = BookResult
 				}
 			} else if strings.Contains(text, noticeMessage) {
 				if strings.Contains(text, noResults) {
-					handler.NoResults()
+					event = NoResults
 				} else if strings.Contains(text, serverUnavailable) {
-					handler.BadServer()
+					event = BadServer
 				} else if strings.Contains(text, searchAccepted) {
-					handler.SearchAccepted()
+					event = SearchAccepted
 				} else if strings.Contains(text, numMatches) {
 					start := strings.LastIndex(text, "returned") + 9
 					end := strings.LastIndex(text, "matches") - 1
-					handler.MatchesFound(text[start:end])
+					text = text[start:end]
+					event = MatchesFound
 				}
 			} else if strings.Contains(text, beginUserList) {
-				users.WriteString(text) // Accumulate the user list
+				users.WriteString(text)
 			} else if strings.Contains(text, endUserList) {
-				serverCache.ParseServers(users.String())
+				event = ServerList
+				text = users.String()
 				users.Reset()
 			} else if strings.Contains(text, pingMessage) {
-				irc.PONG("irc.irchighway.net")
+				event = Ping
+			}
+
+			if invoke, ok := handler[event]; ok {
+				go invoke(text)
 			}
 		}
 	}

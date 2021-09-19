@@ -9,18 +9,19 @@ import (
 type Conn struct {
 	net.Conn
 	channel  string
-	username string
+	Username string
 	realname string
 }
 
 // New creates a new IRC connection to the server using the supplied username and realname
 func New(username, realname string) *Conn {
-	irc := Conn{}
-	irc.channel = ""
-	irc.username = username
-	irc.realname = realname
+	irc := &Conn{
+		channel:  "",
+		Username: username,
+		realname: realname,
+	}
 
-	return &irc
+	return irc
 }
 
 // Connect connects to the given server at port 6667
@@ -33,8 +34,8 @@ func (i *Conn) Connect(address string) {
 
 	i.Conn = conn
 
-	user := "USER " + i.username + " " + i.username + " " + i.username + " :" + i.realname + "\r\n"
-	nick := "NICK " + i.username + "\r\n"
+	user := "USER " + i.Username + " " + i.Username + " " + i.Username + " :" + i.realname + "\r\n"
+	nick := "NICK " + i.Username + "\r\n"
 
 	i.Write([]byte(user))
 	i.Write([]byte(nick))
@@ -65,8 +66,8 @@ func (i *Conn) GetUsers(channel string) {
 	i.Write([]byte("NAMES #" + channel + "\r\n"))
 }
 
-// PONG sends a PONG message to the server, often used after a PING request
-func (i *Conn) PONG(server string) {
+// Pong sends a Pong message to the server, often used after a PING request
+func (i *Conn) Pong(server string) {
 	i.Write([]byte("PONG " + server + "\r\n"))
 }
 
