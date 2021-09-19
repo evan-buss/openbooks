@@ -38,7 +38,7 @@ const Sidebar: React.FC = () => {
           </Pane>
           <Pane display="flex" padding={8} borderBottom="muted">
             <Tablist display="flex" flex={1} justifyContent="space-between">
-              {["Book Search", "Previous Downloads"].map((tab, index) => (
+              {["Search History", "Previous Downloads"].map((tab, index) => (
                 <Tab
                   key={tab}
                   flex={1}

@@ -128,7 +128,13 @@ func parseLine(line string) (BookDetail, error) {
 	if tmp = strings.Index(line, "::INFO:: "); tmp == -1 {
 		return BookDetail{}, errors.New("could not parse size")
 	}
-	book.Size = line[tmp+9:]
+
+	line = strings.TrimSpace(line)
+	splits := strings.Split(line, " ")
+
+	if len(splits) >= 2 {
+		book.Size = splits[1]
+	}
 
 	return book, nil
 }
