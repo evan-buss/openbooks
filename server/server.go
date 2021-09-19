@@ -61,6 +61,7 @@ func New(config Config) *server {
 
 // Start instantiates the web server and opens the browser
 func Start(config Config) {
+	createBooksDirectory(config)
 	router := chi.NewRouter()
 	router.Use(middleware.RequestID)
 	router.Use(middleware.RealIP)
@@ -129,4 +130,11 @@ func (server *server) registerGracefulShutdown(cancel context.CancelFunc) {
 		time.Sleep(time.Second)
 		os.Exit(0)
 	}()
+}
+
+func createBooksDirectory(config Config) {
+	err := os.MkdirAll(path.Join(config.DownloadDir, "books"), os.FileMode(0755))
+	if err != nil {
+		panic(err)
+	}
 }
