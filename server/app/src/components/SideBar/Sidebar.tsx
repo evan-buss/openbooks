@@ -1,4 +1,4 @@
-import { Heading, Pane, Paragraph, Tab, Tablist, Tooltip } from "evergreen-ui";
+import { Heading, Pane, Paragraph, Tab, Tablist } from "evergreen-ui";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import useLocalStorageState from "use-local-storage-state";
@@ -38,7 +38,7 @@ const Sidebar: React.FC = () => {
           </Pane>
           <Pane display="flex" padding={8} borderBottom="muted">
             <Tablist display="flex" flex={1} justifyContent="space-between">
-              {["Book Search", "Past Downloads"].map((tab, index) => (
+              {["Book Search", "Previous Downloads"].map((tab, index) => (
                 <Tab
                   key={tab}
                   flex={1}
