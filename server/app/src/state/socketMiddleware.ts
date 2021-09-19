@@ -67,7 +67,7 @@ const route = (store: Store, msg: MessageEvent<any>): void => {
       case MessageType.CONNECT:
         store.dispatch(setUsername(response.name));
         return {
-          type: NotificationType.NOTIFY,
+          type: NotificationType.SUCCESS,
           title: "Welcome, connection established.",
           detail: `IRC username ${response.name}`,
           timestamp
