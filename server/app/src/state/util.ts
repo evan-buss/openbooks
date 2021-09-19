@@ -60,6 +60,7 @@ export const downloadFile = (relativeURL: string) => {
 
   let link = document.createElement("a");
   link.download = "";
+  link.target = "_blank";
   link.href = url.href;
   link.click();
   link.remove();
