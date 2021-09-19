@@ -54,7 +54,7 @@ const Sidebar: React.FC = () => {
           {selectedIndex === 0 ? <SearchHistory /> : <BookList />}
         </Pane>
         {username && (
-          <div className="z-10 fixed bottom-0 left-0 flex w-[325px] border-t bg-white border-gray-200 p-4 text-sm">
+          <div className="z-10 absolute bottom-0 left-0 flex w-[325px] border-t bg-white border-gray-200 p-4 text-sm">
             <IdentificationBadge size={24} className="mr-4" />
             {username}
           </div>
