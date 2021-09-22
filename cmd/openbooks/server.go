@@ -1,13 +1,9 @@
 package main
 
 import (
-	"fmt"
-	"math/rand"
 	"os"
 	"path"
-	"time"
 
-	"github.com/brianvoe/gofakeit/v5"
 	"github.com/evan-buss/openbooks/server"
 
 	"github.com/spf13/cobra"
@@ -15,11 +11,10 @@ import (
 
 func init() {
 	rootCmd.AddCommand(serverCmd)
-	userName := generateUserName()
 
 	serverCmd.Flags().BoolP("log", "l", false, "Save raw IRC logs for each client connection.")
 	serverCmd.Flags().BoolP("browser", "b", false, "Open the browser on server start.")
-	serverCmd.Flags().StringP("name", "n", userName, "Use a name that isn't randomly generated. One word only.")
+	serverCmd.Flags().StringP("name", "n", generateUserName(), "Use a name that isn't randomly generated. One word only.")
 	serverCmd.Flags().StringP("port", "p", "5228", "Set the local network port for browser mode.")
 	serverCmd.Flags().StringP("dir", "d", path.Join(os.TempDir(), "openbooks"), "The directory where eBooks are saved when persist enabled.")
 	serverCmd.Flags().Bool("persist", false, "Persist eBooks in 'dir'. Default is to delete after sending.")
@@ -62,14 +57,6 @@ var serverCmd = &cobra.Command{
 
 		server.Start(config)
 	},
-}
-
-// Generate a random username to avoid IRC name collisions if multiple users are hosting
-// at the same time.
-func generateUserName() string {
-	rand.Seed(time.Now().UnixNano())
-	gofakeit.Seed(int64(rand.Int()))
-	return fmt.Sprintf("%s-%s", gofakeit.Adjective(), gofakeit.Noun())
 }
 
 func sanitizePath(basepath string) string {
