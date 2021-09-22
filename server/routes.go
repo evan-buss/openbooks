@@ -31,10 +31,9 @@ func (server *server) registerRoutes() *chi.Mux {
 
 	router.Group(func(r chi.Router) {
 		r.Use(server.requireUser)
-		r.Get("/library", server.libraryHandler())
-		r.Delete("/library/{fileName}", server.deleteLibraryFileHandler())
-		r.Get("/static/library/*", server.libraryFileHandler("/static/library").ServeHTTP)
-		r.Get("/test", server.testHandler())
+		r.Get("/library", server.getAllBooksHandler())
+		r.Delete("/library/{fileName}", server.deleteBooksHandler())
+		r.Get("/library/*", server.getBookHandler())
 	})
 
 	return router
@@ -133,7 +132,7 @@ func (server *server) serverListHandler() http.HandlerFunc {
 	}
 }
 
-func (server *server) libraryHandler() http.HandlerFunc {
+func (server *server) getAllBooksHandler() http.HandlerFunc {
 	type download struct {
 		Name         string    `json:"name"`
 		DownloadLink string    `json:"downloadLink"`
@@ -141,6 +140,11 @@ func (server *server) libraryHandler() http.HandlerFunc {
 	}
 
 	return func(w http.ResponseWriter, r *http.Request) {
+		if !server.config.Persist {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+
 		libraryDir := path.Join(server.config.DownloadDir, "books")
 		books, err := os.ReadDir(libraryDir)
 		if err != nil {
@@ -170,30 +174,23 @@ func (server *server) libraryHandler() http.HandlerFunc {
 	}
 }
 
-func (server *server) libraryFileHandler(route string) http.Handler {
-	libraryPath := path.Join(server.config.DownloadDir, "books")
-	fs := http.FileServer(http.Dir(libraryPath))
+func (server *server) getBookHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		_, fileName := path.Split(r.URL.Path)
+		bookPath := path.Join(server.config.DownloadDir, "books", fileName)
 
-	// Inline middleware that deletes files after sending to user if "Persist"
-	// config option is disabled.
-	fileDeleter := func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			next.ServeHTTP(w, r)
+		http.ServeFile(w, r, bookPath)
 
-			if !server.config.Persist {
-				_, fileName := path.Split(r.URL.Path)
-				bookPath := path.Join(server.config.DownloadDir, "books", fileName)
-				err := os.Remove(bookPath)
-				if err != nil {
-					server.log.Printf("Error when deleting book file. %s", err)
-				}
+		if !server.config.Persist {
+			err := os.Remove(bookPath)
+			if err != nil {
+				server.log.Printf("Error when deleting book file. %s", err)
 			}
-		})
+		}
 	}
-	return fileDeleter(http.StripPrefix(route, fs))
 }
 
-func (server *server) deleteLibraryFileHandler() http.HandlerFunc {
+func (server *server) deleteBooksHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		fileName, err := url.PathUnescape(chi.URLParam(r, "fileName"))
 		if err != nil {
@@ -206,16 +203,5 @@ func (server *server) deleteLibraryFileHandler() http.HandlerFunc {
 			server.log.Printf("Error deleting book file: %s\n", err)
 			w.WriteHeader(http.StatusInternalServerError)
 		}
-	}
-}
-
-func (server *server) testHandler() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		client := server.getClient(r.Context())
-		if client == nil {
-			w.Write([]byte("Client not found."))
-			return
-		}
-		fmt.Fprintf(w, "Your user id is %s", client.irc.Username)
 	}
 }

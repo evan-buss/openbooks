@@ -14,7 +14,7 @@ import { useDeleteBookMutation, useGetBooksQuery } from "../../state/api";
 import { downloadFile } from "../../state/util";
 
 export default function BookList() {
-  const { data, isLoading, isSuccess } = useGetBooksQuery(null);
+  const { data, isLoading, isSuccess, isError } = useGetBooksQuery(null);
   const [deleteBook] = useDeleteBookMutation();
 
   if (isLoading) {
@@ -25,13 +25,19 @@ export default function BookList() {
     );
   }
 
+  if (isError) {
+    return (
+      <p className="text-center my-4 text-gray-500 text-sm">
+        Book persistance disabled.
+      </p>
+    );
+  }
+
   if (isSuccess && data?.length === 0) {
     return (
-      <Pane display="flex" justifyContent="center">
-        <Text marginX="auto" marginY={16} color="muted">
-          No previous downloads.
-        </Text>
-      </Pane>
+      <p className="text-center my-4 text-gray-500 text-sm">
+        No previous downloads.
+      </p>
     );
   }
 

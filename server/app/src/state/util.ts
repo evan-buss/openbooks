@@ -56,7 +56,7 @@ export const displayNotification = ({
 
 export const downloadFile = (relativeURL: string) => {
   let url = getApiURL();
-  url.pathname = relativeURL;
+  url.pathname += relativeURL;
 
   let link = document.createElement("a");
   link.download = "";

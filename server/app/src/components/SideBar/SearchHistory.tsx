@@ -38,11 +38,9 @@ const SearchHistory: React.FC = () => {
           />
         ))
       ) : (
-        <Pane display="flex" justifyContent="center">
-          <Text marginX="auto" marginY={16} color="muted">
-            History is a mystery.
-          </Text>
-        </Pane>
+        <p className="text-center my-4 text-gray-500 text-sm">
+          History is a mystery.
+        </p>
       )}
     </>
   );

@@ -74,7 +74,7 @@ func (c *Client) bookResultHandler(downloadDir string) core.HandlerFunc {
 		c.send <- DownloadResponse{
 			MessageType:  DOWNLOAD,
 			Name:         fileName,
-			DownloadLink: path.Join("/static/library", fileName),
+			DownloadLink: path.Join("library", fileName),
 		}
 	}
 }
