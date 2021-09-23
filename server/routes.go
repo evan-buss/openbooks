@@ -47,7 +47,7 @@ func (server *server) serveWs() http.HandlerFunc {
 			cookie = &http.Cookie{
 				Name:     "OpenBooks",
 				Value:    uuid.New().String(),
-				Secure:   true,
+				Secure:   false,
 				HttpOnly: true,
 				Expires:  time.Now().Add(time.Hour * 24 * 7),
 				SameSite: http.SameSiteStrictMode,
@@ -72,7 +72,6 @@ func (server *server) serveWs() http.HandlerFunc {
 		client := &Client{
 			conn: conn,
 			send: make(chan interface{}, 128),
-			// disconnect: make(chan struct{}),
 			uuid: userId,
 			irc:  irc.New(name, "OpenBooks - Search and download eBooks"),
 			log:  log.New(os.Stdout, fmt.Sprintf("CLIENT (%s): ", name), log.LstdFlags|log.Lmsgprefix),
