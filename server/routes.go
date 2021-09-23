@@ -160,7 +160,7 @@ func (server *server) getAllBooksHandler() http.HandlerFunc {
 
 				dl := download{
 					Name:         book.Name(),
-					DownloadLink: path.Join("/static/library", book.Name()),
+					DownloadLink: path.Join("library", book.Name()),
 					Time:         info.ModTime(),
 				}
 
