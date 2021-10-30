@@ -33,7 +33,7 @@ func TestStringParsing(t *testing.T) {
 	for _, table := range tables {
 		download, err := ParseString(table.search)
 		require.NoError(t, err)
-		assert.Equal(t, download, table.download)
+		assert.Equal(t, table.download, download)
 	}
 }
 

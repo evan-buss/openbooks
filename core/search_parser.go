@@ -181,8 +181,15 @@ func parseLineV2(line string) (BookDetail, error) {
 		if dashChar == -1 {
 			return "", errors.New("unable to parse author")
 		}
+		author := line[firstSpace+len(" ") : dashChar]
 
-		return line[firstSpace+len(" ") : dashChar], nil
+		// Handles case with weird author characters %\w% ("%F77FE9FF1CCD% Michael Haag")
+		if strings.Contains(author, "%") {
+			split := strings.SplitAfterN(author, " ", 2)
+			return split[1], nil
+		}
+
+		return author, nil
 	}
 
 	getTitle := func(line string) (string, string, int) {

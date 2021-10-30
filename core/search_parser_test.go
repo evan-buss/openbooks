@@ -18,8 +18,8 @@ func TestSearchParser(t *testing.T) {
 		}
 	}
 
-	if len(results) != 26 {
-		t.Errorf("Expected 26 results but got %d\n", len(results))
+	if len(results) != 28 {
+		t.Errorf("Expected 28 results but got %d\n", len(results))
 	}
 }
 
@@ -34,8 +34,8 @@ func TestSearchParserV2(t *testing.T) {
 		}
 	}
 
-	if len(results) != 26 {
-		t.Errorf("Expected 26 results but got %d\n", len(results))
+	if len(results) != 28 {
+		t.Errorf("Expected 28 results but got %d\n", len(results))
 	}
 }
 
@@ -81,12 +81,36 @@ func TestSpecialCases(t *testing.T) {
 				Full:   "!Ook So we Read on -How the Great Gatsby came to be and why it Endures (2014) - Maureen Corrigan.epub",
 			},
 		},
+		{
+			"has a weird %some_text% prefix on the title",
+			"!FWServer %F77FE9FF1CCD% Michael Haag - Inferno Decoded - The Essential Companion To The Myths, Mysteries And Locations Of Dan Brown's Inferno.epub  ::INFO:: 8.00MB",
+			BookDetail{
+				Server: "FWServer",
+				Author: "Michael Haag",
+				Title:  "Inferno Decoded - The Essential Companion To The Myths, Mysteries And Locations Of Dan Brown's Inferno",
+				Format: "epub",
+				Size:   "8.00MB",
+				Full:   "!FWServer %F77FE9FF1CCD% Michael Haag - Inferno Decoded - The Essential Companion To The Myths, Mysteries And Locations Of Dan Brown's Inferno.epub",
+			},
+		},
+		{
+			"has a weird %some_text% prefix on the title, audiobook with valid eBook format",
+			"!FWServer %DE7B9E7F6F34% Brown, Dan - Robert Langdon 04 - Inferno - Audiobook.zip  ::INFO:: 445.09MB",
+			BookDetail{
+				Server: "FWServer",
+				Author: "Brown, Dan",
+				Title:  "Robert Langdon 04 - Inferno - Audiobook",
+				Format: "zip",
+				Size:   "445.09MB",
+				Full:   "!FWServer %DE7B9E7F6F34% Brown, Dan - Robert Langdon 04 - Inferno - Audiobook.zip",
+			},
+		},
 	}
 
 	for _, input := range cases {
 		result, err := parseLineV2(input.original)
 		require.NoError(t, err)
-		assert.Equal(t, result, input.download)
+		assert.Equal(t, input.download, result)
 	}
 }
 
@@ -126,4 +150,6 @@ For easier searching, use sbClient script (also very fast local searches). You c
 !phoomphy Fitzgerald, F. Scott - The Great Gatsby (1925).epub     ::INFO:: 205.10 KiB
 !phoomphy Fitzgerald, F. Scott - The Great Gatsby.pdf     ::INFO:: 775.69 KiB
 !phoomphy Call of Cthulhu - Gatsby and the Great Race (monograph #0324).pdf     ::INFO:: 20.23 MiB
+!FWServer %F77FE9FF1CCD% Michael Haag - Inferno Decoded - The Essential Companion To The Myths, Mysteries And Locations Of Dan Brown's Inferno.epub  ::INFO:: 8.00MB
+!FWServer %DE7B9E7F6F34% Brown, Dan - Robert Langdon 04 - Inferno - Audiobook.zip  ::INFO:: 445.09MB
 `
