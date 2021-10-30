@@ -1,6 +1,8 @@
 package core
 
 import (
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"strings"
 	"testing"
 )
@@ -9,12 +11,15 @@ func TestSearchParser(t *testing.T) {
 	reader := strings.NewReader(sampleData)
 	results, errors := ParseSearch(reader)
 
-	if len(errors) > 0 {
-		t.Errorf("Expected 0 errors but got %d\n", len(errors))
+	if len(errors) > 1 {
+		t.Errorf("Expected 1 errors but got %d\n", len(errors))
+		for _, parseError := range errors {
+			t.Log(parseError)
+		}
 	}
 
-	if len(results) != 27 {
-		t.Errorf("Expected 27 results but got %d\n", len(results))
+	if len(results) != 26 {
+		t.Errorf("Expected 26 results but got %d\n", len(results))
 	}
 }
 
@@ -22,12 +27,66 @@ func TestSearchParserV2(t *testing.T) {
 	reader := strings.NewReader(sampleData)
 	results, errors := ParseSearchV2(reader)
 
-	if len(errors) > 0 {
-		t.Errorf("Expected 0 errors but got %d\n", len(errors))
+	if len(errors) != 1 {
+		t.Errorf("Expected 1 errors but got %d\n", len(errors))
+		for _, parseError := range errors {
+			t.Log(parseError)
+		}
 	}
 
-	if len(results) != 27 {
-		t.Errorf("Expected 27 results but got %d\n", len(results))
+	if len(results) != 26 {
+		t.Errorf("Expected 26 results but got %d\n", len(results))
+	}
+}
+
+func TestSpecialCases(t *testing.T) {
+	cases := []struct {
+		reason   string
+		original string
+		download BookDetail
+	}{
+		{
+			"info block, file size, title case file format, rar file",
+			"!DV8 F. Scott Fitzgerald - The Great Gatsby (Epub).rar  ::INFO:: 394.7KB",
+			BookDetail{
+				Server: "DV8",
+				Author: "F. Scott Fitzgerald",
+				Title:  "The Great Gatsby (Epub)",
+				Format: "epub",
+				Size:   "394.7KB",
+				Full:   "!DV8 F. Scott Fitzgerald - The Great Gatsby (Epub).rar",
+			},
+		},
+		{
+			"no info block, no file size",
+			"!Horla F Scott Fitzgerald - The Great Gatsby (retail) (epub).epub",
+			BookDetail{
+				Server: "Horla",
+				Author: "F Scott Fitzgerald",
+				Title:  "The Great Gatsby (retail) (epub)",
+				Format: "epub",
+				Size:   "N/A",
+				Full:   "!Horla F Scott Fitzgerald - The Great Gatsby (retail) (epub).epub",
+			},
+		},
+		{
+			"hash code, author/title swapped position",
+			"!Ook So we Read on -How the Great Gatsby came to be and why it Endures (2014) - Maureen Corrigan.epub  ::INFO:: 5MB ::HASH:: dde55317998f25aa",
+			BookDetail{
+				Server: "Ook",
+				Author: "So we Read on -How the Great Gatsby came to be and why it Endures (2014)",
+				Title:  "Maureen Corrigan",
+				Format: "epub",
+				Size:   "5MB",
+				Full:   "!Ook So we Read on -How the Great Gatsby came to be and why it Endures (2014) - Maureen Corrigan.epub",
+			},
+		},
+	}
+
+	for _, input := range cases {
+		result, err := parseLineV2(input.original)
+		require.NoError(t, err)
+		assert.Equal(t, result, input.download)
 	}
 }
 

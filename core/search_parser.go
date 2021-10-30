@@ -56,7 +56,7 @@ func ParseSearchFile(filePath string) ([]BookDetail, []ParseError) {
 
 func ParseSearch(reader io.Reader) ([]BookDetail, []ParseError) {
 	var books []BookDetail
-	var errors []ParseError
+	var parseErrors []ParseError
 
 	scanner := bufio.NewScanner(reader)
 	for scanner.Scan() {
@@ -64,7 +64,7 @@ func ParseSearch(reader io.Reader) ([]BookDetail, []ParseError) {
 		if strings.HasPrefix(line, "!") {
 			dat, err := parseLine(line)
 			if err != nil {
-				errors = append(errors, ParseError{Line: line, Error: err})
+				parseErrors = append(parseErrors, ParseError{Line: line, Error: err})
 			} else {
 				books = append(books, dat)
 			}
@@ -73,7 +73,7 @@ func ParseSearch(reader io.Reader) ([]BookDetail, []ParseError) {
 
 	sort.Slice(books, func(i, j int) bool { return books[i].Server < books[j].Server })
 
-	return books, errors
+	return books, parseErrors
 }
 
 // Parse line extracts data from a single line
@@ -141,7 +141,7 @@ func parseLine(line string) (BookDetail, error) {
 
 func ParseSearchV2(reader io.Reader) ([]BookDetail, []ParseError) {
 	var books []BookDetail
-	var errors []ParseError
+	var parseErrors []ParseError
 
 	scanner := bufio.NewScanner(reader)
 	for scanner.Scan() {
@@ -149,7 +149,7 @@ func ParseSearchV2(reader io.Reader) ([]BookDetail, []ParseError) {
 		if strings.HasPrefix(line, "!") {
 			dat, err := parseLineV2(line)
 			if err != nil {
-				errors = append(errors, ParseError{Line: line, Error: err})
+				parseErrors = append(parseErrors, ParseError{Line: line, Error: err})
 			} else {
 				books = append(books, dat)
 			}
@@ -158,7 +158,7 @@ func ParseSearchV2(reader io.Reader) ([]BookDetail, []ParseError) {
 
 	sort.Slice(books, func(i, j int) bool { return books[i].Server < books[j].Server })
 
-	return books, errors
+	return books, parseErrors
 }
 
 func parseLineV2(line string) (BookDetail, error) {
@@ -182,48 +182,46 @@ func parseLineV2(line string) (BookDetail, error) {
 			return "", errors.New("unable to parse author")
 		}
 
-		return line[firstSpace:dashChar], nil
+		return line[firstSpace+len(" ") : dashChar], nil
 	}
 
-	getTitle := func(line string) (title string, format string, endIndex int) {
-		format = ""
+	getTitle := func(line string) (string, string, int) {
+		title := ""
+		fileFormat := ""
+		endIndex := -1
 		// Get the Title
 		for _, ext := range fileTypes { //Loop through each possible file extension we've got on record
 			endTitle := strings.Index(line, "."+ext) // check if it contains our extension
 			if endTitle == -1 {
 				continue
 			}
-			format = ext
+			fileFormat = ext
 			if ext == "rar" || ext == "zip" { // If the extension is .rar or .zip the actual format is contained in ()
 				for _, ext2 := range fileTypes[:len(fileTypes)-2] { // Range over the eBook formats (exclude archives)
-					if strings.Contains(line[:endTitle], ext2) {
-						format = ext2
+					if strings.Contains(strings.ToLower(line[:endTitle]), ext2) {
+						fileFormat = ext2
 					}
 				}
 			}
 			startIndex := strings.Index(line, " - ")
-			title = line[startIndex:endTitle]
+			title = line[startIndex+len(" - ") : endTitle]
 			endIndex = endTitle
-			// line = line[tmp+len(ext)+1:]
 		}
 
-		if title == "" { // Got through the entire loop without finding a single match
-			return "", "", -1
-		}
-		return
+		return title, fileFormat, endIndex
 	}
 
 	getSize := func(line string) (string, int) {
-		infoIndex := strings.LastIndex(line, " ::INFO:: ")
+		const delimiter = " ::INFO:: "
+		infoIndex := strings.LastIndex(line, delimiter)
 
 		if infoIndex != -1 {
-			// TODO: Figure out correct index math. Mind too sleepy....
-			endIndex := strings.Index(line[infoIndex:], " ") + len(line) - infoIndex
-			size := line[infoIndex:endIndex]
-			return size, endIndex
+			// Handle cases when there is additional info after the file size (ex ::HASH:: )
+			parts := strings.Split(line[infoIndex+len(delimiter):], " ")
+			return parts[0], infoIndex
 		}
 
-		return "Unknown", len(line)
+		return "N/A", len(line)
 	}
 
 	server, err := getServer(line)
@@ -249,6 +247,6 @@ func parseLineV2(line string) (BookDetail, error) {
 		Title:  title,
 		Format: format,
 		Size:   size,
-		Full:   line[:endIndex],
+		Full:   strings.TrimSpace(line[:endIndex]),
 	}, nil
 }
