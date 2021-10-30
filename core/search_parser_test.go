@@ -18,6 +18,19 @@ func TestSearchParser(t *testing.T) {
 	}
 }
 
+func TestSearchParserV2(t *testing.T) {
+	reader := strings.NewReader(sampleData)
+	results, errors := ParseSearchV2(reader)
+
+	if len(errors) > 0 {
+		t.Errorf("Expected 0 errors but got %d\n", len(errors))
+	}
+
+	if len(results) != 27 {
+		t.Errorf("Expected 27 results but got %d\n", len(results))
+	}
+}
+
 var sampleData = `Search results from SearchBot v3.00.07 by Ook, searching dll written by Iczelion, Based on Searchbot v2.22 by Dukelupus
 Searched 20 lists for "the great gatsby" , found 27 matches. Enjoy!
 This list includes results from ALL the lists SearchBot v3.00.07 currently has, some of these servers may be offline.
