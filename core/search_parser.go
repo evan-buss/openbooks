@@ -11,7 +11,9 @@ import (
 	"strings"
 )
 
-// List of common file extensions
+// List of file extensions that I've encountered.
+// Some of them aren't eBooks, but they were returned
+// in previous search results.
 var fileTypes = [...]string{
 	"epub",
 	"mobi",
@@ -20,7 +22,13 @@ var fileTypes = [...]string{
 	"rtf",
 	"pdf",
 	"cdr",
-	"rar",
+	"lit",
+	"cbr",
+	"doc",
+	"htm",
+	"jpg",
+	"txt",
+	"rar", // Compressed extensions should always be last 2 items
 	"zip",
 }
 
@@ -51,7 +59,7 @@ func ParseSearchFile(filePath string) ([]BookDetail, []ParseError) {
 	}
 	defer file.Close()
 
-	return ParseSearch(file)
+	return ParseSearchV2(file)
 }
 
 func ParseSearch(reader io.Reader) ([]BookDetail, []ParseError) {

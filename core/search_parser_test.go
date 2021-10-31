@@ -18,8 +18,8 @@ func TestSearchParser(t *testing.T) {
 		}
 	}
 
-	if len(results) != 28 {
-		t.Errorf("Expected 28 results but got %d\n", len(results))
+	if len(results) != 57 {
+		t.Errorf("Expected 57 results but got %d\n", len(results))
 	}
 }
 
@@ -34,8 +34,8 @@ func TestSearchParserV2(t *testing.T) {
 		}
 	}
 
-	if len(results) != 28 {
-		t.Errorf("Expected 28 results but got %d\n", len(results))
+	if len(results) != 57 {
+		t.Errorf("Expected 57 results but got %d\n", len(results))
 	}
 }
 
@@ -152,4 +152,34 @@ For easier searching, use sbClient script (also very fast local searches). You c
 !phoomphy Call of Cthulhu - Gatsby and the Great Race (monograph #0324).pdf     ::INFO:: 20.23 MiB
 !FWServer %F77FE9FF1CCD% Michael Haag - Inferno Decoded - The Essential Companion To The Myths, Mysteries And Locations Of Dan Brown's Inferno.epub  ::INFO:: 8.00MB
 !FWServer %DE7B9E7F6F34% Brown, Dan - Robert Langdon 04 - Inferno - Audiobook.zip  ::INFO:: 445.09MB
+!DeathCookie Emma_L_Adams_Heritage_of_Fire_03_Inferno.epub.rar  ::INFO:: 530.0KB
+!DeathCookie J._L._Weil_Divisa_Huntress_02_Inferno_of_Darkness.epub.rar  ::INFO:: 330.9KB
+!DeathCookie Jan_Stryvant_Dan's_Inferno_01_Cursed!.epub.rar  ::INFO:: 212.5KB
+!DeathCookie Jan_Stryvant_Dan's_Inferno_02_BeDeviled.epub.rar  ::INFO:: 222.4KB
+!DeathCookie Jan_Stryvant_Dan's_Inferno_03_Heritage.epub.rar  ::INFO:: 311.6KB
+!DeathCookie Jan_Stryvant_Dan's_Inferno_04_Vengeance.epub.rar  ::INFO:: 341.4KB
+!DeathCookie Simon_Archer_Super_Hero_Academy_03_Inferno_Island.epub.rar  ::INFO:: 293.3KB
+!DeathCookie Travis_Bagwell_Tarot_03_Inferno.epub.rar  ::INFO:: 579.5KB
+!dragnbreaker Cooper, Louise - Indigo 02 - Inferno.doc  ::INFO:: 791.9KB
+!dragnbreaker Allen, Roger MacBride - Isaac Asimov's Caliban 02 - Inferno.htm  ::INFO:: 109.0B
+!dragnbreaker Allen, Roger MacBride - Isaac Asimov's Caliban 02 - Inferno.jpg  ::INFO:: 52.5KB
+!dragnbreaker Inferno! 030 [Black Library] (2002) (U.K.) (CBRed by Discovery-DCP).cbr  ::INFO:: 17.1MB
+!dragnbreaker Inferno! 001 [Black Library] (1997) (U.K.) (CBRed by Discovery-DCP).cbr  ::INFO:: 16.6MB
+!dragnbreaker Inferno! 003 [Black Library] (1997) (U.K.) (CBRed by Discovery-DCP).cbr  ::INFO:: 15.6MB
+!dragnbreaker Inferno! 004 (Black Library) (1997) (UK) (CBRed by Discovery-DCP).cbr  ::INFO:: 33.2MB
+!dragnbreaker Inferno! 006 (Black Library) (1998) (U.K.) (CBRed by Discovery-DCP).cbr  ::INFO:: 14.9MB
+!dragnbreaker Inferno! 013 [Black Library] (1999) (U.K.) (CBRed by Discovery-DCP).cbr  ::INFO:: 17.5MB
+!dragnbreaker Inferno! 024 [Black Library] (2001) (U.K.) (CBRed by Discovery-DCP).cbr  ::INFO:: 16.5MB
+!dragnbreaker Inferno! 025 [Black Library] (2001) (U.K.) (CBRed by Discovery-DCP).cbr  ::INFO:: 15.8MB
+!dragnbreaker Inferno! 029 [Black Library] (2002) (U.K.) (CBRed by Discovery-DCP).cbr  ::INFO:: 17.5MB
+!Horla Annmarie Ortega - Dante's Inferno (lit).lit
+!Horla Bianca D'Arc - Inferno (lit).lit
+!Horla Niven, Larry - [Inferno 01] - Inferno (v5.0).lit
+!Horla Linda Howard -[Raintree 01]- Inferno.doc
+!Horla Linda Howard - [Raintree 01] - Inferno (lit).lit
+!Horla Martin Amis - The Moronic Inferno & Other Visits to America.lit
+!Horla Monnery, David - The Bosnian Inferno.txt.RAR
+!Horla Roger MacBride Allen - Caliban 02 - Inferno.lit
+!Horla Annmarie Ortega - Dante's Inferno (lit).lit
+!Horla Bianca D'Arc - Inferno (lit).lit
 `
