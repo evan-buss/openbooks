@@ -2,6 +2,7 @@ package core
 
 import (
 	"bufio"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -43,8 +44,21 @@ type BookDetail struct {
 }
 
 type ParseError struct {
-	Line  string
-	Error error
+	Line  string `json:"line"`
+	Error error  `json:"error"`
+}
+
+func (p *ParseError) MarshalJSON() ([]byte, error) {
+	fmt.Println("Custom marshal")
+
+	item := struct {
+		Line  string `json:"line"`
+		Error string `json:"error"`
+	}{
+		Line:  p.Line,
+		Error: p.Error.Error(),
+	}
+	return json.Marshal(item)
 }
 
 func (p ParseError) String() string {

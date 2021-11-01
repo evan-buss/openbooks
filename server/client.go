@@ -58,11 +58,11 @@ type Client struct {
 // The application runs readPump in a per-connection goroutine. The application
 // ensures that there is at most one reader on a connection by executing all
 // reads from this goroutine.
-func (s *server) readPump(c *Client) {
+func (server *server) readPump(c *Client) {
 	defer func() {
 		c.irc.Disconnect()
 		c.conn.Close()
-		s.unregister <- c
+		server.unregister <- c
 	}()
 	c.conn.SetReadLimit(maxMessageSize)
 	c.conn.SetReadDeadline(time.Now().Add(pongWait))
@@ -82,7 +82,7 @@ func (s *server) readPump(c *Client) {
 
 			c.log.Printf("%s Message Received\n", messageToString(request.RequestType))
 
-			s.routeMessage(request, c)
+			server.routeMessage(request, c)
 		}
 	}
 }
@@ -92,7 +92,7 @@ func (s *server) readPump(c *Client) {
 // A goroutine running writePump is started for each connection. The
 // application ensures that there is at most one writer to a connection by
 // executing all writes from this goroutine.
-func (s *server) writePump(c *Client) {
+func (server *server) writePump(c *Client) {
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
 		ticker.Stop()

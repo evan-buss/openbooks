@@ -46,6 +46,7 @@ func (c *Client) searchResultHandler(downloadDir string) core.HandlerFunc {
 		c.send <- SearchResponse{
 			MessageType: SEARCH,
 			Books:       results,
+			Errors:      errors,
 		}
 
 		err = os.Remove(extractedPath)

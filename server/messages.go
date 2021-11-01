@@ -60,6 +60,7 @@ type SearchRequest struct {
 type SearchResponse struct {
 	MessageType int               `json:"type"`
 	Books       []core.BookDetail `json:"books"`
+	Errors      []core.ParseError `json:"errors"`
 }
 
 // DownloadRequest is a request to download a specific book from the IRC server

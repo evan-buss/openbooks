@@ -1,23 +1,21 @@
 import { Button, majorScale, Pane, Spinner, Table, Text } from "evergreen-ui";
 import React, { useEffect, useMemo, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { MessageType } from "../../models/messages";
+import { useDispatch } from "react-redux";
+import { BookDetail, MessageType } from "../../models/messages";
 import { sendMessage } from "../../state/stateSlice";
-import { RootState } from "../../state/store";
-import image from "../../assets/reading.svg";
 import SelectMenuHeader, { makeStatusMenuItem } from "./SelectMenuHeader";
 import { useGetServersQuery } from "../../state/api";
-import { HistoryItem } from "../../state/historySlice";
 
 const stringContains = (first: string, second: string): boolean => {
   return first.toLowerCase().includes(second.toLowerCase());
 };
 
-export const BooksGrid: React.FC = () => {
+export interface Props {
+    books?: BookDetail[];
+}
+
+export const BooksGrid: React.FC<Props> = ({ books }: Props) => {
   const dispatch = useDispatch();
-  const activeItem: HistoryItem | null = useSelector(
-    (store: RootState) => store.state.activeItem
-  );
   const { data: onlineServers, refetch } = useGetServersQuery(null);
   const [titleFilter, setTitleFilter] = useState<string>("");
   const [authorFilter, setAuthorFilter] = useState<string>("");
@@ -26,11 +24,10 @@ export const BooksGrid: React.FC = () => {
 
   useEffect(() => {
     refetch();
-  }, [activeItem]);
+  }, [books]);
 
   const filteredBooks = useMemo(() => {
-    const books = activeItem?.results ?? [];
-    return books
+    return (books ?? [])
       .filter(
         (x) =>
           serverFilter.length === 0 ||
@@ -43,32 +40,20 @@ export const BooksGrid: React.FC = () => {
           formatFilter.length === 0 ||
           formatFilter.findIndex((format) => format === x.format) !== -1
       );
-  }, [activeItem, authorFilter, titleFilter, formatFilter, serverFilter]);
+  }, [books, authorFilter, titleFilter, formatFilter, serverFilter]);
 
   const availableExtensions = useMemo(() => {
-    const extensionTypes = activeItem?.results?.map((x) => x.format) ?? [];
+    const extensionTypes = books?.map((x) => x.format) ?? [];
     return extensionTypes.filter((x, i, arr) => arr.indexOf(x) === i);
-  }, [activeItem]);
+  }, [books]);
 
   const availableServers = useMemo(() => {
     const servers =
-      onlineServers?.concat(activeItem?.results?.map((x) => x.server) ?? []) ??
-      [];
+      onlineServers?.concat(books?.map((x) => x.server) ?? []) ?? [];
     return servers.filter((x, i, arr) => arr.indexOf(x) === i);
-  }, [onlineServers, activeItem]);
+  }, [onlineServers, books]);
 
-  if (activeItem === null) {
-    return (
-      <>
-        <Text fontSize="2em" margin="3em">
-          Search a book to get started.
-        </Text>
-        <img className="w-96 xl:w-1/3" src={image} alt="person reading" />
-      </>
-    );
-  }
-
-  if (activeItem !== null && !activeItem.results) {
+  if (!books) {
     return (
       <Pane>
         <Spinner marginX="auto" marginY={120} />
@@ -78,7 +63,7 @@ export const BooksGrid: React.FC = () => {
 
   const renderBody = () => {
     // Results length is zero. No results for query
-    if (activeItem.results?.length === 0) {
+    if (books?.length === 0) {
       return (
         <Text textAlign="center" padding={majorScale(3)}>
           No results for search.
@@ -150,10 +135,12 @@ export const BooksGrid: React.FC = () => {
           placeholder="AUTHOR"
           flexBasis={250}
           flexGrow={0}
-          flexShrink={0}></Table.SearchHeaderCell>
+          flexShrink={0}
+        />
         <Table.SearchHeaderCell
           onChange={(e) => setTitleFilter(e)}
-          placeholder="TITLE"></Table.SearchHeaderCell>
+          placeholder="TITLE"
+        />
         <SelectMenuHeader
           columnTitle="Formats"
           menuTitle="Select Book Formats"

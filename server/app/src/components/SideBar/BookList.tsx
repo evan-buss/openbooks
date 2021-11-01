@@ -1,11 +1,10 @@
 import {
-  Text,
   Badge,
-  Spinner,
+  Menu,
   Popover,
   Position,
-  Menu,
-  Pane,
+  Spinner,
+  Text,
   Tooltip
 } from "evergreen-ui";
 import { Book, Download, Trash } from "phosphor-react";
@@ -20,7 +19,7 @@ export default function BookList() {
   if (isLoading) {
     return (
       <div className="flex justify-center m-4">
-        <Spinner></Spinner>
+        <Spinner />
       </div>
     );
   }
@@ -28,7 +27,7 @@ export default function BookList() {
   if (isError) {
     return (
       <p className="text-center my-4 text-gray-500 text-sm">
-        Book persistance disabled.
+        Book persistence disabled.
       </p>
     );
   }
