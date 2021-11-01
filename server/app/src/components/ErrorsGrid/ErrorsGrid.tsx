@@ -23,7 +23,7 @@ export default function ErrorsGrid({ errors }: Props) {
       <Text className="mb-2 w-full text-gray-500" size={400}>
         These results could not be parsed to due to their non-standard format.
         To download, copy the line up to the <code>::INFO::</code> or file size
-        at the end and paste in the text box above.
+        at the end and paste into the text box above.
       </Text>
       <Table
         flex={1}
