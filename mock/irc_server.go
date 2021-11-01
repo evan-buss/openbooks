@@ -9,20 +9,19 @@ import (
 	"strings"
 )
 
-var logger *log.Logger
-
 type IrcServer struct {
 	Port string
+	log  *log.Logger
 }
 
 func (irc *IrcServer) Start(ready chan<- struct{}) {
-	logger = log.New(os.Stdout, "MOCK SERVER: ", 0)
+	irc.log = log.New(os.Stdout, "MOCK SERVER: ", 0)
 
 	server, err := net.Listen("tcp", irc.Port)
 	if err != nil {
 		panic(err)
 	}
-	logger.Println("Listening on " + irc.Port)
+	irc.log.Println("Listening on " + irc.Port)
 	ready <- struct{}{}
 
 	for {
@@ -30,48 +29,48 @@ func (irc *IrcServer) Start(ready chan<- struct{}) {
 		if err != nil {
 			panic(err)
 		}
-		go handler(conn)
+		go irc.handler(conn)
 	}
 }
 
-func handler(conn net.Conn) {
-	logger.Printf("Connection received from %s", conn.RemoteAddr().String())
+func (irc *IrcServer) handler(conn net.Conn) {
+	irc.log.Printf("Connection received from %s", conn.RemoteAddr().String())
 	scanner := bufio.NewScanner(conn)
 
-	serverHandler(conn)
+	irc.serverHandler(conn)
 
 	for scanner.Scan() {
 		request := scanner.Text()
 		if err := scanner.Err(); err != nil {
-			logger.Println(err)
+			irc.log.Println(err)
 		}
 
-		logger.Printf("Request Received: %s\n", request)
+		irc.log.Printf("Request Received: %s\n", request)
 
 		if strings.Contains(request, "@search") {
-			go searchHandler(request, conn)
+			go irc.searchHandler(request, conn)
 		}
 
 		if strings.Contains(request, "!") {
-			go downloadHandler(request, conn)
+			go irc.downloadHandler(request, conn)
 		}
 	}
 
-	logger.Println("Connection closed.")
+	irc.log.Println("Connection closed.")
 }
 
-func serverHandler(conn net.Conn) {
+func (irc *IrcServer) serverHandler(conn net.Conn) {
 	fmt.Fprintf(conn, "353 +server1 ~server2 ~evan_irc\r\n")
 	fmt.Fprintf(conn, "end_list 366\r\n")
 }
 
-func searchHandler(request string, conn net.Conn) {
-	logger.Printf("Sending search results.")
+func (irc *IrcServer) searchHandler(request string, conn net.Conn) {
+	irc.log.Printf("Sending search results.")
 	fmt.Fprint(conn, "NOTICE: Search returned 27 matches\r\n")
 	fmt.Fprint(conn, ":SearchOok!ook@only.ook PRIVMSG evan_28 :DCC SEND SearchOok_results_for__the_great_gatsby.txt.zip 2130706433 6668 1184\r\n")
 }
 
-func downloadHandler(request string, conn net.Conn) {
-	logger.Println("Sending book file.")
+func (irc *IrcServer) downloadHandler(request string, conn net.Conn) {
+	irc.log.Println("Sending book file.")
 	fmt.Fprint(conn, ":SearchOok!ook@only.ook PRIVMSG evan_28 :DCC SEND great-gatsby.epub 2130706433 6669 358887\r\n")
 }

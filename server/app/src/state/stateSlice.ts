@@ -1,5 +1,5 @@
 import { createAction, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { BookDetail, MessageType } from "../models/messages";
+import { MessageType, SearchResponse } from "../models/messages";
 import { addHistoryItem, HistoryItem, updateHistoryItem } from "./historySlice";
 import { AppThunk } from "./store";
 
@@ -66,7 +66,7 @@ const sendSearch =
   };
 
 const setSearchResults =
-  (results: BookDetail[]): AppThunk =>
+  ({ books, errors }: SearchResponse): AppThunk =>
   (dispatch, getStore) => {
     const activeItem = getStore().state.activeItem;
     if (activeItem === null) {
@@ -75,7 +75,8 @@ const setSearchResults =
     const updatedItem: HistoryItem = {
       query: activeItem.query,
       timestamp: activeItem.timestamp,
-      results: results
+      results: books,
+      errors: errors
     };
 
     dispatch(setActiveItem(updatedItem));

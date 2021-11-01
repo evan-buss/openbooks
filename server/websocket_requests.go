@@ -13,7 +13,7 @@ type RequestHandler interface {
 }
 
 // messageRouter is used to parse the incoming request and respond appropriately
-func (s *server) routeMessage(message Request, c *Client) {
+func (server *server) routeMessage(message Request, c *Client) {
 	var obj interface{}
 
 	switch message.RequestType {
@@ -25,7 +25,7 @@ func (s *server) routeMessage(message Request, c *Client) {
 
 	err := json.Unmarshal(message.Payload, &obj)
 	if err != nil {
-		s.log.Println("Invalid request payload.")
+		server.log.Println("Invalid request payload.")
 		c.send <- ErrorResponse{
 			Error:   message.RequestType,
 			Details: err.Error(),
@@ -34,13 +34,13 @@ func (s *server) routeMessage(message Request, c *Client) {
 
 	switch message.RequestType {
 	case CONNECT:
-		c.startIrcConnection(s)
+		c.startIrcConnection(server)
 	case SEARCH:
 		c.sendSearchRequest(obj.(*SearchRequest))
 	case DOWNLOAD:
 		c.sendDownloadRequest(obj.(*DownloadRequest))
 	default:
-		s.log.Println("Unknown request type received.")
+		server.log.Println("Unknown request type received.")
 	}
 }
 

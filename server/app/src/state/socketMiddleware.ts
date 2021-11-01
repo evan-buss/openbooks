@@ -1,5 +1,5 @@
 import { AnyAction, PayloadAction, Store } from "@reduxjs/toolkit";
-import { BookDetail, BookResponse, MessageType } from "../models/messages";
+import { BookResponse, MessageType, SearchResponse } from "../models/messages";
 import { displayNotification, downloadFile } from "./util";
 import {
   sendMessage,
@@ -74,9 +74,7 @@ const route = (store: Store, msg: MessageEvent<any>): void => {
         };
       case MessageType.SEARCH:
         store.dispatch(
-          setSearchResults(
-            response.books as BookDetail[]
-          ) as unknown as AnyAction
+          setSearchResults(response as SearchResponse) as unknown as AnyAction
         );
         return {
           type: NotificationType.SUCCESS,

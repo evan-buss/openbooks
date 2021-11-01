@@ -95,24 +95,24 @@ func Start(config Config) {
 
 // The client hub is to be run in a goroutine and handles management of
 // websocket client registrations.
-func (s *server) startClientHub(ctx context.Context) {
+func (server *server) startClientHub(ctx context.Context) {
 	for {
 		select {
-		case client := <-s.register:
-			s.clients[client.uuid] = client
-		case client := <-s.unregister:
-			if _, ok := s.clients[client.uuid]; ok {
+		case client := <-server.register:
+			server.clients[client.uuid] = client
+		case client := <-server.unregister:
+			if _, ok := server.clients[client.uuid]; ok {
 				_, cancel := context.WithCancel(client.ctx)
 				close(client.send)
 				cancel()
-				delete(s.clients, client.uuid)
+				delete(server.clients, client.uuid)
 			}
 		case <-ctx.Done():
-			for _, client := range s.clients {
+			for _, client := range server.clients {
 				_, cancel := context.WithCancel(client.ctx)
 				close(client.send)
 				cancel()
-				delete(s.clients, client.uuid)
+				delete(server.clients, client.uuid)
 			}
 			return
 		}

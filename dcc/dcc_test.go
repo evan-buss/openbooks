@@ -2,7 +2,8 @@ package dcc
 
 import (
 	"bytes"
-	"reflect"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"testing"
 
 	"github.com/evan-buss/openbooks/mock"
@@ -31,13 +32,8 @@ func TestStringParsing(t *testing.T) {
 
 	for _, table := range tables {
 		download, err := ParseString(table.search)
-		if err != nil {
-			t.Error(err)
-		}
-
-		if !reflect.DeepEqual(download, table.download) {
-			t.Errorf("Got %#v want %#v\n", download, table.download)
-		}
+		require.NoError(t, err)
+		assert.Equal(t, table.download, download)
 	}
 }
 
@@ -65,11 +61,6 @@ func TestDownload(t *testing.T) {
 
 	received := new(mock.WriteCloser)
 	err := textDownload.Download(received)
-	if err != nil {
-		t.Error(err)
-	}
-
-	if !reflect.DeepEqual(text, string(received.Data)) {
-		t.Errorf("data does not match. got: '%s' want: '%s'\n", received.Data, text)
-	}
+	require.NoError(t, err)
+	assert.Equal(t, text, string(received.Data))
 }
