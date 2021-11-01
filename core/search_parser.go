@@ -49,8 +49,6 @@ type ParseError struct {
 }
 
 func (p *ParseError) MarshalJSON() ([]byte, error) {
-	fmt.Println("Custom marshal")
-
 	item := struct {
 		Line  string `json:"line"`
 		Error string `json:"error"`

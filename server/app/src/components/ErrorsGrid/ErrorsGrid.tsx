@@ -41,7 +41,7 @@ export default function ErrorsGrid({ errors }: Props) {
           />
           <Table.SearchHeaderCell
             onChange={(e) => setErrorFilter(e)}
-            placeholder="ERROR"
+            placeholder="PARSE ERROR"
             flexBasis={350}
             flexGrow={0}
             flexShrink={0}
