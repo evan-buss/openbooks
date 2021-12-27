@@ -44,7 +44,7 @@ services:
         command: --persist
         environment:
           - BASE_PATH=/openbooks/
-        image: evan-buss/openbooks:latest
+        image: evanbuss/openbooks:latest
 
 volumes:
     booksVolume:
