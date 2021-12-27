@@ -3,6 +3,7 @@ package server
 import (
 	"os"
 	"path"
+	"path/filepath"
 
 	"github.com/evan-buss/openbooks/core"
 )
@@ -23,7 +24,7 @@ func (server *server) NewIrcEventHandler(client *Client) core.EventHandler {
 // searchResultHandler downloads from DCC server, parses data, and sends data to client
 func (c *Client) searchResultHandler(downloadDir string) core.HandlerFunc {
 	return func(text string) {
-		extractedPath, err := core.DownloadExtractDCCString(path.Join(downloadDir, "books"), text, nil)
+		extractedPath, err := core.DownloadExtractDCCString(filepath.Join(downloadDir, "books"), text, nil)
 		if err != nil {
 			c.log.Println(err)
 		}
@@ -59,7 +60,7 @@ func (c *Client) searchResultHandler(downloadDir string) core.HandlerFunc {
 // bookResultHandler downloads the book file and sends it over the websocket
 func (c *Client) bookResultHandler(downloadDir string) core.HandlerFunc {
 	return func(text string) {
-		extractedPath, err := core.DownloadExtractDCCString(path.Join(downloadDir, "books"), text, nil)
+		extractedPath, err := core.DownloadExtractDCCString(filepath.Join(downloadDir, "books"), text, nil)
 		if err != nil {
 			c.log.Println(err)
 			c.send <- ErrorResponse{
@@ -69,7 +70,7 @@ func (c *Client) bookResultHandler(downloadDir string) core.HandlerFunc {
 			return
 		}
 
-		fileName := path.Base(extractedPath)
+		fileName := filepath.Base(extractedPath)
 
 		c.log.Printf("Sending book entitled '%s'.\n", fileName)
 		c.send <- DownloadResponse{

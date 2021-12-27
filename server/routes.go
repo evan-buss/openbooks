@@ -12,6 +12,7 @@ import (
 	"net/url"
 	"os"
 	"path"
+	"path/filepath"
 	"time"
 
 	"github.com/evan-buss/openbooks/irc"
@@ -144,7 +145,7 @@ func (server *server) getAllBooksHandler() http.HandlerFunc {
 			return
 		}
 
-		libraryDir := path.Join(server.config.DownloadDir, "books")
+		libraryDir := filepath.Join(server.config.DownloadDir, "books")
 		books, err := os.ReadDir(libraryDir)
 		if err != nil {
 			server.log.Printf("Unable to list books. %s\n", err)
@@ -176,7 +177,7 @@ func (server *server) getAllBooksHandler() http.HandlerFunc {
 func (server *server) getBookHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		_, fileName := path.Split(r.URL.Path)
-		bookPath := path.Join(server.config.DownloadDir, "books", fileName)
+		bookPath := filepath.Join(server.config.DownloadDir, "books", fileName)
 
 		http.ServeFile(w, r, bookPath)
 
@@ -197,7 +198,7 @@ func (server *server) deleteBooksHandler() http.HandlerFunc {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 
-		err = os.Remove(path.Join(server.config.DownloadDir, "books", fileName))
+		err = os.Remove(filepath.Join(server.config.DownloadDir, "books", fileName))
 		if err != nil {
 			server.log.Printf("Error deleting book file: %s\n", err)
 			w.WriteHeader(http.StatusInternalServerError)
