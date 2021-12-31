@@ -89,7 +89,8 @@ type IrcErrorResponse struct {
 	Status      string `json:"status"`
 }
 
-// IrcErrorResponse is a response that indicates something went wrong on the IRC server's end
+// SearchRateLimitResponse is a response that indicates the user is making search requests to quickly.
+// Displays the time until the next search request can be made.
 type SearchRateLimitResponse struct {
 	MessageType int    `json:"type"`
 	Status      string `json:"status"`

@@ -78,11 +78,11 @@ func (c *Client) sendSearchRequest(s *SearchRequest, server *server) {
 	nextAvailableSearch := server.lastSearch.Add(server.config.SearchTimeout)
 
 	if time.Now().Before(nextAvailableSearch) {
-		remaining := time.Until(server.lastSearch.Add(server.config.SearchTimeout))
+		remainingSeconds := time.Until(nextAvailableSearch).Seconds()
 
 		c.send <- SearchRateLimitResponse{
 			MessageType: SEARCHRATELIMIT,
-			Status:      fmt.Sprintf("Please wait %v seconds to submit another search.", math.Round(remaining.Seconds())),
+			Status:      fmt.Sprintf("Please wait %v seconds to submit another search.", math.Round(remainingSeconds)),
 		}
 		return
 	}
