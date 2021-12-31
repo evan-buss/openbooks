@@ -4,6 +4,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"time"
 
 	"github.com/evan-buss/openbooks/server"
 
@@ -21,6 +22,7 @@ func init() {
 	serverCmd.Flags().Bool("persist", false, "Persist eBooks in 'dir'. Default is to delete after sending.")
 	serverCmd.Flags().String("basepath", "/", `Base path where the application is accessible. For example "/openbooks/".`)
 	serverCmd.Flags().StringP("server", "s", "irc.irchighway.net", "IRC server to connect to.")
+	serverCmd.Flags().IntP("rate-limit", "r", 10, "The number of seconds to wait between searches to reduce strain on IRC search servers. Minimum is 10 seconds.")
 }
 
 var serverCmd = &cobra.Command{
@@ -36,6 +38,7 @@ var serverCmd = &cobra.Command{
 		persist, _ := cmd.Flags().GetBool("persist")
 		basepath, _ := cmd.Flags().GetString("basepath")
 		url, _ := cmd.Flags().GetString("server")
+		rateLimit, _ := cmd.Flags().GetInt("rate-limit")
 
 		// If cli flag isn't set (default value) check for the presence of an
 		// environment variable and use it if found.
@@ -45,15 +48,21 @@ var serverCmd = &cobra.Command{
 			}
 		}
 
+		// If user enters a limit that's too low, set to default of 10 seconds.
+		if rateLimit < 10 {
+			rateLimit = 10
+		}
+
 		config := server.Config{
-			Log:         log,
-			OpenBrowser: browser,
-			UserName:    name,
-			Port:        port,
-			DownloadDir: dir,
-			Persist:     persist,
-			Basepath:    sanitizePath(basepath),
-			Server:      url,
+			Log:           log,
+			OpenBrowser:   browser,
+			UserName:      name,
+			Port:          port,
+			DownloadDir:   dir,
+			Persist:       persist,
+			Basepath:      sanitizePath(basepath),
+			Server:        url,
+			SearchTimeout: time.Duration(rateLimit) * time.Second,
 		}
 
 		server.Start(config)

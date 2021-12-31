@@ -2,6 +2,9 @@ package server
 
 import (
 	"encoding/json"
+	"fmt"
+	"math"
+	"time"
 
 	"github.com/evan-buss/openbooks/core"
 	"github.com/evan-buss/openbooks/util"
@@ -36,7 +39,7 @@ func (server *server) routeMessage(message Request, c *Client) {
 	case CONNECT:
 		c.startIrcConnection(server)
 	case SEARCH:
-		c.sendSearchRequest(obj.(*SearchRequest))
+		c.sendSearchRequest(obj.(*SearchRequest), server)
 	case DOWNLOAD:
 		c.sendDownloadRequest(obj.(*DownloadRequest))
 	default:
@@ -68,8 +71,24 @@ func (c *Client) startIrcConnection(server *server) {
 }
 
 // handle SearchRequests and send the query to the book server
-func (c *Client) sendSearchRequest(s *SearchRequest) {
+func (c *Client) sendSearchRequest(s *SearchRequest, server *server) {
+	server.lastSearchMutex.Lock()
+	defer server.lastSearchMutex.Unlock()
+
+	nextAvailableSearch := server.lastSearch.Add(server.config.SearchTimeout)
+
+	if time.Now().Before(nextAvailableSearch) {
+		remaining := time.Until(server.lastSearch.Add(server.config.SearchTimeout))
+
+		c.send <- SearchRateLimitResponse{
+			MessageType: SEARCHRATELIMIT,
+			Status:      fmt.Sprintf("Please wait %v seconds to submit another search.", math.Round(remaining.Seconds())),
+		}
+		return
+	}
+
 	core.SearchBook(c.irc, s.Query)
+	server.lastSearch = time.Now()
 
 	c.send <- WaitResponse{
 		MessageType: WAIT,
