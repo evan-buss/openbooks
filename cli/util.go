@@ -2,12 +2,15 @@ package cli
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"log"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"syscall"
+	"time"
 
 	"github.com/evan-buss/openbooks/core"
 	"github.com/evan-buss/openbooks/irc"
@@ -45,4 +48,26 @@ func (config *Config) setupLogger(handler core.EventHandler) io.Closer {
 	}
 
 	return file
+}
+
+func GetLastSearchTime() time.Time {
+	timestampFilePath := filepath.Join(os.TempDir(), ".openbooks")
+	fileInfo, err := os.Stat(timestampFilePath)
+
+	if errors.Is(err, os.ErrNotExist) {
+		return time.Time{}
+	}
+
+	return fileInfo.ModTime()
+}
+
+func SetLastSearchTime() {
+	timestampFilePath := filepath.Join(os.TempDir(), ".openbooks")
+	_, err := os.Stat(timestampFilePath)
+
+	if errors.Is(err, os.ErrNotExist) {
+		os.Create(timestampFilePath)
+	}
+
+	os.Chtimes(timestampFilePath, time.Now(), time.Now())
 }

@@ -5,10 +5,13 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/evan-buss/openbooks/core"
 	"github.com/evan-buss/openbooks/irc"
 )
+
+var lastSearch time.Time
 
 func terminalMenu(irc *irc.Conn) {
 	fmt.Print("\ns)search\ng)et book\nd)one\n~> ")
@@ -24,8 +27,10 @@ func terminalMenu(irc *irc.Conn) {
 	case "s":
 		fmt.Print("@search ")
 		message, _ := reader.ReadString('\n')
-		core.SearchBook(irc, clean(message))
 		fmt.Println("\nSent search request.")
+		time.Sleep(time.Until(lastSearch.Add(time.Second * 15)))
+		core.SearchBook(irc, clean(message))
+		lastSearch = time.Now()
 	case "g":
 		fmt.Print("Download String: ")
 		message, _ := reader.ReadString('\n')
