@@ -7,6 +7,8 @@ import (
 	"os"
 	"os/signal"
 	"path"
+	"path/filepath"
+	"sync"
 	"syscall"
 	"time"
 
@@ -34,18 +36,25 @@ type server struct {
 	unregister chan *Client
 
 	log *log.Logger
+
+	// Mutex to guard the lastSearch timestamp
+	lastSearchMutex sync.Mutex
+
+	// The time the last search was performed. Used to rate limit searches.
+	lastSearch time.Time
 }
 
 // Config contains settings for server
 type Config struct {
-	Log         bool
-	OpenBrowser bool
-	Port        string
-	UserName    string
-	Persist     bool
-	DownloadDir string
-	Basepath    string
-	Server      string
+	Log           bool
+	OpenBrowser   bool
+	Port          string
+	UserName      string
+	Persist       bool
+	DownloadDir   string
+	Basepath      string
+	Server        string
+	SearchTimeout time.Duration
 }
 
 func New(config Config) *server {
@@ -133,7 +142,7 @@ func (server *server) registerGracefulShutdown(cancel context.CancelFunc) {
 }
 
 func createBooksDirectory(config Config) {
-	err := os.MkdirAll(path.Join(config.DownloadDir, "books"), os.FileMode(0755))
+	err := os.MkdirAll(filepath.Join(config.DownloadDir, "books"), os.FileMode(0755))
 	if err != nil {
 		panic(err)
 	}

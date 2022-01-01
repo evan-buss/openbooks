@@ -52,8 +52,17 @@ export const historySlice = createSlice({
 
 // Delete an item from history. Clear current item and loading state if deleting active search
 const deleteHistoryItem =
-  (timeStamp: number): AppThunk =>
+  (timeStamp?: number): AppThunk =>
   (dispatch, getStore) => {
+    if (timeStamp === undefined) {
+      dispatch(setActiveItem(null));
+      const toRemove = getStore().history.items.at(0)?.timestamp;
+      if (toRemove) {
+        dispatch(historySlice.actions.deleteByTimetamp(toRemove));
+      }
+      return;
+    }
+
     const activeItem = getStore().state.activeItem;
     if (activeItem?.timestamp === timeStamp) {
       dispatch(setActiveItem(null));
