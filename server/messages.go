@@ -15,6 +15,7 @@ const (
 	DOWNLOAD
 	WAIT
 	IRCERROR
+	SEARCHRATELIMIT
 )
 
 func messageToString(s int) string {
@@ -84,6 +85,13 @@ type WaitResponse struct {
 
 // IrcErrorResponse is a response that indicates something went wrong on the IRC server's end
 type IrcErrorResponse struct {
+	MessageType int    `json:"type"`
+	Status      string `json:"status"`
+}
+
+// SearchRateLimitResponse is a response that indicates the user is making search requests to quickly.
+// Displays the time until the next search request can be made.
+type SearchRateLimitResponse struct {
 	MessageType int    `json:"type"`
 	Status      string `json:"status"`
 }

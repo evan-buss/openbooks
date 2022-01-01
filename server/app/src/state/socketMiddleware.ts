@@ -10,6 +10,7 @@ import {
 import { addNotification } from "./notificationSlice";
 import { Notification, NotificationType } from "./models";
 import { openbooksApi } from "./api";
+import { deleteHistoryItem } from "./historySlice";
 
 // Web socket redux middleware.
 // Listens to socket and dispatches handlers.
@@ -100,6 +101,14 @@ const route = (store: Store, msg: MessageEvent<any>): void => {
         return {
           type: NotificationType.DANGER,
           title: "IRC Error. Try again.",
+          timestamp
+        };
+      case MessageType.SEARCHRATELIMIT:
+        store.dispatch(deleteHistoryItem() as unknown as AnyAction);
+        return {
+          type: NotificationType.WARNING,
+          title: "Search Rate Limit",
+          detail: response.status,
           timestamp
         };
       default:
