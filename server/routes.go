@@ -69,7 +69,7 @@ func (server *server) serveWs() http.HandlerFunc {
 		}
 
 		// Each client gets its own connection, so use different usernames by appending count
-		name := fmt.Sprintf("%s-%d", server.config.UserName, len(server.clients)+1)
+		name := fmt.Sprintf("%s_%d", server.config.UserName, len(server.clients)+1)
 		client := &Client{
 			conn: conn,
 			send: make(chan interface{}, 128),

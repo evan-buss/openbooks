@@ -27,5 +27,5 @@ func main() {
 func generateUserName() string {
 	rand.Seed(time.Now().UnixNano())
 	gofakeit.Seed(int64(rand.Int()))
-	return fmt.Sprintf("%s-%s", gofakeit.Adjective(), gofakeit.Noun())
+	return fmt.Sprintf("%s_%s", gofakeit.Adjective(), gofakeit.Noun())
 }
