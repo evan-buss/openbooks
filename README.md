@@ -1,6 +1,6 @@
 # openbooks
 
-> NOTE: OpenBooks is currently banned from the #ebooks channel due to excessive search requests putting strain on their servers. I am working with the server admins to resolve this issue. Please be patient. (See [Issue #52](https://github.com/evan-buss/openbooks/issues/52))
+> NOTE: OpenBooks has been updated to comply with requests from IRC admins. Please download the latest release to continue using it. See [Issue #52](https://github.com/evan-buss/openbooks/issues/52) for context.
 
 [![Docker Pulls](https://img.shields.io/docker/pulls/evanbuss/openbooks.svg)](https://hub.docker.com/r/evanbuss/openbooks/)
 
