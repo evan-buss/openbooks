@@ -38,7 +38,7 @@ func (c *Client) searchResultHandler(downloadDir string) core.HandlerFunc {
 			}
 		}
 
-		if len(results) == 0 {
+		if len(results) == 0 && len(errors) == 0 {
 			c.noResultsHandler(text)
 			return
 		}
