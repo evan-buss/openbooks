@@ -30,13 +30,13 @@ func registerShutdown(conn *irc.Conn, cancel context.CancelFunc) {
 	}()
 }
 
-func instantiate(config *Config) *irc.Conn {
+// Connect to IRC server and save connection to Config
+func instantiate(config *Config) {
 	fmt.Printf("Connecting to %s.", config.Server)
 	conn := irc.New(config.UserName, "OpenBooks CLI")
 	config.irc = conn
 	core.Join(conn, config.Server)
 	fmt.Printf("%sConnected to %s.\n", clearLine, config.Server)
-	return conn
 }
 
 // Required handlers are used regardless of what CLI mode is selected.
