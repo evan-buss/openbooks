@@ -3,6 +3,7 @@ Future:
   - Show server status indicator in the grid rows
   - Show IRC logs in the browser
   - Show online servers in the CLI.
+  - Handle name collisions
   - Allow reconnecting to same IRC connection if websocket disconnects.
     - Currently we immediately terminate the IRC connection and remove the client
     - Possible use a timer that keeps the Client around for a set period of time
