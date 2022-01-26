@@ -22,7 +22,7 @@ func StartInteractive(config Config) {
 	fmt.Println("          Welcome to OpenBooks         ")
 	fmt.Println("=======================================")
 
-	conn := instantiate(config)
+	conn := instantiate(&config)
 	config.irc = conn
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -41,11 +41,12 @@ func StartInteractive(config Config) {
 }
 
 func StartDownload(config Config, download string) {
-	conn := instantiate(config)
+	conn := instantiate(&config)
 	defer conn.Close()
 	ctx, cancel := context.WithCancel(context.Background())
 
 	handler := core.EventHandler{}
+	addRequiredHandlers(handler, &config)
 	handler[core.BookResult] = func(text string) {
 		fmt.Printf("%sReceived file response.\n", clearLine)
 		config.downloadHandler(text)
@@ -67,11 +68,12 @@ func StartDownload(config Config, download string) {
 }
 
 func StartSearch(config Config, query string) {
-	conn := instantiate(config)
+	conn := instantiate(&config)
 	defer conn.Close()
 	ctx, cancel := context.WithCancel(context.Background())
 
 	handler := core.EventHandler{}
+	addRequiredHandlers(handler, &config)
 	handler[core.SearchResult] = func(text string) {
 		fmt.Printf("%sReceived file response.\n", clearLine)
 		config.searchHandler(text)

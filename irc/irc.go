@@ -52,6 +52,11 @@ func (i *Conn) SendMessage(message string) {
 	i.Write([]byte("PRIVMSG #" + i.channel + " :" + message + "\r\n"))
 }
 
+// SendNotice sends a notice message to the specified user
+func (i *Conn) SendNotice(user string, message string) {
+	i.Write([]byte("NOTICE " + user + " :" + message + "\r\n"))
+}
+
 // JoinChannel joins the channel given by channel string
 func (i *Conn) JoinChannel(channel string) {
 	i.channel = channel

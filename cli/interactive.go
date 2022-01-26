@@ -48,6 +48,7 @@ func terminalMenu(irc *irc.Conn) {
 
 func fullHandler(config Config) core.EventHandler {
 	handler := core.EventHandler{}
+	addRequiredHandlers(handler, &config)
 
 	handler[core.BadServer] = func(text string) {
 		config.badServerHandler(text)
@@ -67,7 +68,6 @@ func fullHandler(config Config) core.EventHandler {
 		terminalMenu(config.irc)
 	}
 	handler[core.MatchesFound] = config.matchesFoundHandler
-	handler[core.Ping] = config.pingHandler
 
 	return handler
 }
