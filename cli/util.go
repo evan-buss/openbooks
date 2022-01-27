@@ -63,7 +63,7 @@ func GetLastSearchTime() time.Time {
 	fileInfo, err := os.Stat(timestampFilePath)
 
 	if errors.Is(err, os.ErrNotExist) {
-		return time.Time{}
+		return time.Now()
 	}
 
 	return fileInfo.ModTime()

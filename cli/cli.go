@@ -3,6 +3,7 @@ package cli
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/evan-buss/openbooks/core"
 	"github.com/evan-buss/openbooks/irc"
@@ -68,6 +69,7 @@ func StartDownload(config Config, download string) {
 }
 
 func StartSearch(config Config, query string) {
+	nextSearchTime := GetLastSearchTime().Add(15 * time.Second)
 	instantiate(&config)
 	defer config.irc.Close()
 	ctx, cancel := context.WithCancel(context.Background())
@@ -86,8 +88,10 @@ func StartSearch(config Config, query string) {
 	}
 
 	fmt.Printf("Sending search request.")
+	time.Sleep(time.Until(nextSearchTime))
 	go core.StartReader(ctx, config.irc, handler)
 	core.SearchBook(config.irc, query)
+	SetLastSearchTime()
 	fmt.Printf("%sSent search request.", clearLine)
 	fmt.Printf("Waiting for file response.")
 
