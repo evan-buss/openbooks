@@ -24,7 +24,6 @@ export interface Props {
 }
 
 export const BooksGrid: React.FC<Props> = ({ books }: Props) => {
-  const dispatch = useDispatch();
   const { data: onlineServers, refetch } = useGetServersQuery(null);
   const [titleFilter, setTitleFilter] = useState<string>("");
   const [authorFilter, setAuthorFilter] = useState<string>("");
@@ -114,19 +113,7 @@ export const BooksGrid: React.FC<Props> = ({ books }: Props) => {
           {book.size}
         </Table.TextCell>
         <Table.Cell flexBasis={150} flexGrow={0} flexShrink={0}>
-          <Button
-            appearance="primary"
-            size="small"
-            onClick={() =>
-              dispatch(
-                sendMessage({
-                  type: MessageType.DOWNLOAD,
-                  payload: { book: book.full }
-                })
-              )
-            }>
-            Download
-          </Button>
+          <DownloadButton book={book.full} />
         </Table.Cell>
       </Table.Row>
     ));
@@ -186,3 +173,26 @@ export const BooksGrid: React.FC<Props> = ({ books }: Props) => {
     </Table>
   );
 };
+
+function DownloadButton({ book }: { book: string }) {
+  const dispatch = useDispatch();
+  const [disabled, setDisabled] = useState(false);
+
+  // Prevent hitting the same button multiple times
+  const onClick = () => {
+    if (disabled) return;
+    dispatch(
+      sendMessage({
+        type: MessageType.DOWNLOAD,
+        payload: { book }
+      })
+    );
+    setDisabled(true);
+  };
+
+  return (
+    <Button appearance="primary" size="small" onClick={onClick}>
+      Download
+    </Button>
+  );
+}
