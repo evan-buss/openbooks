@@ -1,4 +1,13 @@
-import { Button, majorScale, Pane, Spinner, Table, Text } from "evergreen-ui";
+import {
+  Button,
+  majorScale,
+  Pane,
+  Spinner,
+  StatusIndicator,
+  Table,
+  Text,
+  Tooltip
+} from "evergreen-ui";
 import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import { BookDetail, MessageType } from "../../models/messages";
@@ -11,7 +20,7 @@ const stringContains = (first: string, second: string): boolean => {
 };
 
 export interface Props {
-    books?: BookDetail[];
+  books?: BookDetail[];
 }
 
 export const BooksGrid: React.FC<Props> = ({ books }: Props) => {
@@ -82,7 +91,16 @@ export const BooksGrid: React.FC<Props> = ({ books }: Props) => {
 
     return filteredBooks.map((book, i) => (
       <Table.Row key={book.full + i} isSelectable>
-        <Table.TextCell flexBasis={100} flexGrow={0} flexShrink={0}>
+        <Table.TextCell flexBasis={120} flexGrow={0} flexShrink={0}>
+          <Tooltip
+            content={
+              onlineServers?.includes(book.server) ? "Online" : "Offline"
+            }>
+            <StatusIndicator
+              color={
+                onlineServers?.includes(book.server) ? "success" : undefined
+              }></StatusIndicator>
+          </Tooltip>
           {book.server}
         </Table.TextCell>
         <Table.TextCell flexBasis={250} flexGrow={0} flexShrink={0}>
@@ -123,6 +141,7 @@ export const BooksGrid: React.FC<Props> = ({ books }: Props) => {
       className="rounded-lg">
       <Table.Head background="white" className="rounded-t-md">
         <SelectMenuHeader
+          flexBasis={120}
           options={availableServers}
           columnTitle="Servers"
           menuTitle="Filter Servers"

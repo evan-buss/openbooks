@@ -10,6 +10,7 @@ import {
 import React from "react";
 
 interface Props {
+  flexBasis?: number;
   columnTitle: string;
   menuTitle: string;
   options: string[];
@@ -25,7 +26,10 @@ const SelectMenuHeader = (props: Props) => {
   }));
 
   return (
-    <Table.TextHeaderCell flexBasis={100} flexGrow={0} flexShrink={0}>
+    <Table.TextHeaderCell
+      flexBasis={props.flexBasis ?? 100}
+      flexGrow={0}
+      flexShrink={0}>
       <SelectMenu
         isMultiSelect
         title={props.menuTitle}
