@@ -99,7 +99,7 @@ const HistoryCard: React.FC<Props> = ({ activeTS, item, dispatch }: Props) => {
           textOverflow="ellipsis">
           {item.query}
         </Text>
-        {!item.results?.length ? (
+        {!item.results?.length && !item.errors?.length ? (
           <Spinner size={20} marginRight={5} />
         ) : (
           <Badge color="blue">{`${item.results?.length} RESULTS`}</Badge>

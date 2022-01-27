@@ -160,8 +160,8 @@ func parseLine(line string) (BookDetail, error) {
 }
 
 func ParseSearchV2(reader io.Reader) ([]BookDetail, []ParseError) {
-	var books []BookDetail
-	var parseErrors []ParseError
+	books := make([]BookDetail, 0)
+	parseErrors := make([]ParseError, 0)
 
 	scanner := bufio.NewScanner(reader)
 	for scanner.Scan() {

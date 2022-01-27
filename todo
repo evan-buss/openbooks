@@ -7,3 +7,9 @@ Future:
   - Convert grid to use React Grid instead of Evergreen's built in one.
     - Things like styling are more difficult with Evergreen (ex. can't round the bottom corners)
   - Send download progress updates to the browser like we show for the CLI
+  - Improve message formats. 
+    - Don't need as many separate message types. Just have functions that create them with the appropriate status code.
+  - Log the address to access it in the browser on startup
+  - When the results contain only lines that couldn't be parsed,
+    the grid doesn't show and user can't manually download.
+  - Prevent double clicking the download button.

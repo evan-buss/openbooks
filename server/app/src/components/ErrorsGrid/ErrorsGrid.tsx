@@ -56,7 +56,11 @@ export default function ErrorsGrid({ errors }: Props) {
             )
             .map((book, i) => (
               <Table.Row key={book.line + i} isSelectable>
-                <Table.TextCell flexBasis={250} flexGrow={1} flexShrink={0}>
+                <Table.TextCell
+                  flexBasis={250}
+                  flexGrow={1}
+                  flexShrink={0}
+                  cursor="text">
                   <code>{book.line}</code>
                 </Table.TextCell>
                 <Table.TextCell flexBasis={350} flexGrow={0} flexShrink={0}>
