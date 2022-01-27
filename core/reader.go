@@ -22,6 +22,7 @@ const (
 	MatchesFound   = event(7)
 	ServerList     = event(8)
 	Ping           = event(9)
+	Version        = event(10)
 )
 
 // Unique identifiers found in the message for various different events.
@@ -36,6 +37,7 @@ const (
 	numMatches             = "matches"
 	beginUserList          = "353"
 	endUserList            = "366"
+	versionInquiry         = "\x01VERSION\x01"
 )
 
 type HandlerFunc func(text string)
@@ -88,6 +90,8 @@ func StartReader(ctx context.Context, irc *irc.Conn, handler EventHandler) {
 				users.Reset()
 			} else if strings.Contains(text, pingMessage) {
 				event = Ping
+			} else if strings.Contains(text, versionInquiry) {
+				event = Version
 			}
 
 			if invoke, ok := handler[event]; ok {

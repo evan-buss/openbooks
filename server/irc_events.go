@@ -18,6 +18,7 @@ func (server *server) NewIrcEventHandler(client *Client) core.EventHandler {
 	handler[core.MatchesFound] = client.matchesFoundHandler
 	handler[core.Ping] = client.pingHandler
 	handler[core.ServerList] = client.userListHandler(server.repository)
+	handler[core.Version] = client.versionHandler
 	return handler
 }
 
@@ -115,6 +116,10 @@ func (c *Client) matchesFoundHandler(num string) {
 
 func (c *Client) pingHandler(serverUrl string) {
 	c.irc.Pong(serverUrl)
+}
+
+func (c *Client) versionHandler(line string) {
+	core.SendVersionInfo(c.irc, line)
 }
 
 func (c *Client) userListHandler(repo *Repository) core.HandlerFunc {

@@ -30,12 +30,20 @@ func registerShutdown(conn *irc.Conn, cancel context.CancelFunc) {
 	}()
 }
 
-func instantiate(config Config) *irc.Conn {
+// Connect to IRC server and save connection to Config
+func instantiate(config *Config) {
 	fmt.Printf("Connecting to %s.", config.Server)
 	conn := irc.New(config.UserName, "OpenBooks CLI")
+	config.irc = conn
 	core.Join(conn, config.Server)
 	fmt.Printf("%sConnected to %s.\n", clearLine, config.Server)
-	return conn
+}
+
+// Required handlers are used regardless of what CLI mode is selected.
+// Keep alive pings and other core IRC client features
+func addRequiredHandlers(handler core.EventHandler, config *Config) {
+	handler[core.Ping] = config.pingHandler
+	handler[core.Version] = config.versionHandler
 }
 
 func (config *Config) setupLogger(handler core.EventHandler) io.Closer {
@@ -55,7 +63,7 @@ func GetLastSearchTime() time.Time {
 	fileInfo, err := os.Stat(timestampFilePath)
 
 	if errors.Is(err, os.ErrNotExist) {
-		return time.Time{}
+		return time.Now()
 	}
 
 	return fileInfo.ModTime()
