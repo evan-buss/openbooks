@@ -99,6 +99,7 @@ func Start(config Config) {
 	}
 
 	server.log.Printf("OpenBooks is listening on port %v", config.Port)
+	server.log.Printf("Open http://localhost:%v%s in your browser.", config.Port, config.Basepath)
 	server.log.Fatal(http.ListenAndServe(":"+config.Port, router))
 }
 
