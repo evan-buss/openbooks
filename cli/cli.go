@@ -47,7 +47,7 @@ func StartDownload(config Config, download string) {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	handler := core.EventHandler{}
-	addRequiredHandlers(handler, &config)
+	addEssentialHandlers(handler, &config)
 	handler[core.BookResult] = func(text string) {
 		fmt.Printf("%sReceived file response.\n", clearLine)
 		config.downloadHandler(text)
@@ -69,13 +69,13 @@ func StartDownload(config Config, download string) {
 }
 
 func StartSearch(config Config, query string) {
-	nextSearchTime := GetLastSearchTime().Add(15 * time.Second)
+	nextSearchTime := getLastSearchTime().Add(15 * time.Second)
 	instantiate(&config)
 	defer config.irc.Close()
 	ctx, cancel := context.WithCancel(context.Background())
 
 	handler := core.EventHandler{}
-	addRequiredHandlers(handler, &config)
+	addEssentialHandlers(handler, &config)
 	handler[core.SearchResult] = func(text string) {
 		fmt.Printf("%sReceived file response.\n", clearLine)
 		config.searchHandler(text)
@@ -88,10 +88,13 @@ func StartSearch(config Config, query string) {
 	}
 
 	fmt.Printf("Sending search request.")
+	warnIfServerOffline(query)
 	time.Sleep(time.Until(nextSearchTime))
+
 	go core.StartReader(ctx, config.irc, handler)
 	core.SearchBook(config.irc, query)
-	SetLastSearchTime()
+
+	setLastSearchTime()
 	fmt.Printf("%sSent search request.", clearLine)
 	fmt.Printf("Waiting for file response.")
 
