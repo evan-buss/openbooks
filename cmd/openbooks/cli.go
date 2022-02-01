@@ -5,7 +5,6 @@ import (
 	"log"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/evan-buss/openbooks/cli"
 	"github.com/spf13/cobra"
@@ -61,9 +60,6 @@ var searchCmd = &cobra.Command{
 	Short: "Searches for a book and exits.",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		nextSearchTime := cli.GetLastSearchTime().Add(15 * time.Second)
-		time.Sleep(time.Until(nextSearchTime))
 		cli.StartSearch(config, args[0])
-		cli.SetLastSearchTime()
 	},
 }

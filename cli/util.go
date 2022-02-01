@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"strings"
 	"syscall"
 	"time"
 
@@ -16,6 +17,8 @@ import (
 	"github.com/evan-buss/openbooks/irc"
 	"github.com/evan-buss/openbooks/util"
 )
+
+var servers []string
 
 const clearLine = "\r\033[2K"
 
@@ -41,9 +44,12 @@ func instantiate(config *Config) {
 
 // Required handlers are used regardless of what CLI mode is selected.
 // Keep alive pings and other core IRC client features
-func addRequiredHandlers(handler core.EventHandler, config *Config) {
+func addEssentialHandlers(handler core.EventHandler, config *Config) {
 	handler[core.Ping] = config.pingHandler
 	handler[core.Version] = config.versionHandler
+	handler[core.ServerList] = func(text string) {
+		servers = core.ParseServers(text).ElevatedUsers
+	}
 }
 
 func (config *Config) setupLogger(handler core.EventHandler) io.Closer {
@@ -58,7 +64,18 @@ func (config *Config) setupLogger(handler core.EventHandler) io.Closer {
 	return file
 }
 
-func GetLastSearchTime() time.Time {
+// Show warning message if the server they are downloading from is not online.
+func warnIfServerOffline(bookLine string) {
+	for _, server := range servers {
+		if strings.HasPrefix(bookLine[1:], server) {
+			return
+		}
+	}
+
+	fmt.Println("WARNING: That server is not online. Your request will never complete.")
+}
+
+func getLastSearchTime() time.Time {
 	timestampFilePath := filepath.Join(os.TempDir(), ".openbooks")
 	fileInfo, err := os.Stat(timestampFilePath)
 
@@ -69,7 +86,7 @@ func GetLastSearchTime() time.Time {
 	return fileInfo.ModTime()
 }
 
-func SetLastSearchTime() {
+func setLastSearchTime() {
 	timestampFilePath := filepath.Join(os.TempDir(), ".openbooks")
 	_, err := os.Stat(timestampFilePath)
 
