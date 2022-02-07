@@ -7,32 +7,56 @@ import (
 	"github.com/evan-buss/openbooks/core"
 )
 
+type MessageType int
+
 // Available commands. These are sent via integers starting at 1
 const (
-	ERROR = iota + 1
+	STATUS MessageType = iota
 	CONNECT
 	SEARCH
 	DOWNLOAD
-	WAIT
-	IRCERROR
-	SEARCHRATELIMIT
 )
 
-func messageToString(s int) string {
-	name := []string{"INVALID", "ERROR", "CONNECT", "SEARCH", "DOWNLOAD", "WAIT", "IRCERROR"}
+type NotificationType int
+
+const (
+	NOTIFY NotificationType = iota
+	SUCCESS
+	WARNING
+	DANGER
+)
+
+func messageToString(s MessageType) string {
+	name := []string{"STATUS", "CONNECT", "SEARCH", "DOWNLOAD"}
 	i := uint8(s)
 	switch {
-	case i <= uint8(IRCERROR):
+	case i <= uint8(DOWNLOAD):
 		return name[i]
 	default:
 		return strconv.Itoa(int(i))
 	}
 }
 
+type Message struct {
+	MessageType MessageType `json:"type"`
+}
+
+type StatusResponse struct {
+	Message
+	NotificationType NotificationType `json:"status"`
+	Title            string           `json:"title"`
+	Detail           string           `json:"detail"`
+}
+
 // Request in a generic structure for all requests from the websocket client
 type Request struct {
-	RequestType int             `json:"type"`
-	Payload     json.RawMessage `json:"payload"`
+	Message
+	Payload json.RawMessage `json:"payload"`
+}
+
+type Response struct {
+	MessageType MessageType `json:"type"`
+	Status      string      `json:"status"`
 }
 
 // ErrorResponse is a response sent when something goes wrong (ie. bad JSON parse)
@@ -44,12 +68,10 @@ type ErrorResponse struct {
 // ConnectionRequest is a request to start the IRC server
 type ConnectionRequest struct{}
 
-// ConnectionResponse is a response sent upon successful connection to the IRC server
+// ConnectionResponse
 type ConnectionResponse struct {
-	MessageType int    `json:"type"`
-	Status      string `json:"status"`
-	Name        string `json:"name"`
-	Wait        int    `json:"wait"`
+	StatusResponse
+	Name string `json:"name"`
 }
 
 // SearchRequest is a request that sends a search request to the IRC server for a specific query
@@ -59,9 +81,9 @@ type SearchRequest struct {
 
 // SearchResponse is a response that is sent containing BookDetails objects that matched the query
 type SearchResponse struct {
-	MessageType int               `json:"type"`
-	Books       []core.BookDetail `json:"books"`
-	Errors      []core.ParseError `json:"errors"`
+	Message
+	Books  []core.BookDetail `json:"books"`
+	Errors []core.ParseError `json:"errors"`
 }
 
 // DownloadRequest is a request to download a specific book from the IRC server
@@ -71,27 +93,15 @@ type DownloadRequest struct {
 
 // DownloadResponse is a response that sends the requested book to the client
 type DownloadResponse struct {
-	MessageType  int    `json:"type"`
+	Message
 	Name         string `json:"name"`
 	DownloadLink string `json:"downloadLink"`
 }
 
-// WaitResponse is a response that reports status updates to the client. IRC is asynchronous
-// and has an unbounded time-frame so we want to show the client things are happening
-type WaitResponse struct {
-	MessageType int    `json:"type"`
-	Status      string `json:"status"`
-}
-
-// IrcErrorResponse is a response that indicates something went wrong on the IRC server's end
-type IrcErrorResponse struct {
-	MessageType int    `json:"type"`
-	Status      string `json:"status"`
-}
-
-// SearchRateLimitResponse is a response that indicates the user is making search requests to quickly.
-// Displays the time until the next search request can be made.
-type SearchRateLimitResponse struct {
-	MessageType int    `json:"type"`
-	Status      string `json:"status"`
+func newStatusResponse(notificationType NotificationType) StatusResponse {
+	response := StatusResponse{
+		Message:          Message{MessageType: STATUS},
+		NotificationType: notificationType,
+	}
+	return response
 }

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ParseError } from "../../models/messages";
+import { ParseError } from "../../state/messages";
 import { majorScale, Table, Text } from "evergreen-ui";
 
 export interface Props {

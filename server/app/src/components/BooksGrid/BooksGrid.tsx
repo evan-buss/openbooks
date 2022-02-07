@@ -10,7 +10,7 @@ import {
 } from "evergreen-ui";
 import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
-import { BookDetail, MessageType } from "../../models/messages";
+import { BookDetail, MessageType } from "../../state/messages";
 import { sendMessage } from "../../state/stateSlice";
 import SelectMenuHeader, { makeStatusMenuItem } from "./SelectMenuHeader";
 import { useGetServersQuery } from "../../state/api";

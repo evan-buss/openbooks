@@ -1,16 +1,30 @@
+export enum NotificationType {
+  NOTIFY,
+  SUCCESS,
+  WARNING,
+  DANGER
+}
+
+export interface Notification {
+  type: NotificationType;
+  title: string;
+  detail?: string;
+  timestamp: number;
+}
+
 export enum MessageType {
-  ERROR = 1,
-  CONNECT = 2,
-  SEARCH = 3,
-  DOWNLOAD = 4,
-  // SERVERS = 5,
-  WAIT = 5,
-  IRCERROR = 6,
-  SEARCHRATELIMIT = 7
+  STATUS,
+  CONNECT,
+  SEARCH,
+  DOWNLOAD,
+  RATELIMIT
 }
 
 export interface BookResponse {
   type: MessageType;
+  notify: NotificationType;
+  title: string;
+  detail?: string;
 
   [x: string]: any;
 }

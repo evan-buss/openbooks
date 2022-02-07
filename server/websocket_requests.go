@@ -19,7 +19,7 @@ type RequestHandler interface {
 func (server *server) routeMessage(message Request, c *Client) {
 	var obj interface{}
 
-	switch message.RequestType {
+	switch message.MessageType {
 	case SEARCH:
 		obj = new(SearchRequest)
 	case DOWNLOAD:
@@ -28,14 +28,15 @@ func (server *server) routeMessage(message Request, c *Client) {
 
 	err := json.Unmarshal(message.Payload, &obj)
 	if err != nil {
-		server.log.Println("Invalid request payload.")
-		c.send <- ErrorResponse{
-			Error:   message.RequestType,
-			Details: err.Error(),
+		server.log.Printf("Invalid request payload. %s.\n", err.Error())
+		c.send <- StatusResponse{
+			Message:          Message{MessageType: STATUS},
+			NotificationType: DANGER,
+			Title:            "Unknown request payload.",
 		}
 	}
 
-	switch message.RequestType {
+	switch message.MessageType {
 	case CONNECT:
 		c.startIrcConnection(server)
 	case SEARCH:
@@ -63,10 +64,13 @@ func (c *Client) startIrcConnection(server *server) {
 	go core.StartReader(c.ctx, c.irc, handler)
 
 	c.send <- ConnectionResponse{
-		MessageType: CONNECT,
-		Status:      "IRC Server Ready",
-		Name:        c.irc.Username,
-		Wait:        0,
+		StatusResponse: StatusResponse{
+			Message:          Message{MessageType: STATUS},
+			NotificationType: SUCCESS,
+			Title:            "Welcome, connection established.",
+			Detail:           fmt.Sprintf("IRC username %s", c.irc.Username),
+		},
+		Name: c.irc.Username,
 	}
 }
 
@@ -80,28 +84,28 @@ func (c *Client) sendSearchRequest(s *SearchRequest, server *server) {
 	if time.Now().Before(nextAvailableSearch) {
 		remainingSeconds := time.Until(nextAvailableSearch).Seconds()
 
-		c.send <- SearchRateLimitResponse{
-			MessageType: SEARCHRATELIMIT,
-			Status:      fmt.Sprintf("Please wait %v seconds to submit another search.", math.Round(remainingSeconds)),
+		c.send <- StatusResponse{
+			Message:          Message{MessageType: STATUS},
+			NotificationType: WARNING,
+			Title:            fmt.Sprintf("Please wait %v seconds to submit another search.", math.Round(remainingSeconds)),
 		}
+
 		return
 	}
 
 	core.SearchBook(c.irc, s.Query)
 	server.lastSearch = time.Now()
 
-	c.send <- WaitResponse{
-		MessageType: WAIT,
-		Status:      "Search request sent",
-	}
+	response := newStatusResponse(NOTIFY)
+	response.Title = "Search request sent."
+	c.send <- response
 }
 
 // handle DownloadRequests by sending the request to the book server
 func (c *Client) sendDownloadRequest(d *DownloadRequest) {
 	core.DownloadBook(c.irc, d.Book)
 
-	c.send <- WaitResponse{
-		MessageType: WAIT,
-		Status:      "Download request received",
-	}
+	response := newStatusResponse(NOTIFY)
+	response.Title = "Download request received."
+	c.send <- response
 }
