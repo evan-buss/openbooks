@@ -64,7 +64,7 @@ func (c *Client) startIrcConnection(server *server) {
 
 	c.send <- ConnectionResponse{
 		StatusResponse: StatusResponse{
-			MessageType:      STATUS,
+			MessageType:      CONNECT,
 			NotificationType: SUCCESS,
 			Title:            "Welcome, connection established.",
 			Detail:           fmt.Sprintf("IRC username %s", c.irc.Username),
