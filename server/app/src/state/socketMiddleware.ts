@@ -1,9 +1,12 @@
 import { AnyAction, PayloadAction, Store } from "@reduxjs/toolkit";
 import {
-  BookResponse,
+  Response,
+  Notification,
   MessageType,
   NotificationType,
-  SearchResponse
+  SearchResponse,
+  ConnectionResponse,
+  DownloadResponse
 } from "./messages";
 import { displayNotification, downloadFile } from "./util";
 import {
@@ -35,7 +38,7 @@ export const websocketConn = (wsUrl: string): any => {
           socket.send(action.payload.message);
         } else {
           displayNotification({
-            type: NotificationType.WARNING,
+            appearance: NotificationType.WARNING,
             title: "Server connection closed. Reload page.",
             timestamp: new Date().getTime()
           });
@@ -60,29 +63,26 @@ const onClose = (store: Store): void => {
 
 const route = (store: Store, msg: MessageEvent<any>): void => {
   const getNotif = (): Notification => {
-    let response = JSON.parse(msg.data) as BookResponse;
+    let response = JSON.parse(msg.data) as Response;
     const timestamp = new Date().getTime();
     const notification: Notification = {
-      type: response.NotificationType,
-      title: response.title,
-      detail: response.detail,
+      ...response,
       timestamp
     };
+
     switch (response.type) {
       case MessageType.STATUS:
         return notification;
       case MessageType.CONNECT:
-        store.dispatch(setUsername(response.name));
+        store.dispatch(setUsername((response as ConnectionResponse).name));
         return notification;
       case MessageType.SEARCH:
         store.dispatch(
-          setSearchResults(
-            response as unknown as SearchResponse
-          ) as unknown as AnyAction
+          setSearchResults(response as SearchResponse) as unknown as AnyAction
         );
         return notification;
       case MessageType.DOWNLOAD:
-        downloadFile(response.downloadLink);
+        downloadFile((response as DownloadResponse).downloadPath);
         store.dispatch(openbooksApi.util.invalidateTags(["books"]));
         return notification;
       case MessageType.RATELIMIT:
@@ -91,7 +91,7 @@ const route = (store: Store, msg: MessageEvent<any>): void => {
       default:
         console.error(response);
         return {
-          type: NotificationType.DANGER,
+          appearance: NotificationType.DANGER,
           title: "Unknown message type. See console.",
           timestamp
         };

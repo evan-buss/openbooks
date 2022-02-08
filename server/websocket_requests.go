@@ -3,7 +3,6 @@ package server
 import (
 	"encoding/json"
 	"fmt"
-	"math"
 	"time"
 
 	"github.com/evan-buss/openbooks/core"
@@ -30,7 +29,7 @@ func (server *server) routeMessage(message Request, c *Client) {
 	if err != nil {
 		server.log.Printf("Invalid request payload. %s.\n", err.Error())
 		c.send <- StatusResponse{
-			Message:          Message{MessageType: STATUS},
+			MessageType:      STATUS,
 			NotificationType: DANGER,
 			Title:            "Unknown request payload.",
 		}
@@ -65,7 +64,7 @@ func (c *Client) startIrcConnection(server *server) {
 
 	c.send <- ConnectionResponse{
 		StatusResponse: StatusResponse{
-			Message:          Message{MessageType: STATUS},
+			MessageType:      STATUS,
 			NotificationType: SUCCESS,
 			Title:            "Welcome, connection established.",
 			Detail:           fmt.Sprintf("IRC username %s", c.irc.Username),
@@ -83,12 +82,7 @@ func (c *Client) sendSearchRequest(s *SearchRequest, server *server) {
 
 	if time.Now().Before(nextAvailableSearch) {
 		remainingSeconds := time.Until(nextAvailableSearch).Seconds()
-
-		c.send <- StatusResponse{
-			Message:          Message{MessageType: STATUS},
-			NotificationType: WARNING,
-			Title:            fmt.Sprintf("Please wait %v seconds to submit another search.", math.Round(remainingSeconds)),
-		}
+		c.send <- newRateLimitResponse(remainingSeconds)
 
 		return
 	}
@@ -96,16 +90,11 @@ func (c *Client) sendSearchRequest(s *SearchRequest, server *server) {
 	core.SearchBook(c.irc, s.Query)
 	server.lastSearch = time.Now()
 
-	response := newStatusResponse(NOTIFY)
-	response.Title = "Search request sent."
-	c.send <- response
+	c.send <- newStatusResponse(NOTIFY, "Search request sent.")
 }
 
 // handle DownloadRequests by sending the request to the book server
 func (c *Client) sendDownloadRequest(d *DownloadRequest) {
 	core.DownloadBook(c.irc, d.Book)
-
-	response := newStatusResponse(NOTIFY)
-	response.Title = "Download request received."
-	c.send <- response
+	c.send <- newStatusResponse(NOTIFY, "Download request received.")
 }

@@ -5,13 +5,6 @@ export enum NotificationType {
   DANGER
 }
 
-export interface Notification {
-  type: NotificationType;
-  title: string;
-  detail?: string;
-  timestamp: number;
-}
-
 export enum MessageType {
   STATUS,
   CONNECT,
@@ -20,19 +13,34 @@ export enum MessageType {
   RATELIMIT
 }
 
-export interface BookResponse {
-  type: MessageType;
-  notify: NotificationType;
+// Notification is used to show a UI toast notification the the user.
+export interface Notification {
+  appearance: NotificationType;
   title: string;
   detail?: string;
-
-  [x: string]: any;
+  timestamp: number;
 }
 
-export interface SearchResponse {
+// Response is received from websocket requests
+export interface Response extends Omit<Notification, "timestamp"> {
   type: MessageType;
+}
+
+// ConnectionResponse is received after successful IRC connection
+export interface ConnectionResponse extends Response {
+  name: string;
+}
+
+// SearchResponse is received after search results are received and parsed.
+export interface SearchResponse extends Response {
   books: BookDetail[];
   errors: ParseError[];
+}
+
+// DownloadResponse is received after file is downloaded from IRC and ready for
+// user download.
+export interface DownloadResponse extends Response {
+  downloadPath: string;
 }
 
 export interface BookDetail {

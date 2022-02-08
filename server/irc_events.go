@@ -1,8 +1,8 @@
 package server
 
 import (
+	"fmt"
 	"os"
-	"path"
 	"path/filepath"
 
 	"github.com/evan-buss/openbooks/core"
@@ -45,11 +45,7 @@ func (c *Client) searchResultHandler(downloadDir string) core.HandlerFunc {
 		}
 
 		c.log.Printf("Sending %d search results.\n", len(results))
-		c.send <- SearchResponse{
-			Message: Message{MessageType: SEARCH},
-			Books:   results,
-			Errors:  errors,
-		}
+		c.send <- newSearchResponse(results, errors)
 
 		err = os.Remove(extractedPath)
 		if err != nil {
@@ -65,49 +61,35 @@ func (c *Client) bookResultHandler(downloadDir string) core.HandlerFunc {
 		if err != nil {
 			c.log.Println(err)
 
-			response := newStatusResponse(DANGER)
-			response.Title = err.Error()
-			c.send <- response
+			c.send <- newErrorResponse(err.Error())
 			return
 		}
 
 		fileName := filepath.Base(extractedPath)
 
 		c.log.Printf("Sending book entitled '%s'.\n", fileName)
-		c.send <- DownloadResponse{
-			Message:      Message{DOWNLOAD},
-			Name:         fileName,
-			DownloadLink: path.Join("library", fileName),
-		}
+		c.send <- newDownloadResponse(fileName)
 	}
 }
 
 // NoResults is called when the server returns that nothing was found for the query
 func (c *Client) noResultsHandler(_ string) {
-	response := newStatusResponse(DANGER)
-	response.Title = "No results found for the query."
-	c.send <- response
+	c.send <- newErrorResponse("No results found for the query.")
 }
 
 // BadServer is called when the requested download fails because the server is not available
 func (c *Client) badServerHandler(_ string) {
-	response := newStatusResponse(DANGER)
-	response.Title = "Server is not available. Try another one."
-	c.send <- response
+	c.send <- newErrorResponse("Server is not available. Try another one.")
 }
 
 // SearchAccepted is called when the user's query is accepted into the search queue
 func (c *Client) searchAcceptedHandler(_ string) {
-	response := newStatusResponse(NOTIFY)
-	response.Title = "Search accepted into the queue."
-	c.send <- response
+	c.send <- newStatusResponse(NOTIFY, "Search accepted into the queue.")
 }
 
 // MatchesFound is called when the server finds matches for the user's query
 func (c *Client) matchesFoundHandler(num string) {
-	response := newStatusResponse(NOTIFY)
-	response.Title = "Found " + num + " results for your query."
-	c.send <- response
+	c.send <- newStatusResponse(NOTIFY, fmt.Sprintf("Found %s results for your query.", num))
 }
 
 func (c *Client) pingHandler(serverUrl string) {

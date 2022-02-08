@@ -7,8 +7,8 @@ import {
   toggleDrawer
 } from "../../state/notificationSlice";
 import { RootState } from "../../state/store";
-import { NotificationType } from "../../state/models";
 import { BellSimpleSlash } from "phosphor-react";
+import { NotificationType } from "../../state/messages";
 
 const NotificationDrawer = () => {
   const { isOpen, notifications } = useSelector(
@@ -60,7 +60,7 @@ const NotificationDrawer = () => {
                 })}
               </p>
               <Alert
-                intent={getIntent(notif.type)}
+                intent={getIntent(notif.appearance)}
                 title={notif.title}
                 onRemove={() => dispatch(dismissNotification(notif))}
                 isRemoveable>
