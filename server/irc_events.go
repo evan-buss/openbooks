@@ -97,6 +97,7 @@ func (c *Client) pingHandler(serverUrl string) {
 }
 
 func (c *Client) versionHandler(line string) {
+	c.log.Printf("Sending CTCP version response: %s", line)
 	core.SendVersionInfo(c.irc, line)
 }
 

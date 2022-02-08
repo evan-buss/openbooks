@@ -29,7 +29,7 @@ func (i *Conn) Connect(address string) {
 	conn, err := net.Dial("tcp", address+":6667")
 
 	if err != nil {
-		log.Fatal("IRC Connection Error", err)
+		log.Fatal("IRC Connection Error ", err)
 	}
 
 	i.Conn = conn
