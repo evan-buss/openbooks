@@ -77,11 +77,17 @@ type DownloadResponse struct {
 }
 
 func newRateLimitResponse(remainingSeconds float64) StatusResponse {
+	wait := math.Round(remainingSeconds)
+	units := "seconds"
+	if wait == 1 {
+		units = "second"
+	}
+
 	return StatusResponse{
 		MessageType:      RATELIMIT,
 		NotificationType: WARNING,
 		Title:            "You are searching too frequently!",
-		Detail:           fmt.Sprintf("Please wait %v seconds to submit another search.", math.Round(remainingSeconds)),
+		Detail:           fmt.Sprintf("Please wait %v %s to submit another search.", wait, units),
 	}
 }
 
