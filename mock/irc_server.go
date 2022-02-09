@@ -67,7 +67,7 @@ func (irc *IrcServer) sendVersionRequest(conn net.Conn) {
 }
 
 func (irc *IrcServer) serverHandler(conn net.Conn) {
-	fmt.Fprintf(conn, "353 +server1 ~server2 ~evan_irc\r\n")
+	fmt.Fprintf(conn, "353 ~DV8 ~Horla +server1 ~server2 ~evan_irc\r\n")
 	fmt.Fprintf(conn, "end_list 366\r\n")
 }
 
