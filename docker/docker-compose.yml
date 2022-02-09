@@ -1,0 +1,20 @@
+version: "3.9" # optional since v1.27.0
+services:
+  nginx:
+    image: nginx:1.16.0-alpine
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "8080:80"
+  web:
+    build: ../.
+    command: --server localhost
+  mock_server:
+    image: mock_server
+    # ports:
+    #   - "5000:5000"
+    # volumes:
+    #   - .:/code
+    #   - logvolume01:/var/log
+    # links:
+    #   - redis
