@@ -5,7 +5,7 @@ import { BooksGrid } from "../components/BooksGrid/BooksGrid";
 import { sendMessage, sendSearch } from "../state/stateSlice";
 import { RootState } from "../state/store";
 import ErrorsGrid from "../components/ErrorsGrid/ErrorsGrid";
-import { MessageType } from "../models/messages";
+import { MessageType } from "../state/messages";
 import { Warning } from "phosphor-react";
 import image from "../assets/reading.svg";
 

@@ -1,5 +1,13 @@
 import { AnyAction, PayloadAction, Store } from "@reduxjs/toolkit";
-import { BookResponse, MessageType, SearchResponse } from "../models/messages";
+import {
+  Response,
+  Notification,
+  MessageType,
+  NotificationType,
+  SearchResponse,
+  ConnectionResponse,
+  DownloadResponse
+} from "./messages";
 import { displayNotification, downloadFile } from "./util";
 import {
   sendMessage,
@@ -8,7 +16,6 @@ import {
   setUsername
 } from "./stateSlice";
 import { addNotification } from "./notificationSlice";
-import { Notification, NotificationType } from "./models";
 import { openbooksApi } from "./api";
 import { deleteHistoryItem } from "./historySlice";
 
@@ -31,7 +38,7 @@ export const websocketConn = (wsUrl: string): any => {
           socket.send(action.payload.message);
         } else {
           displayNotification({
-            type: NotificationType.WARNING,
+            appearance: NotificationType.WARNING,
             title: "Server connection closed. Reload page.",
             timestamp: new Date().getTime()
           });
@@ -56,65 +63,35 @@ const onClose = (store: Store): void => {
 
 const route = (store: Store, msg: MessageEvent<any>): void => {
   const getNotif = (): Notification => {
-    let response = JSON.parse(msg.data) as BookResponse;
+    let response = JSON.parse(msg.data) as Response;
     const timestamp = new Date().getTime();
+    const notification: Notification = {
+      ...response,
+      timestamp
+    };
+
     switch (response.type) {
-      case MessageType.ERROR:
-        return {
-          type: NotificationType.DANGER,
-          title: response.details,
-          timestamp
-        };
+      case MessageType.STATUS:
+        return notification;
       case MessageType.CONNECT:
-        store.dispatch(setUsername(response.name));
-        return {
-          type: NotificationType.SUCCESS,
-          title: "Welcome, connection established.",
-          detail: `IRC username ${response.name}`,
-          timestamp
-        };
+        store.dispatch(setUsername((response as ConnectionResponse).name));
+        return notification;
       case MessageType.SEARCH:
         store.dispatch(
           setSearchResults(response as SearchResponse) as unknown as AnyAction
         );
-        return {
-          type: NotificationType.SUCCESS,
-          title: "Search results received.",
-          timestamp
-        };
+        return notification;
       case MessageType.DOWNLOAD:
-        downloadFile(response.downloadLink);
+        downloadFile((response as DownloadResponse).downloadPath);
         store.dispatch(openbooksApi.util.invalidateTags(["books"]));
-        return {
-          type: NotificationType.SUCCESS,
-          title: "Book file received.",
-          detail: response.name,
-          timestamp
-        };
-      case MessageType.WAIT:
-        return {
-          type: NotificationType.NOTIFY,
-          title: response.status,
-          timestamp
-        };
-      case MessageType.IRCERROR:
-        return {
-          type: NotificationType.DANGER,
-          title: "IRC Error. Try again.",
-          timestamp
-        };
-      case MessageType.SEARCHRATELIMIT:
+        return notification;
+      case MessageType.RATELIMIT:
         store.dispatch(deleteHistoryItem() as unknown as AnyAction);
-        return {
-          type: NotificationType.WARNING,
-          title: "Search Rate Limit",
-          detail: response.status,
-          timestamp
-        };
+        return notification;
       default:
         console.error(response);
         return {
-          type: NotificationType.DANGER,
+          appearance: NotificationType.DANGER,
           title: "Unknown message type. See console.",
           timestamp
         };

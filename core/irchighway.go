@@ -34,5 +34,5 @@ func SendVersionInfo(irc *irc.Conn, line string) {
 	// we just want the messager without the colon
 	sender := strings.Split(line, " ")[0][1:]
 	// TODO: Figure out if there's an automated way to adjust this...
-	irc.SendNotice(sender, "\x01OpenBooks 4.3.0\x01")
+	irc.SendNotice(sender, "\x01OpenBooks\x01")
 }

@@ -1,5 +1,5 @@
 import { createAction, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { MessageType, SearchResponse } from "../models/messages";
+import { MessageType, SearchResponse } from "./messages";
 import { addHistoryItem, HistoryItem, updateHistoryItem } from "./historySlice";
 import { AppThunk } from "./store";
 

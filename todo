@@ -7,6 +7,3 @@ Future:
   - Possible use a timer that keeps the Client around for a set period of time
     after websocket disconnect.
 - Send download progress updates to the browser like we show for the CLI
-- Simplify dto model calling code in Go. Don't need as many types.
-- Improve message formats.
-  - Don't need as many separate message types. Just have functions that create them with the appropriate status code.

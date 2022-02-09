@@ -80,7 +80,7 @@ func (server *server) readPump(c *Client) {
 				return
 			}
 
-			c.log.Printf("%s Message Received\n", messageToString(request.RequestType))
+			c.log.Printf("%s Message Received\n", request.MessageType)
 
 			server.routeMessage(request, c)
 		}

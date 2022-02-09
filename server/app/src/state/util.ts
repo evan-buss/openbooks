@@ -1,5 +1,5 @@
 import { toaster } from "evergreen-ui";
-import { Notification, NotificationType } from "./models";
+import { Notification, NotificationType } from "./messages";
 
 export const getWebsocketURL = (): URL => {
   const websocketURL = new URL(window.location.href + "ws");
@@ -26,11 +26,11 @@ export const getApiURL = (): URL => {
 };
 
 export const displayNotification = ({
-  type = NotificationType.NOTIFY,
+  appearance = NotificationType.NOTIFY,
   title,
   detail
 }: Notification) => {
-  switch (type) {
+  switch (appearance) {
     case NotificationType.NOTIFY:
       toaster.notify(title, {
         description: detail
