@@ -6,15 +6,16 @@ services:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
     ports:
       - "8080:80"
-  web:
-    build: ../.
-    command: --server localhost
+  openbooks:
+    build:
+      context: ../.
+      dockerfile: cmd/openbooks/Dockerfile
+    command: --server mock_server
+    depends_on:
+      - mock_server
+    restart: unless-stopped
   mock_server:
-    image: mock_server
-    # ports:
-    #   - "5000:5000"
-    # volumes:
-    #   - .:/code
-    #   - logvolume01:/var/log
-    # links:
-    #   - redis
+    build:
+      context: ../.
+      dockerfile: cmd/mock_server/Dockerfile
+    restart: unless-stopped
