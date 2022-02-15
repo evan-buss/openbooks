@@ -1,6 +1,6 @@
 # openbooks
 
-> NOTE: OpenBooks has been updated to comply with requests from IRC admins. Please download the latest release to continue using it. See [Issue #52](https://github.com/evan-buss/openbooks/issues/52) for context.
+> NOTE: Going forward only the latest release will be supported. If you encounter any issues, be sure you are using the latest version.
 
 [![Docker Pulls](https://img.shields.io/docker/pulls/evanbuss/openbooks.svg)](https://hub.docker.com/r/evanbuss/openbooks/)
 
@@ -64,8 +64,7 @@ that you can visit in your browser.
 
 - The mock server allows you to debug responses and requests to simplified IRC / DCC
   servers that mimic the responses received from IRC Highway.
-- 
-  ```bash
+- ```bash
   cd cmd/mock_server
   go run .
   # Another Terminal
