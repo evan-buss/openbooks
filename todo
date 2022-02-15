@@ -7,3 +7,4 @@ Future:
   - Possible use a timer that keeps the Client around for a set period of time
     after websocket disconnect.
 - Send download progress updates to the browser like we show for the CLI
+- Responsive layout
