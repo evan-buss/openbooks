@@ -82,11 +82,12 @@ that you can visit in your browser.
 
 - Backend
   - Golang
-  - Archiver (extract files from various archive formats)
+  - Chi
   - gorilla/websocket
+  - Archiver (extract files from various archive formats)
 - Frontend
   - React.js
   - TypeScript
   - Redux / Redux Toolkit
-  - Styled Components
+  - Tailwind CSS
   - Evergreen UI
