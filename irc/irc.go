@@ -29,7 +29,7 @@ func (i *Conn) Connect(address string) {
 	conn, err := net.Dial("tcp", address+":6667")
 
 	if err != nil {
-		log.Fatal("IRC Connection Error", err)
+		log.Fatal("IRC Connection Error ", err)
 	}
 
 	i.Conn = conn
@@ -50,6 +50,11 @@ func (i *Conn) Disconnect() {
 // SendMessage sends the given message string to the connected IRC server
 func (i *Conn) SendMessage(message string) {
 	i.Write([]byte("PRIVMSG #" + i.channel + " :" + message + "\r\n"))
+}
+
+// SendNotice sends a notice message to the specified user
+func (i *Conn) SendNotice(user string, message string) {
+	i.Write([]byte("NOTICE " + user + " :" + message + "\r\n"))
 }
 
 // JoinChannel joins the channel given by channel string

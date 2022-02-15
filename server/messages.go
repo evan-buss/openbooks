@@ -2,66 +2,53 @@ package server
 
 import (
 	"encoding/json"
-	"strconv"
+	"fmt"
+	"math"
+	"path"
 
 	"github.com/evan-buss/openbooks/core"
 )
 
+//go:generate stringer -type=MessageType
+type MessageType int
+
 // Available commands. These are sent via integers starting at 1
 const (
-	ERROR = iota + 1
+	STATUS MessageType = iota
 	CONNECT
 	SEARCH
 	DOWNLOAD
-	WAIT
-	IRCERROR
-	SEARCHRATELIMIT
+	RATELIMIT
 )
 
-func messageToString(s int) string {
-	name := []string{"INVALID", "ERROR", "CONNECT", "SEARCH", "DOWNLOAD", "WAIT", "IRCERROR"}
-	i := uint8(s)
-	switch {
-	case i <= uint8(IRCERROR):
-		return name[i]
-	default:
-		return strconv.Itoa(int(i))
-	}
+type NotificationType int
+
+const (
+	NOTIFY NotificationType = iota
+	SUCCESS
+	WARNING
+	DANGER
+)
+
+type StatusResponse struct {
+	MessageType      MessageType      `json:"type"`
+	NotificationType NotificationType `json:"appearance"`
+	Title            string           `json:"title"`
+	Detail           string           `json:"detail"`
 }
 
 // Request in a generic structure for all requests from the websocket client
 type Request struct {
-	RequestType int             `json:"type"`
+	MessageType MessageType     `json:"type"`
 	Payload     json.RawMessage `json:"payload"`
-}
-
-// ErrorResponse is a response sent when something goes wrong (ie. bad JSON parse)
-type ErrorResponse struct {
-	Error   int    `json:"error"`
-	Details string `json:"details"`
 }
 
 // ConnectionRequest is a request to start the IRC server
 type ConnectionRequest struct{}
 
-// ConnectionResponse is a response sent upon successful connection to the IRC server
-type ConnectionResponse struct {
-	MessageType int    `json:"type"`
-	Status      string `json:"status"`
-	Name        string `json:"name"`
-	Wait        int    `json:"wait"`
-}
-
 // SearchRequest is a request that sends a search request to the IRC server for a specific query
 type SearchRequest struct {
 	Query string `json:"query"`
-}
-
-// SearchResponse is a response that is sent containing BookDetails objects that matched the query
-type SearchResponse struct {
-	MessageType int               `json:"type"`
-	Books       []core.BookDetail `json:"books"`
-	Errors      []core.ParseError `json:"errors"`
 }
 
 // DownloadRequest is a request to download a specific book from the IRC server
@@ -69,29 +56,82 @@ type DownloadRequest struct {
 	Book string `json:"book"`
 }
 
+// ConnectionResponse
+type ConnectionResponse struct {
+	StatusResponse
+	Name string `json:"name"`
+}
+
+// SearchResponse is a response that is sent containing BookDetails objects that matched the query
+type SearchResponse struct {
+	StatusResponse
+	Books  []core.BookDetail `json:"books"`
+	Errors []core.ParseError `json:"errors"`
+}
+
 // DownloadResponse is a response that sends the requested book to the client
 type DownloadResponse struct {
-	MessageType  int    `json:"type"`
+	StatusResponse
 	Name         string `json:"name"`
-	DownloadLink string `json:"downloadLink"`
+	DownloadPath string `json:"downloadPath"`
 }
 
-// WaitResponse is a response that reports status updates to the client. IRC is asynchronous
-// and has an unbounded time-frame so we want to show the client things are happening
-type WaitResponse struct {
-	MessageType int    `json:"type"`
-	Status      string `json:"status"`
+func newRateLimitResponse(remainingSeconds float64) StatusResponse {
+	wait := math.Round(remainingSeconds)
+	units := "seconds"
+	if wait == 1 {
+		units = "second"
+	}
+
+	return StatusResponse{
+		MessageType:      RATELIMIT,
+		NotificationType: WARNING,
+		Title:            "You are searching too frequently!",
+		Detail:           fmt.Sprintf("Please wait %v %s to submit another search.", wait, units),
+	}
 }
 
-// IrcErrorResponse is a response that indicates something went wrong on the IRC server's end
-type IrcErrorResponse struct {
-	MessageType int    `json:"type"`
-	Status      string `json:"status"`
+func newSearchResponse(results []core.BookDetail, errors []core.ParseError) SearchResponse {
+	detail := fmt.Sprintf("There were %v parsing errors.", len(errors))
+	if len(errors) == 1 {
+		detail = "There was 1 parsing error."
+	}
+	return SearchResponse{
+		StatusResponse: StatusResponse{
+			MessageType:      SEARCH,
+			NotificationType: SUCCESS,
+			Title:            fmt.Sprintf("%v Search Results Received", len(results)),
+			Detail:           detail,
+		},
+		Books:  results,
+		Errors: errors,
+	}
 }
 
-// SearchRateLimitResponse is a response that indicates the user is making search requests to quickly.
-// Displays the time until the next search request can be made.
-type SearchRateLimitResponse struct {
-	MessageType int    `json:"type"`
-	Status      string `json:"status"`
+func newDownloadResponse(fileName string) DownloadResponse {
+	return DownloadResponse{
+		StatusResponse: StatusResponse{
+			MessageType:      DOWNLOAD,
+			NotificationType: SUCCESS,
+			Title:            "Book file received.",
+			Detail:           fileName,
+		},
+		DownloadPath: path.Join("library", fileName),
+	}
+}
+
+func newStatusResponse(notificationType NotificationType, title string) StatusResponse {
+	return StatusResponse{
+		MessageType:      STATUS,
+		NotificationType: notificationType,
+		Title:            title,
+	}
+}
+
+func newErrorResponse(title string) StatusResponse {
+	return StatusResponse{
+		MessageType:      STATUS,
+		NotificationType: DANGER,
+		Title:            title,
+	}
 }

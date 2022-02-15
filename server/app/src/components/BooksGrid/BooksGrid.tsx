@@ -1,7 +1,16 @@
-import { Button, majorScale, Pane, Spinner, Table, Text } from "evergreen-ui";
+import {
+  Button,
+  majorScale,
+  Pane,
+  Spinner,
+  StatusIndicator,
+  Table,
+  Text,
+  Tooltip
+} from "evergreen-ui";
 import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
-import { BookDetail, MessageType } from "../../models/messages";
+import { BookDetail, MessageType } from "../../state/messages";
 import { sendMessage } from "../../state/stateSlice";
 import SelectMenuHeader, { makeStatusMenuItem } from "./SelectMenuHeader";
 import { useGetServersQuery } from "../../state/api";
@@ -11,11 +20,10 @@ const stringContains = (first: string, second: string): boolean => {
 };
 
 export interface Props {
-    books?: BookDetail[];
+  books?: BookDetail[];
 }
 
 export const BooksGrid: React.FC<Props> = ({ books }: Props) => {
-  const dispatch = useDispatch();
   const { data: onlineServers, refetch } = useGetServersQuery(null);
   const [titleFilter, setTitleFilter] = useState<string>("");
   const [authorFilter, setAuthorFilter] = useState<string>("");
@@ -82,7 +90,16 @@ export const BooksGrid: React.FC<Props> = ({ books }: Props) => {
 
     return filteredBooks.map((book, i) => (
       <Table.Row key={book.full + i} isSelectable>
-        <Table.TextCell flexBasis={100} flexGrow={0} flexShrink={0}>
+        <Table.TextCell flexBasis={120} flexGrow={0} flexShrink={0}>
+          <Tooltip
+            content={
+              onlineServers?.includes(book.server) ? "Online" : "Offline"
+            }>
+            <StatusIndicator
+              color={
+                onlineServers?.includes(book.server) ? "success" : undefined
+              }></StatusIndicator>
+          </Tooltip>
           {book.server}
         </Table.TextCell>
         <Table.TextCell flexBasis={250} flexGrow={0} flexShrink={0}>
@@ -96,19 +113,7 @@ export const BooksGrid: React.FC<Props> = ({ books }: Props) => {
           {book.size}
         </Table.TextCell>
         <Table.Cell flexBasis={150} flexGrow={0} flexShrink={0}>
-          <Button
-            appearance="primary"
-            size="small"
-            onClick={() =>
-              dispatch(
-                sendMessage({
-                  type: MessageType.DOWNLOAD,
-                  payload: { book: book.full }
-                })
-              )
-            }>
-            Download
-          </Button>
+          <DownloadButton book={book.full} />
         </Table.Cell>
       </Table.Row>
     ));
@@ -123,6 +128,7 @@ export const BooksGrid: React.FC<Props> = ({ books }: Props) => {
       className="rounded-lg">
       <Table.Head background="white" className="rounded-t-md">
         <SelectMenuHeader
+          flexBasis={120}
           options={availableServers}
           columnTitle="Servers"
           menuTitle="Filter Servers"
@@ -167,3 +173,26 @@ export const BooksGrid: React.FC<Props> = ({ books }: Props) => {
     </Table>
   );
 };
+
+function DownloadButton({ book }: { book: string }) {
+  const dispatch = useDispatch();
+  const [disabled, setDisabled] = useState(false);
+
+  // Prevent hitting the same button multiple times
+  const onClick = () => {
+    if (disabled) return;
+    dispatch(
+      sendMessage({
+        type: MessageType.DOWNLOAD,
+        payload: { book }
+      })
+    );
+    setDisabled(true);
+  };
+
+  return (
+    <Button appearance="primary" size="small" onClick={onClick}>
+      Download
+    </Button>
+  );
+}

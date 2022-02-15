@@ -2,16 +2,16 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/evan-buss/openbooks/cli"
 	"github.com/spf13/cobra"
 )
 
-var config cli.Config
+var cliConfig cli.Config
 
 func init() {
 	rootCmd.AddCommand(cliCmd)
@@ -23,17 +23,18 @@ func init() {
 		log.Fatalln("Could not get current working directory.", err)
 	}
 
-	cliCmd.PersistentFlags().StringVarP(&config.UserName, "name", "n", generateUserName(), "Use a name that isn't randomly generated. One word only.")
-	cliCmd.PersistentFlags().StringVarP(&config.Dir, "directory", "d", cwd, "Directory where files are downloaded.")
-	cliCmd.PersistentFlags().BoolVarP(&config.Log, "log", "l", false, "Whether or not to log IRC messages to an output file.")
-	cliCmd.PersistentFlags().StringVarP(&config.Server, "server", "s", "irc.irchighway.net", "IRC server to connect to.")
+	cliConfig.Version = fmt.Sprintf("OpenBooks CLI %s", version)
+	cliCmd.PersistentFlags().StringVarP(&cliConfig.UserName, "name", "n", generateUserName(), "Use a name that isn't randomly generated. One word only.")
+	cliCmd.PersistentFlags().StringVarP(&cliConfig.Dir, "directory", "d", cwd, "Directory where files are downloaded.")
+	cliCmd.PersistentFlags().BoolVarP(&cliConfig.Log, "log", "l", false, "Whether or not to log IRC messages to an output file.")
+	cliCmd.PersistentFlags().StringVarP(&cliConfig.Server, "server", "s", "irc.irchighway.net", "IRC server to connect to.")
 }
 
 var cliCmd = &cobra.Command{
 	Use:   "cli",
 	Short: "Run openbooks from the terminal in CLI mode.",
 	Run: func(cmd *cobra.Command, args []string) {
-		cli.StartInteractive(config)
+		cli.StartInteractive(cliConfig)
 	},
 }
 
@@ -52,7 +53,7 @@ var downloadCmd = &cobra.Command{
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		cli.StartDownload(config, args[0])
+		cli.StartDownload(cliConfig, args[0])
 	},
 }
 
@@ -61,9 +62,6 @@ var searchCmd = &cobra.Command{
 	Short: "Searches for a book and exits.",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		nextSearchTime := cli.GetLastSearchTime().Add(15 * time.Second)
-		time.Sleep(time.Until(nextSearchTime))
-		cli.StartSearch(config, args[0])
-		cli.SetLastSearchTime()
+		cli.StartSearch(cliConfig, args[0])
 	},
 }

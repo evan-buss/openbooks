@@ -1,9 +1,9 @@
 Future:
 
-  - Allow reconnecting to same IRC connection if websocket disconnects.
-    - Currently we immediately terminate the IRC connection and remove the client
-    - Possible use a timer that keeps the Client around for a set period of time
-      after websocket disconnect.
-  - Convert grid to use React Grid instead of Evergreen's built in one.
-    - Things like styling are more difficult with Evergreen (ex. can't round the bottom corners)
-  - Send download progress updates to the browser like we show for the CLI
+- Show IRC logs in the browser
+- Handle IRC name collisions
+- Allow reconnecting to same IRC connection if websocket disconnects.
+  - Currently we immediately terminate the IRC connection and remove the client
+  - Possible use a timer that keeps the Client around for a set period of time
+    after websocket disconnect.
+- Send download progress updates to the browser like we show for the CLI

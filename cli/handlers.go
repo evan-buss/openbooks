@@ -70,3 +70,7 @@ func (c Config) matchesFoundHandler(num string) {
 func (c Config) pingHandler(_ string) {
 	c.irc.Pong(c.Server)
 }
+
+func (c *Config) versionHandler(line string) {
+	core.SendVersionInfo(c.irc, line, c.Version)
+}

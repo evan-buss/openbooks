@@ -39,6 +39,8 @@ func (irc *IrcServer) handler(conn net.Conn) {
 
 	irc.serverHandler(conn)
 
+	irc.sendVersionRequest(conn)
+
 	for scanner.Scan() {
 		request := scanner.Text()
 		if err := scanner.Err(); err != nil {
@@ -59,8 +61,13 @@ func (irc *IrcServer) handler(conn net.Conn) {
 	irc.log.Println("Connection closed.")
 }
 
+func (irc *IrcServer) sendVersionRequest(conn net.Conn) {
+	irc.log.Println("Sending CTCP Version inquiry.")
+	fmt.Fprintf(conn, ":mock_server PRIVMSG evan_28 :\x01VERSION\x01\r\n")
+}
+
 func (irc *IrcServer) serverHandler(conn net.Conn) {
-	fmt.Fprintf(conn, "353 +server1 ~server2 ~evan_irc\r\n")
+	fmt.Fprintf(conn, "353 ~DV8 ~Horla +server1 ~server2 ~evan_irc\r\n")
 	fmt.Fprintf(conn, "end_list 366\r\n")
 }
 

@@ -1,8 +1,8 @@
 package server
 
 import (
+	"fmt"
 	"os"
-	"path"
 	"path/filepath"
 
 	"github.com/evan-buss/openbooks/core"
@@ -18,6 +18,7 @@ func (server *server) NewIrcEventHandler(client *Client) core.EventHandler {
 	handler[core.MatchesFound] = client.matchesFoundHandler
 	handler[core.Ping] = client.pingHandler
 	handler[core.ServerList] = client.userListHandler(server.repository)
+	handler[core.Version] = client.versionHandler(server.config.Version)
 	return handler
 }
 
@@ -38,17 +39,13 @@ func (c *Client) searchResultHandler(downloadDir string) core.HandlerFunc {
 			}
 		}
 
-		if len(results) == 0 {
+		if len(results) == 0 && len(errors) == 0 {
 			c.noResultsHandler(text)
 			return
 		}
 
 		c.log.Printf("Sending %d search results.\n", len(results))
-		c.send <- SearchResponse{
-			MessageType: SEARCH,
-			Books:       results,
-			Errors:      errors,
-		}
+		c.send <- newSearchResponse(results, errors)
 
 		err = os.Remove(extractedPath)
 		if err != nil {
@@ -63,58 +60,47 @@ func (c *Client) bookResultHandler(downloadDir string) core.HandlerFunc {
 		extractedPath, err := core.DownloadExtractDCCString(filepath.Join(downloadDir, "books"), text, nil)
 		if err != nil {
 			c.log.Println(err)
-			c.send <- ErrorResponse{
-				Error:   ERROR,
-				Details: err.Error(),
-			}
+
+			c.send <- newErrorResponse(err.Error())
 			return
 		}
 
 		fileName := filepath.Base(extractedPath)
 
 		c.log.Printf("Sending book entitled '%s'.\n", fileName)
-		c.send <- DownloadResponse{
-			MessageType:  DOWNLOAD,
-			Name:         fileName,
-			DownloadLink: path.Join("library", fileName),
-		}
+		c.send <- newDownloadResponse(fileName)
 	}
 }
 
 // NoResults is called when the server returns that nothing was found for the query
 func (c *Client) noResultsHandler(_ string) {
-	c.send <- IrcErrorResponse{
-		MessageType: IRCERROR,
-		Status:      "No results found for the query.",
-	}
+	c.send <- newErrorResponse("No results found for the query.")
 }
 
 // BadServer is called when the requested download fails because the server is not available
 func (c *Client) badServerHandler(_ string) {
-	c.send <- IrcErrorResponse{
-		MessageType: IRCERROR,
-		Status:      "Server is not available. Try another one.",
-	}
+	c.send <- newErrorResponse("Server is not available. Try another one.")
 }
 
 // SearchAccepted is called when the user's query is accepted into the search queue
 func (c *Client) searchAcceptedHandler(_ string) {
-	c.send <- WaitResponse{
-		MessageType: WAIT,
-		Status:      "Search accepted into the queue.",
-	}
+	c.send <- newStatusResponse(NOTIFY, "Search accepted into the queue.")
 }
 
 // MatchesFound is called when the server finds matches for the user's query
 func (c *Client) matchesFoundHandler(num string) {
-	c.send <- WaitResponse{
-		MessageType: WAIT,
-		Status:      "Found " + num + " results for your query.",
-	}
+	c.send <- newStatusResponse(NOTIFY, fmt.Sprintf("Found %s results for your query.", num))
 }
 
 func (c *Client) pingHandler(serverUrl string) {
 	c.irc.Pong(serverUrl)
+}
+
+func (c *Client) versionHandler(version string) core.HandlerFunc {
+	return func(line string) {
+		c.log.Printf("Sending CTCP version response: %s", line)
+		core.SendVersionInfo(c.irc, line, version)
+	}
 }
 
 func (c *Client) userListHandler(repo *Repository) core.HandlerFunc {

@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { BookDetail, ParseError } from "../models/messages";
+import { BookDetail, ParseError } from "./messages";
 import { setActiveItem } from "./stateSlice";
 import { AppThunk, RootState } from "./store";
 
