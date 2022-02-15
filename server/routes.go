@@ -74,7 +74,7 @@ func (server *server) serveWs() http.HandlerFunc {
 			conn: conn,
 			send: make(chan interface{}, 128),
 			uuid: userId,
-			irc:  irc.New(name, "OpenBooks - Search and download eBooks"),
+			irc:  irc.New(name, server.config.Version),
 			log:  log.New(os.Stdout, fmt.Sprintf("CLIENT (%s): ", name), log.LstdFlags|log.Lmsgprefix),
 			ctx:  context.Background(),
 		}

@@ -18,7 +18,7 @@ func (server *server) NewIrcEventHandler(client *Client) core.EventHandler {
 	handler[core.MatchesFound] = client.matchesFoundHandler
 	handler[core.Ping] = client.pingHandler
 	handler[core.ServerList] = client.userListHandler(server.repository)
-	handler[core.Version] = client.versionHandler
+	handler[core.Version] = client.versionHandler(server.config.Version)
 	return handler
 }
 
@@ -96,9 +96,11 @@ func (c *Client) pingHandler(serverUrl string) {
 	c.irc.Pong(serverUrl)
 }
 
-func (c *Client) versionHandler(line string) {
-	c.log.Printf("Sending CTCP version response: %s", line)
-	core.SendVersionInfo(c.irc, line)
+func (c *Client) versionHandler(version string) core.HandlerFunc {
+	return func(line string) {
+		c.log.Printf("Sending CTCP version response: %s", line)
+		core.SendVersionInfo(c.irc, line, version)
+	}
 }
 
 func (c *Client) userListHandler(repo *Repository) core.HandlerFunc {

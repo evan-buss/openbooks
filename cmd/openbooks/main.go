@@ -10,9 +10,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const version = "4.3.0"
+
 var rootCmd = &cobra.Command{
-	Use:   "openbooks",
-	Short: "Quickly and easily download eBooks from IRCHighway.",
+	Use:     "openbooks",
+	Short:   "Quickly and easily download eBooks from IRCHighway.",
+	Version: version,
 }
 
 func main() {

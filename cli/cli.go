@@ -15,6 +15,7 @@ type Config struct {
 	Dir      string
 	Server   string
 	irc      *irc.Conn
+	Version  string
 }
 
 // StartInteractive instantiates the OpenBooks CLI interface
