@@ -72,5 +72,5 @@ func (c Config) pingHandler(_ string) {
 }
 
 func (c *Config) versionHandler(line string) {
-	core.SendVersionInfo(c.irc, line)
+	core.SendVersionInfo(c.irc, line, c.Version)
 }

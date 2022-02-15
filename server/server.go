@@ -55,6 +55,7 @@ type Config struct {
 	Basepath      string
 	Server        string
 	SearchTimeout time.Duration
+	Version       string
 }
 
 func New(config Config) *server {

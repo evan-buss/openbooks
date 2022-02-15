@@ -26,7 +26,8 @@
 		"golang.Go",
 		"eamodio.gitlens",
 		"bradlc.vscode-tailwindcss",
-		"esbenp.prettier-vscode"
+		"esbenp.prettier-vscode",
+		"GitHub.copilot"
 	],
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	"forwardPorts": [
