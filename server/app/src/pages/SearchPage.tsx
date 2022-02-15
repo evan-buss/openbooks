@@ -101,7 +101,7 @@ export default function SearchPage() {
           {errorMode() ? "Download" : "Search"}
         </Button>
       </form>
-      {activeItem?.errors?.length && (
+      {activeItem?.errors?.length !== 0 && (
         <Button
           appearance={errorMode() ? "primary" : "minimal"}
           onClick={() => setShowErrors((show) => !show)}
