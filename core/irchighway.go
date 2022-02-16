@@ -11,12 +11,16 @@ import (
 // Specific irc.irchighway.net commands
 
 // Join connects to the irc.irchighway.net server and joins the #ebooks channel
-func Join(irc *irc.Conn, url string) {
-	irc.Connect(url)
+func Join(irc *irc.Conn, url string) error {
+	err := irc.Connect(url)
+	if err != nil {
+		return err
+	}
 	// Wait before joining the ebooks room
 	// Often you recieve a private message from the server
 	time.Sleep(time.Second * 2)
 	irc.JoinChannel("ebooks")
+	return nil
 }
 
 // SearchBook sends a search query to the search bot

@@ -28,24 +28,32 @@ func (c *Client) searchResultHandler(downloadDir string) core.HandlerFunc {
 		extractedPath, err := core.DownloadExtractDCCString(filepath.Join(downloadDir, "books"), text, nil)
 		if err != nil {
 			c.log.Println(err)
+			c.send <- newErrorResponse("Error when downloading search results.")
+			return
 		}
 
-		results, errors := core.ParseSearchFile(extractedPath)
-		// Output all errors so parser can be improved over time
-		if len(errors) > 0 {
-			c.log.Printf("%d Search Result Parsing Errors\n", len(errors))
-			for _, err := range errors {
-				c.log.Println(err)
-			}
+		bookResults, parseErrors, err := core.ParseSearchFile(extractedPath)
+		if err != nil {
+			c.log.Println(err)
+			c.send <- newErrorResponse("Error when parsing search results.")
+			return
 		}
 
-		if len(results) == 0 && len(errors) == 0 {
+		if len(bookResults) == 0 && len(parseErrors) == 0 {
 			c.noResultsHandler(text)
 			return
 		}
 
-		c.log.Printf("Sending %d search results.\n", len(results))
-		c.send <- newSearchResponse(results, errors)
+		// Output all errors so parser can be improved over time
+		if len(parseErrors) > 0 {
+			c.log.Printf("%d Search Result Parsing Errors\n", len(parseErrors))
+			for _, err := range parseErrors {
+				c.log.Println(err)
+			}
+		}
+
+		c.log.Printf("Sending %d search results.\n", len(bookResults))
+		c.send <- newSearchResponse(bookResults, parseErrors)
 
 		err = os.Remove(extractedPath)
 		if err != nil {
@@ -60,8 +68,7 @@ func (c *Client) bookResultHandler(downloadDir string) core.HandlerFunc {
 		extractedPath, err := core.DownloadExtractDCCString(filepath.Join(downloadDir, "books"), text, nil)
 		if err != nil {
 			c.log.Println(err)
-
-			c.send <- newErrorResponse(err.Error())
+			c.send <- newErrorResponse("Error when downloading book.")
 			return
 		}
 

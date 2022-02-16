@@ -4,7 +4,6 @@ import (
 	"encoding/binary"
 	"errors"
 	"io"
-	"log"
 	"net"
 	"regexp"
 	"strconv"
@@ -76,13 +75,13 @@ func (download Download) Download(writer io.Writer) error {
 	bytes := make([]byte, 4096)
 	for int64(received) < download.Size {
 		n, err := conn.Read(bytes)
-
 		if err != nil {
-			log.Fatal("Error Downloading Data", err)
+			return err
 		}
+
 		_, err = writer.Write(bytes[:n])
 		if err != nil {
-			log.Println(err)
+			return err
 		}
 		received += n
 	}
