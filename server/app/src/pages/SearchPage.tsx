@@ -19,6 +19,8 @@ export default function SearchPage() {
     setShowErrors(false);
   }, [activeItem]);
 
+  const hasErrors = () =>
+    activeItem?.errors?.length && activeItem?.errors?.length > 0;
   const errorMode = () => showErrors && activeItem;
   const validInput = () => {
     if (errorMode()) {
@@ -106,7 +108,7 @@ export default function SearchPage() {
           {errorMode() ? "Download" : "Search"}
         </Button>
       </form>
-      {activeItem?.errors?.length && (
+      {hasErrors() && (
         <Button
           appearance={errorMode() ? "primary" : "minimal"}
           onClick={() => setShowErrors((show) => !show)}
