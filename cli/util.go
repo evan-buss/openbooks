@@ -38,7 +38,10 @@ func instantiate(config *Config) {
 	fmt.Printf("Connecting to %s.", config.Server)
 	conn := irc.New(config.UserName, config.Version)
 	config.irc = conn
-	core.Join(conn, config.Server)
+	err := core.Join(conn, config.Server)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Printf("%sConnected to %s.\n", clearLine, config.Server)
 }
 
