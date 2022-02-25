@@ -11,7 +11,9 @@ import { toggleDrawer } from "../../state/notificationSlice";
 import { IdentificationBadge } from "phosphor-react";
 
 const Sidebar: React.FC = () => {
-  const [selectedIndex, setIndex] = useLocalStorageState("index", 0);
+  const [selectedIndex, setIndex] = useLocalStorageState("index", {
+    defaultValue: 0
+  });
   const connected = useSelector((store: RootState) => store.state.isConnected);
   const username = useSelector((store: RootState) => store.state.username);
   const dispatch = useDispatch();
