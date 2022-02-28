@@ -14,6 +14,7 @@ import (
 
 var cliConfig cli.Config
 
+// TODO: Move init() code to normal functions. No need for init()
 func init() {
 	desktopCmd.AddCommand(cliCmd)
 	cliCmd.AddCommand(downloadCmd)

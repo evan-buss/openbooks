@@ -21,6 +21,11 @@ dev-server:
 	go build
 	./openbooks server --server localhost
 
+dev-api:
+	cd cmd/openbooks_api
+	go build
+	./openbooks_api
+
 dev-client:
 	cd server/app
 	npm run dev

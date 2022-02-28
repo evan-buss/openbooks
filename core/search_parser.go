@@ -82,7 +82,7 @@ func ParseSearch(reader io.Reader) ([]BookDetail, []ParseError) {
 	for scanner.Scan() {
 		line := scanner.Text()
 		if strings.HasPrefix(line, "!") {
-			dat, err := parseLine(line)
+			dat, err := ParseLine(line)
 			if err != nil {
 				parseErrors = append(parseErrors, ParseError{Line: line, Error: err})
 			} else {
@@ -97,7 +97,7 @@ func ParseSearch(reader io.Reader) ([]BookDetail, []ParseError) {
 }
 
 // Parse line extracts data from a single line
-func parseLine(line string) (BookDetail, error) {
+func ParseLine(line string) (BookDetail, error) {
 
 	//First check if it follows the correct format. Some servers don't include file info...
 	if !strings.Contains(line, "::INFO::") {
