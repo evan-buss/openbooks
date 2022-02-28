@@ -1,0 +1,8 @@
+Admin endpoints
+Reorganize folders / file structure
+Set up Dockerfile
+    - Volume mounts
+    - Make work with existing dockerfile workflow
+        - Had to remove the golang embed from OpenBooks to get dockerfile build...
+Read forwarded IP headers for rate limiting as well..
+Look into RWMutex for rate limiter

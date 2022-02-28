@@ -1,6 +1,10 @@
 # start persist
 mock_server
 openbooks
+openbooks_api
+!cmd/openbooks_api
+**/openbooks.bleve
+**/openbooks_api/sources
 !openbooks/
 *.DS_Store
 **/dist

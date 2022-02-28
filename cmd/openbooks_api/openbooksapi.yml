@@ -1,0 +1,6 @@
+port: 6969
+username: openbooks-api
+refreshSchedule: '@every 10m'
+ircServers:
+  - Oatmeal
+  - FWServer
