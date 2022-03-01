@@ -4,12 +4,27 @@ import (
 	"encoding/json"
 	"net/http"
 	"sync/atomic"
+	"time"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/httprate"
 )
 
 func (s *server) registerRoutes() {
-	s.router.Get("/search", s.limit(s.searchHandler()).ServeHTTP)
-	s.router.Post("/index", s.indexHandler())
-	s.router.Get("/stats", s.statsHandler())
+	// Rate limited endpoints
+	s.router.Group(func(r chi.Router) {
+		r.Use(middleware.NoCache)
+		r.Use(httprate.LimitByIP(2, 10*time.Second))
+		r.Get("/search", s.searchHandler())
+	})
+
+	// Admin only endpoints
+	s.router.Group(func(r chi.Router) {
+		r.Use(middleware.BasicAuth("openbooks_api", s.config.AdminUsers))
+		r.Post("/index", s.indexHandler())
+		r.Get("/stats", s.statsHandler())
+	})
 }
 
 func (s *server) searchHandler() http.HandlerFunc {
