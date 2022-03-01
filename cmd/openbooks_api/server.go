@@ -11,19 +11,19 @@ import (
 )
 
 type Config struct {
-	Username        string   `mapstructure:"username"`
-	Port            string   `mapstructure:"port"`
-	IrcServers      []string `mapstructure:"ircServers"`
-	RefreshSchedule string   `mapstructure:"refreshSchedule"`
+	Username        string            `mapstructure:"username"`
+	Port            string            `mapstructure:"port"`
+	IrcServers      []string          `mapstructure:"ircServers"`
+	RefreshSchedule string            `mapstructure:"refreshSchedule"`
+	AdminUsers      map[string]string `mapstructure:"adminusers"`
 }
 
 type server struct {
-	searcher    Searcher
-	indexer     Indexer
-	router      *chi.Mux
-	cron        *cron.Cron
-	rateLimiter *RateLimiter
-	config      Config
+	searcher Searcher
+	indexer  Indexer
+	router   *chi.Mux
+	cron     *cron.Cron
+	config   Config
 }
 
 func NewServer(config Config) {
@@ -31,6 +31,7 @@ func NewServer(config Config) {
 	router.Use(middleware.RequestID)
 	router.Use(middleware.RealIP)
 	router.Use(middleware.Recoverer)
+	router.Use(middleware.Logger)
 	// router.Use(cors.New(cors.Options{
 	// 	AllowCredentials: true,
 	// 	AllowedOrigins:   []string{"http://localhost:3000"},
@@ -43,23 +44,16 @@ func NewServer(config Config) {
 		log.Fatal(err)
 	}
 
-	duration, err := time.ParseDuration("10s")
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	server := &server{
-		searcher:    searcher,
-		indexer:     &DirectoryIndexer{"sources"},
-		router:      router,
-		cron:        cron.New(),
-		rateLimiter: NewRateLimiter(duration, 3),
-		config:      config,
+		searcher: searcher,
+		indexer:  &DirectoryIndexer{"sources"},
+		router:   router,
+		cron:     cron.New(),
+		config:   config,
 	}
 
 	server.registerRoutes()
 	server.cron.AddFunc(server.config.RefreshSchedule, server.RefreshJob)
-	server.cron.AddFunc("@every 1m", server.rateLimiter.CleanupVisitors)
 	server.cron.Start()
 
 	httpServer := &http.Server{

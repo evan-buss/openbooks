@@ -33,12 +33,13 @@ func NewRootCommand() *cobra.Command {
 			// You can bind cobra and viper in a few locations, but PersistencePreRunE on the root command works well
 			v := viper.New()
 
-			v.SetConfigName("openbooksapi")
-
-			v.AddConfigPath(".")
-			v.AddConfigPath("$HOME")
 			v.AutomaticEnv()
 			util.BindFlags(cmd, v, "OBA_")
+
+			v.SetConfigName("openbooksapi")
+
+			v.AddConfigPath("$HOME")
+			v.AddConfigPath(".")
 
 			if err := v.ReadInConfig(); err != nil {
 				// It's okay if there isn't a config file
