@@ -18,6 +18,11 @@ Openbooks allows you to download ebooks from irc.irchighway.net quickly and easi
 3. `./openbooks --help`
    - This will display all possible configuration values and introduce the two modes; CLI or Server.
 
+### Usage For Non-Programmers
+1. Download the latest release for your platform from the [releases page](https://github.com/evan-buss/openbooks/releases).
+2. Download [launcher](https://github.com/Oliver81594/openbooks-launcher/releases) for your platform.
+3. Make sure they are in the same folder and double-click the launcher. This will open a website that you can use. To exit the app just close the command line window.
+
 ### Docker
 
 - Basic config
