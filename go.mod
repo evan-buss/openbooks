@@ -18,7 +18,11 @@ require (
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
 )
 
-require github.com/stretchr/testify v1.7.2
+require (
+	github.com/spf13/pflag v1.0.5
+	github.com/stretchr/testify v1.7.2
+	github.com/webview/webview v0.0.0-20220613032649-1df219123fb2
+)
 
 require (
 	github.com/andybalholm/brotli v1.0.4 // indirect
@@ -31,8 +35,6 @@ require (
 	github.com/pierrec/lz4/v4 v4.1.14 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
-	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/stretchr/objx v0.4.0 // indirect
 	golang.org/x/crypto v0.0.0-20220525230936-793ad666bf5e // indirect
 	golang.org/x/sys v0.0.0-20220614162138-6c1b26c55098 // indirect
 	golang.org/x/term v0.0.0-20220526004731-065cf7ba2467 // indirect

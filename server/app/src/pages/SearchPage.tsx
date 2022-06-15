@@ -57,7 +57,12 @@ export default function SearchPage() {
         </>
       );
     } else if (errorMode()) {
-      return <ErrorsGrid errors={activeItem?.errors} />;
+      return (
+        <ErrorsGrid
+          errors={activeItem?.errors}
+          setSearchQuery={setSearchQuery}
+        />
+      );
     } else {
       return <BooksGrid books={activeItem?.results} />;
     }

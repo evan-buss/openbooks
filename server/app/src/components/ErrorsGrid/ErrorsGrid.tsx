@@ -1,14 +1,24 @@
 import React, { useState } from "react";
 import { ParseError } from "../../state/messages";
 import { majorScale, Table, Text } from "evergreen-ui";
+import { useEvent } from "react-use";
+import debounce from "lodash/debounce";
 
 export interface Props {
   errors?: ParseError[];
+  setSearchQuery: (query: string) => void;
 }
 
-export default function ErrorsGrid({ errors }: Props) {
+export default function ErrorsGrid({ errors, setSearchQuery }: Props) {
   const [lineFilter, setLineFilter] = useState<string>("");
   const [errorFilter, setErrorFilter] = useState<string>("");
+
+  const onSelectionChange = () => {
+    const selection = document.getSelection()?.toString();
+    if (selection) setSearchQuery(selection);
+  };
+
+  useEvent("selectionchange", debounce(onSelectionChange, 100), document);
 
   if (errors?.length === 0) {
     return (
@@ -20,7 +30,7 @@ export default function ErrorsGrid({ errors }: Props) {
 
   return (
     <>
-      <Text className="mb-2 w-full text-gray-500" size={400}>
+      <Text className="w-full mb-2 text-gray-500" size={400}>
         These results could not be parsed to due to their non-standard format.
         To download, copy the line up to the <code>::INFO::</code> or file size
         at the end and paste into the text box above.
