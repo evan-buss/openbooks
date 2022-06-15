@@ -1,7 +1,6 @@
 import { Heading, Pane, Paragraph, Tab, Tablist } from "evergreen-ui";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
-import useLocalStorageState from "use-local-storage-state";
 import { RootState } from "../../state/store";
 import SearchHistory from "./SearchHistory";
 import Pulse from "./Pulse";
@@ -9,11 +8,10 @@ import NotificationDrawer from "./NotificationDrawer";
 import BookList from "./BookList";
 import { toggleDrawer } from "../../state/notificationSlice";
 import { IdentificationBadge } from "phosphor-react";
+import { useLocalStorage } from "react-use";
 
 const Sidebar: React.FC = () => {
-  const [selectedIndex, setIndex] = useLocalStorageState("index", {
-    defaultValue: 0
-  });
+  const [selectedIndex, setIndex] = useLocalStorage("index", 0);
   const connected = useSelector((store: RootState) => store.state.isConnected);
   const username = useSelector((store: RootState) => store.state.username);
   const dispatch = useDispatch();
