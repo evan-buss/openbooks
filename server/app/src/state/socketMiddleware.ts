@@ -82,7 +82,7 @@ const route = (store: Store, msg: MessageEvent<any>): void => {
         );
         return notification;
       case MessageType.DOWNLOAD:
-        downloadFile((response as DownloadResponse).downloadPath);
+        downloadFile((response as DownloadResponse)?.downloadPath);
         store.dispatch(openbooksApi.util.invalidateTags(["books"]));
         return notification;
       case MessageType.RATELIMIT:
