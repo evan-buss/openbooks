@@ -54,7 +54,9 @@ export const displayNotification = ({
   }
 };
 
-export const downloadFile = (relativeURL: string) => {
+export function downloadFile(relativeURL?: string) {
+  if (relativeURL === "" || relativeURL === undefined) return;
+
   let url = getApiURL();
   url.pathname += relativeURL;
 
@@ -64,4 +66,4 @@ export const downloadFile = (relativeURL: string) => {
   link.href = url.href;
   link.click();
   link.remove();
-};
+}

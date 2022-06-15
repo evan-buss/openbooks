@@ -46,17 +46,18 @@ type server struct {
 
 // Config contains settings for server
 type Config struct {
-	Log           bool
-	OpenBrowser   bool
-	Port          string
-	UserName      string
-	Persist       bool
-	DownloadDir   string
-	Basepath      string
-	Server        string
-	SearchTimeout time.Duration
-	SearchBot     string
-	Version       string
+	Log                     bool
+	OpenBrowser             bool
+	Port                    string
+	UserName                string
+	Persist                 bool
+	DownloadDir             string
+	Basepath                string
+	Server                  string
+	SearchTimeout           time.Duration
+	SearchBot               string
+	DisableBrowserDownloads bool
+	Version                 string
 }
 
 func New(config Config) *server {

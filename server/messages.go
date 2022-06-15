@@ -108,16 +108,29 @@ func newSearchResponse(results []core.BookDetail, errors []core.ParseError) Sear
 	}
 }
 
-func newDownloadResponse(fileName string) DownloadResponse {
-	return DownloadResponse{
+func newDownloadResponse(filePath string, disableBrowserDownloads bool) DownloadResponse {
+	// If we don't want to autodownload the file, show the user the path to the file
+	// otherwise just show file name.
+	if !disableBrowserDownloads {
+		filePath = path.Base(filePath)
+	}
+
+	response := DownloadResponse{
 		StatusResponse: StatusResponse{
 			MessageType:      DOWNLOAD,
 			NotificationType: SUCCESS,
 			Title:            "Book file received.",
-			Detail:           fileName,
+			Detail:           filePath,
 		},
-		DownloadPath: path.Join("library", fileName),
 	}
+
+	// If we want to autodownload the file, add the path to the response
+	// client will not attempt autodownload if the path is empty
+	if !disableBrowserDownloads {
+		response.DownloadPath = path.Join("library", filePath)
+	}
+
+	return response
 }
 
 func newStatusResponse(notificationType NotificationType, title string) StatusResponse {

@@ -11,7 +11,7 @@ import (
 func (server *server) NewIrcEventHandler(client *Client) core.EventHandler {
 	handler := core.EventHandler{}
 	handler[core.SearchResult] = client.searchResultHandler(server.config.DownloadDir)
-	handler[core.BookResult] = client.bookResultHandler(server.config.DownloadDir)
+	handler[core.BookResult] = client.bookResultHandler(server.config.DownloadDir, server.config.DisableBrowserDownloads)
 	handler[core.NoResults] = client.noResultsHandler
 	handler[core.BadServer] = client.badServerHandler
 	handler[core.SearchAccepted] = client.searchAcceptedHandler
@@ -63,7 +63,7 @@ func (c *Client) searchResultHandler(downloadDir string) core.HandlerFunc {
 }
 
 // bookResultHandler downloads the book file and sends it over the websocket
-func (c *Client) bookResultHandler(downloadDir string) core.HandlerFunc {
+func (c *Client) bookResultHandler(downloadDir string, disableBrowserDownloads bool) core.HandlerFunc {
 	return func(text string) {
 		extractedPath, err := core.DownloadExtractDCCString(filepath.Join(downloadDir, "books"), text, nil)
 		if err != nil {
@@ -72,10 +72,8 @@ func (c *Client) bookResultHandler(downloadDir string) core.HandlerFunc {
 			return
 		}
 
-		fileName := filepath.Base(extractedPath)
-
-		c.log.Printf("Sending book entitled '%s'.\n", fileName)
-		c.send <- newDownloadResponse(fileName)
+		c.log.Printf("Sending book entitled '%s'.\n", filepath.Base(extractedPath))
+		c.send <- newDownloadResponse(extractedPath, disableBrowserDownloads)
 	}
 }
 
