@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"path/filepath"
 	"time"
 
 	"github.com/evan-buss/openbooks/desktop"
@@ -28,8 +29,16 @@ func init() {
 	serverCmd.Flags().StringVar(&serverConfig.Basepath, "basepath", "/", `Base path where the application is accessible. For example "/openbooks/".`)
 	serverCmd.Flags().BoolVarP(&serverConfig.OpenBrowser, "browser", "b", false, "Open the browser on server start.")
 	serverCmd.Flags().BoolVar(&serverConfig.Persist, "persist", false, "Persist eBooks in 'dir'. Default is to delete after sending.")
+	serverCmd.Flags().StringVarP(&serverConfig.DownloadDir, "dir", "d", filepath.Join(os.TempDir(), "openbooks"), "The directory where eBooks are saved when persist enabled.")
+
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		panic(fmt.Errorf("unable to determine HOME directory %w", err))
+	}
+	downloadDir := filepath.Join(homeDir, "Downloads")
 
 	desktopCmd.Flags().AddFlagSet(sharedFlags)
+	desktopCmd.Flags().StringVarP(&serverConfig.DownloadDir, "dir", "d", downloadDir, "The directory where eBooks are saved.")
 }
 
 var serverCmd = &cobra.Command{
@@ -73,7 +82,6 @@ var desktopCmd = &cobra.Command{
 func bindGlobalFlags() {
 	serverConfig.Version = fmt.Sprintf("OpenBooks Server %s", ircVersion)
 	serverConfig.UserName = globalFlags.UserName
-	serverConfig.DownloadDir = globalFlags.DownloadDir
 	serverConfig.Log = globalFlags.Log
 	serverConfig.Server = globalFlags.Server
 	serverConfig.SearchBot = globalFlags.SearchBot

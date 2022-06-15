@@ -3,7 +3,7 @@ package core
 import (
 	"io"
 	"os"
-	"path"
+	"path/filepath"
 
 	"github.com/evan-buss/openbooks/dcc"
 	"github.com/evan-buss/openbooks/util"
@@ -16,7 +16,7 @@ func DownloadExtractDCCString(baseDir, dccStr string, progress io.Writer) (strin
 		return "", err
 	}
 
-	dccPath := path.Join(baseDir, download.Filename)
+	dccPath := filepath.Join(baseDir, download.Filename)
 	file, err := os.Create(dccPath)
 	if err != nil {
 		return "", err

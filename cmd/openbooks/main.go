@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
-	"path/filepath"
 	"time"
 
 	"github.com/brianvoe/gofakeit/v5"
@@ -20,11 +19,10 @@ var version = "4.4.0"
 const ircVersion = "4.3.0"
 
 type GlobalFlags struct {
-	UserName    string
-	Server      string
-	DownloadDir string
-	Log         bool
-	SearchBot   string
+	UserName  string
+	Server    string
+	Log       bool
+	SearchBot string
 }
 
 var globalFlags GlobalFlags
@@ -32,11 +30,8 @@ var globalFlags GlobalFlags
 func init() {
 	rootCmd.PersistentFlags().StringVarP(&globalFlags.UserName, "name", "n", generateUserName(), "Use a name that isn't randomly generated. One word only.")
 	rootCmd.PersistentFlags().StringVarP(&globalFlags.Server, "server", "s", "irc.irchighway.net", "IRC server to connect to.")
-	rootCmd.PersistentFlags().StringVarP(&globalFlags.DownloadDir, "dir", "d", filepath.Join(os.TempDir(), "openbooks"), "The directory where eBooks are saved when persist enabled.")
 	rootCmd.PersistentFlags().BoolVarP(&globalFlags.Log, "log", "l", false, "Save raw IRC logs for each client connection.")
 	rootCmd.PersistentFlags().StringVar(&globalFlags.SearchBot, "searchbot", "search", "The IRC bot that handles search queries. Try 'searchook' if 'search' is down.")
-
-	rootCmd.MarkPersistentFlagDirname("dir")
 }
 
 var rootCmd = &cobra.Command{
@@ -46,6 +41,9 @@ var rootCmd = &cobra.Command{
 }
 
 func main() {
+	// Don't block if launched from explorer.
+	cobra.MousetrapHelpText = ""
+
 	// Open in desktop mode by default (no arguments / double click)
 	cmd, _, err := rootCmd.Find(os.Args[1:])
 	if err != nil || cmd == nil || cmd.Name() == rootCmd.Name() {

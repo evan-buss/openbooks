@@ -23,8 +23,6 @@ func init() {
 		log.Fatalln("Could not get current working directory.", err)
 	}
 
-	// Change the default to CWD for CLI mode.
-	cliCmd.InheritedFlags().StringVarP(&cliConfig.Dir, "dir", "d", cwd, "Directory where files are downloaded.")
 	cliCmd.PersistentFlags().StringVarP(&cliConfig.Dir, "dir", "d", cwd, "Directory where files are downloaded.")
 }
 
