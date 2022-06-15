@@ -93,7 +93,7 @@ func (c *Client) sendSearchRequest(s *SearchRequest, server *server) {
 		return
 	}
 
-	core.SearchBook(c.irc, s.Query)
+	core.SearchBook(c.irc, server.config.SearchBot, s.Query)
 	server.lastSearch = time.Now()
 
 	c.send <- newStatusResponse(NOTIFY, "Search request sent.")
