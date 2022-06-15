@@ -3,6 +3,7 @@ import { ParseError } from "../../state/messages";
 import { majorScale, Table, Text } from "evergreen-ui";
 import { useEvent } from "react-use";
 import debounce from "lodash/debounce";
+import { useHeight } from "../../state/hooks";
 
 export interface Props {
   errors?: ParseError[];
@@ -12,6 +13,7 @@ export interface Props {
 export default function ErrorsGrid({ errors, setSearchQuery }: Props) {
   const [lineFilter, setLineFilter] = useState<string>("");
   const [errorFilter, setErrorFilter] = useState<string>("");
+  const height = useHeight();
 
   const onSelectionChange = () => {
     const selection = document.getSelection()?.toString();
@@ -36,6 +38,7 @@ export default function ErrorsGrid({ errors, setSearchQuery }: Props) {
         at the end and paste into the text box above.
       </Text>
       <Table
+        key={height}
         flex={1}
         display="flex"
         flexDirection="column"
