@@ -14,6 +14,7 @@ import { BookDetail, MessageType } from "../../state/messages";
 import { sendMessage } from "../../state/stateSlice";
 import SelectMenuHeader, { makeStatusMenuItem } from "./SelectMenuHeader";
 import { useGetServersQuery } from "../../state/api";
+import debounce from "lodash/debounce";
 
 const stringContains = (first: string, second: string): boolean => {
   return first.toLowerCase().includes(second.toLowerCase());
@@ -29,6 +30,18 @@ export const BooksGrid: React.FC<Props> = ({ books }: Props) => {
   const [authorFilter, setAuthorFilter] = useState<string>("");
   const [formatFilter, setFormatFilter] = useState<string[]>([]);
   const [serverFilter, setServerFilter] = useState<string[]>([]);
+
+  const [sizeKey, setSizeKey] = useState(window.innerHeight);
+
+  useEffect(() => {
+    const handleResize = debounce(() => setSizeKey(window.innerHeight), 100);
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
 
   useEffect(() => {
     refetch();
@@ -121,6 +134,7 @@ export const BooksGrid: React.FC<Props> = ({ books }: Props) => {
 
   return (
     <Table
+      key={sizeKey}
       flex={1}
       display="flex"
       flexDirection="column"
@@ -130,7 +144,7 @@ export const BooksGrid: React.FC<Props> = ({ books }: Props) => {
         <SelectMenuHeader
           flexBasis={120}
           options={availableServers}
-          columnTitle="Servers"
+          columnTitle={`Server ${sizeKey}`}
           menuTitle="Filter Servers"
           selected={serverFilter}
           setSelected={setServerFilter}
