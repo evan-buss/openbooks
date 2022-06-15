@@ -71,7 +71,6 @@ var desktopCmd = &cobra.Command{
 }
 
 func bindGlobalFlags() {
-	fmt.Println("Binding global flags...")
 	serverConfig.Version = fmt.Sprintf("OpenBooks Server %s", ircVersion)
 	serverConfig.UserName = globalFlags.UserName
 	serverConfig.DownloadDir = globalFlags.DownloadDir
@@ -81,7 +80,6 @@ func bindGlobalFlags() {
 }
 
 func ensureValidRate(cmd *cobra.Command) {
-	fmt.Println("Validating flags...")
 	rateLimit, _ := cmd.Flags().GetInt("rate-limit")
 
 	// If user enters a limit that's too low, set to default of 10 seconds.

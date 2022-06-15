@@ -46,6 +46,14 @@ var rootCmd = &cobra.Command{
 }
 
 func main() {
+	// Open in desktop mode by default (no arguments / double click)
+	cmd, _, err := rootCmd.Find(os.Args[1:])
+	if err != nil || cmd == nil || cmd.Name() == rootCmd.Name() {
+		// Not found
+		args := append([]string{"desktop"}, os.Args[1:]...)
+		rootCmd.SetArgs(args)
+	}
+
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
