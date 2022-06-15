@@ -4,9 +4,12 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"path"
 	"time"
 
 	"github.com/brianvoe/gofakeit/v5"
+	"github.com/evan-buss/openbooks/desktop"
+	"github.com/evan-buss/openbooks/server"
 	"github.com/spf13/cobra"
 )
 
@@ -34,23 +37,33 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&globalFlags.SearchBot, "searchbot", "search", "The IRC bot that handles search queries. Try 'searchook' if 'search' is down.")
 }
 
+// var rootCmd = &cobra.Command{
+// 	Use:     "openbooks",
+// 	Short:   "Quickly and easily download eBooks from IRCHighway.",
+// 	Version: version,
+// }
+
 var rootCmd = &cobra.Command{
-	Use:     "openbooks",
-	Short:   "Quickly and easily download eBooks from IRCHighway.",
+	Use:   "openbooks",
+	Short: "Quickly and easily download eBooks from IRCHighway.",
+	Long:  "Runs OpenBooks in desktop mode. This allows you to run OpenBooks like a regular desktop application. This functionality utilizes your OS's native browser renderer and as such may not work on certain operating systems.",
+	PreRun: func(cmd *cobra.Command, args []string) {
+		bindGlobalFlags()
+		serverConfig.DisableBrowserDownloads = true
+		serverConfig.OpenBrowser = false
+		serverConfig.Basepath = "/"
+		serverConfig.Persist = true
+	},
+	Run: func(cmd *cobra.Command, args []string) {
+		go server.Start(serverConfig)
+		desktop.StartWebView(fmt.Sprintf("http://127.0.0.1:%s", path.Join(serverConfig.Port+serverConfig.Basepath)), false)
+	},
 	Version: version,
 }
 
 func main() {
 	// Don't block if launched from explorer.
 	cobra.MousetrapHelpText = ""
-
-	// Open in desktop mode by default (no arguments / double click)
-	cmd, _, err := rootCmd.Find(os.Args[1:])
-	if err != nil || cmd == nil || cmd.Name() == rootCmd.Name() {
-		// Not found
-		args := append([]string{"desktop"}, os.Args[1:]...)
-		rootCmd.SetArgs(args)
-	}
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)

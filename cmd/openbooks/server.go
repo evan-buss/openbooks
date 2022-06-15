@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/evan-buss/openbooks/desktop"
 	"github.com/evan-buss/openbooks/server"
 
 	"github.com/spf13/cobra"
@@ -18,7 +17,7 @@ var serverConfig server.Config
 
 func init() {
 	rootCmd.AddCommand(serverCmd)
-	rootCmd.AddCommand(desktopCmd)
+	// rootCmd.AddCommand(desktopCmd)
 
 	sharedFlags := pflag.NewFlagSet("", pflag.ExitOnError)
 	sharedFlags.StringVarP(&serverConfig.Port, "port", "p", "5228", "Set the local network port for browser mode.")
@@ -37,8 +36,8 @@ func init() {
 	}
 	downloadDir := filepath.Join(homeDir, "Downloads")
 
-	desktopCmd.Flags().AddFlagSet(sharedFlags)
-	desktopCmd.Flags().StringVarP(&serverConfig.DownloadDir, "dir", "d", downloadDir, "The directory where eBooks are saved.")
+	rootCmd.Flags().AddFlagSet(sharedFlags)
+	rootCmd.Flags().StringVarP(&serverConfig.DownloadDir, "dir", "d", downloadDir, "The directory where eBooks are saved.")
 }
 
 var serverCmd = &cobra.Command{
@@ -59,23 +58,6 @@ var serverCmd = &cobra.Command{
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		server.Start(serverConfig)
-	},
-}
-
-var desktopCmd = &cobra.Command{
-	Use:   "desktop",
-	Short: "Run OpenBooks in desktop mode.",
-	Long:  "Run OpenBooks in desktop mode. This allows you to run OpenBooks like a regular desktop application. This functionality utilizes your OS's native browser renderer and as such may not work on certain operating systems.",
-	PreRun: func(cmd *cobra.Command, args []string) {
-		bindGlobalFlags()
-		serverConfig.DisableBrowserDownloads = true
-		serverConfig.OpenBrowser = false
-		serverConfig.Basepath = "/"
-		serverConfig.Persist = true
-	},
-	Run: func(cmd *cobra.Command, args []string) {
-		go server.Start(serverConfig)
-		desktop.StartWebView(fmt.Sprintf("http://127.0.0.1:%s", path.Join(serverConfig.Port+serverConfig.Basepath)), false)
 	},
 }
 
