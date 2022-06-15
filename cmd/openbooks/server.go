@@ -33,7 +33,7 @@ var serverCmd = &cobra.Command{
 		serverConfig.DownloadDir = globalFlags.DownloadDir
 		serverConfig.Log = globalFlags.Log
 		serverConfig.Server = globalFlags.Server
-		// serverConfig.SearchBot = globalFlags.SearchBot
+		serverConfig.SearchBot = globalFlags.SearchBot
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		rateLimit, _ := cmd.Flags().GetInt("rate-limit")
