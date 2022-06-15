@@ -1,8 +1,8 @@
 //go:build windows
 
-import "github.com/inkeliz/gowebview"
-
 package desktop
+
+import "github.com/inkeliz/gowebview"
 
 func StartWebView(url string, debug bool) {
 	config := &gowebview.Config{
