@@ -23,16 +23,21 @@ func init() {
 		log.Fatalln("Could not get current working directory.", err)
 	}
 
-	cliConfig.Version = fmt.Sprintf("OpenBooks CLI %s", version)
-	cliCmd.PersistentFlags().StringVarP(&cliConfig.UserName, "name", "n", generateUserName(), "Use a name that isn't randomly generated. One word only.")
-	cliCmd.PersistentFlags().StringVarP(&cliConfig.Dir, "directory", "d", cwd, "Directory where files are downloaded.")
-	cliCmd.PersistentFlags().BoolVarP(&cliConfig.Log, "log", "l", false, "Whether or not to log IRC messages to an output file.")
-	cliCmd.PersistentFlags().StringVarP(&cliConfig.Server, "server", "s", "irc.irchighway.net", "IRC server to connect to.")
+	// Change the default to CWD for CLI mode.
+	cliCmd.InheritedFlags().StringVarP(&cliConfig.Dir, "dir", "d", cwd, "Directory where files are downloaded.")
+	cliCmd.PersistentFlags().StringVarP(&cliConfig.Dir, "dir", "d", cwd, "Directory where files are downloaded.")
 }
 
 var cliCmd = &cobra.Command{
 	Use:   "cli",
-	Short: "Run openbooks from the terminal in CLI mode.",
+	Short: "Run openbooks from the terminal in interactive CLI mode.",
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		cliConfig.Version = fmt.Sprintf("OpenBooks CLI %s", ircVersion)
+		cliConfig.UserName = globalFlags.UserName
+		cliConfig.Server = globalFlags.Server
+		cliConfig.Log = globalFlags.Log
+		cliConfig.SearchBot = globalFlags.SearchBot
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		cli.StartInteractive(cliConfig)
 	},

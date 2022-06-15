@@ -8,10 +8,9 @@ import (
 	"time"
 
 	"github.com/evan-buss/openbooks/core"
-	"github.com/evan-buss/openbooks/irc"
 )
 
-func terminalMenu(irc *irc.Conn) {
+func terminalMenu(config Config) {
 	fmt.Print("\ns)search\ng)et book\nse)rvers\nd)one\n~> ")
 
 	// Trim user input so we don't send 2 messages
@@ -30,12 +29,12 @@ func terminalMenu(irc *irc.Conn) {
 		nextSearchTime := getLastSearchTime().Add(15 * time.Second)
 		time.Sleep(time.Until(nextSearchTime))
 
-		core.SearchBook(irc, clean(query))
+		core.SearchBook(config.irc, config.SearchBot, clean(query))
 		setLastSearchTime()
 	case "g":
 		fmt.Print("Download String: ")
 		message, _ := reader.ReadString('\n')
-		core.DownloadBook(irc, clean(message))
+		core.DownloadBook(config.irc, clean(message))
 		fmt.Println("\nSent download request.")
 		warnIfServerOffline(clean(message))
 	case "se":
@@ -43,14 +42,14 @@ func terminalMenu(irc *irc.Conn) {
 		for _, server := range servers {
 			fmt.Printf("  %s\n", server)
 		}
-		terminalMenu(irc)
+		terminalMenu(config)
 	case "d":
 		fmt.Println("Disconnecting.")
-		irc.Disconnect()
+		config.irc.Disconnect()
 		os.Exit(0)
 	default:
 		fmt.Println("Invalid Selection.")
-		terminalMenu(irc)
+		terminalMenu(config)
 	}
 }
 
@@ -60,20 +59,20 @@ func fullHandler(config Config) core.EventHandler {
 
 	handler[core.BadServer] = func(text string) {
 		config.badServerHandler(text)
-		terminalMenu(config.irc)
+		terminalMenu(config)
 	}
 	handler[core.BookResult] = func(text string) {
 		config.downloadHandler(text)
-		terminalMenu(config.irc)
+		terminalMenu(config)
 	}
 	handler[core.SearchResult] = func(text string) {
 		config.searchHandler(text)
-		terminalMenu(config.irc)
+		terminalMenu(config)
 	}
 	handler[core.SearchAccepted] = config.searchAcceptedHandler
 	handler[core.NoResults] = func(text string) {
 		config.noResultsHandler(text)
-		terminalMenu(config.irc)
+		terminalMenu(config)
 	}
 	handler[core.MatchesFound] = config.matchesFoundHandler
 

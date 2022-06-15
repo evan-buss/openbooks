@@ -10,12 +10,13 @@ import (
 )
 
 type Config struct {
-	UserName string // Username to use when connecting to IRC
-	Log      bool   // True if IRC messages should be logged
-	Dir      string
-	Server   string
-	irc      *irc.Conn
-	Version  string
+	UserName  string // Username to use when connecting to IRC
+	Log       bool   // True if IRC messages should be logged
+	Dir       string
+	Server    string
+	SearchBot string
+	Version   string
+	irc       *irc.Conn
 }
 
 // StartInteractive instantiates the OpenBooks CLI interface
@@ -37,7 +38,7 @@ func StartInteractive(config Config) {
 	}
 
 	go core.StartReader(ctx, config.irc, handler)
-	terminalMenu(config.irc)
+	terminalMenu(config)
 
 	<-ctx.Done()
 }
@@ -93,7 +94,7 @@ func StartSearch(config Config, query string) {
 	time.Sleep(time.Until(nextSearchTime))
 
 	go core.StartReader(ctx, config.irc, handler)
-	core.SearchBook(config.irc, query)
+	core.SearchBook(config.irc, config.SearchBot, query)
 
 	setLastSearchTime()
 	fmt.Printf("%sSent search request.", clearLine)
