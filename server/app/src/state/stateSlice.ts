@@ -46,7 +46,7 @@ const stateSlice = createSlice({
     addInFlightDownload(state, action: PayloadAction<string>) {
       state.inFlightDownloads.push(action.payload);
     },
-    removeInFlightDownload(state, action: PayloadAction<string>) {
+    removeInFlightDownload(state) {
       state.inFlightDownloads.shift();
     }
   }
@@ -61,10 +61,12 @@ const sendDownload = createAsyncThunk(
   "state/send_download",
   (book: string, { dispatch }) => {
     dispatch(addInFlightDownload(book));
-    sendMessage({
-      type: MessageType.DOWNLOAD,
-      payload: { book }
-    });
+    dispatch(
+      sendMessage({
+        type: MessageType.DOWNLOAD,
+        payload: { book }
+      })
+    );
   }
 );
 

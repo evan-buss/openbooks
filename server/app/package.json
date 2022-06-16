@@ -11,6 +11,7 @@
     "@reduxjs/toolkit": "^1.8.2",
     "clsx": "^1.1.1",
     "evergreen-ui": "^6.9.11",
+    "framer-motion": "^6.3.11",
     "lodash": "^4.17.21",
     "npm": "^8.12.1",
     "phosphor-react": "^1.4.1",

@@ -17,6 +17,7 @@ import {
 } from "./messages";
 import { displayNotification, downloadFile } from "./util";
 import {
+  removeInFlightDownload,
   sendMessage,
   setConnectionState,
   setSearchResults,
@@ -34,8 +35,6 @@ export const websocketConn =
   (wsUrl: string): Middleware =>
   ({ dispatch, getState }: MiddlewareAPI<AppDispatch, RootState>) => {
     const socket = new WebSocket(wsUrl);
-
-    const store = getState();
 
     socket.onopen = () => onOpen(dispatch);
     socket.onclose = () => onClose(dispatch);
@@ -92,6 +91,7 @@ const route = (dispatch: AppDispatch, msg: MessageEvent<any>): void => {
       case MessageType.DOWNLOAD:
         downloadFile((response as DownloadResponse)?.downloadPath);
         dispatch(openbooksApi.util.invalidateTags(["books"]));
+        dispatch(removeInFlightDownload());
         return notification;
       case MessageType.RATELIMIT:
         dispatch(deleteHistoryItem());

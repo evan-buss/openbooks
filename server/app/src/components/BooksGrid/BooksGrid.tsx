@@ -14,8 +14,10 @@ import { sendDownload } from "../../state/stateSlice";
 import SelectMenuHeader, { makeStatusMenuItem } from "./SelectMenuHeader";
 import { useGetServersQuery } from "../../state/api";
 import { useHeight } from "../../state/hooks";
-import "./BooksGrid.css";
-import { useAppDispatch } from "../../state/store";
+import { RootState, useAppDispatch } from "../../state/store";
+import { useSelector } from "react-redux";
+import ThreeDotWave from "./ThreeDotWave";
+import { AnimatePresence } from "framer-motion";
 
 const stringContains = (first: string, second: string): boolean => {
   return first.toLowerCase().includes(second.toLowerCase());
@@ -183,6 +185,10 @@ function DownloadButton({ book }: { book: string }) {
   const dispatch = useAppDispatch();
   const [disabled, setDisabled] = useState(false);
 
+  const isInFlight = useSelector((state: RootState) =>
+    state.state.inFlightDownloads.includes(book)
+  );
+
   // Prevent hitting the same button multiple times
   const onClick = () => {
     if (disabled) return;
@@ -195,10 +201,11 @@ function DownloadButton({ book }: { book: string }) {
       appearance="primary"
       size="small"
       width="100px"
-      disabled={true}
+      disabled={disabled}
       onClick={onClick}>
-      {/* <div className="dot-flashing"></div> */}
-      Download
+      <AnimatePresence>
+        {isInFlight ? <ThreeDotWave /> : <span>Download</span>}
+      </AnimatePresence>
     </Button>
   );
 }
