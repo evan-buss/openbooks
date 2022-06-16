@@ -6,13 +6,11 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"path"
 	"path/filepath"
 	"sync"
 	"syscall"
 	"time"
 
-	"github.com/evan-buss/openbooks/util"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/google/uuid"
@@ -47,7 +45,6 @@ type server struct {
 // Config contains settings for server
 type Config struct {
 	Log                     bool
-	OpenBrowser             bool
 	Port                    string
 	UserName                string
 	Persist                 bool
@@ -96,11 +93,6 @@ func Start(config Config) {
 	router.Mount(config.Basepath, routes)
 
 	server.log.Printf("Base Path: %v\n", config.Basepath)
-	if config.OpenBrowser {
-		browserUrl := "http://127.0.0.1:" + path.Join(config.Port+config.Basepath)
-		util.OpenBrowser(browserUrl)
-	}
-
 	server.log.Printf("OpenBooks is listening on port %v", config.Port)
 	server.log.Printf("Open http://localhost:%v%s in your browser.", config.Port, config.Basepath)
 	server.log.Fatal(http.ListenAndServe(":"+config.Port, router))

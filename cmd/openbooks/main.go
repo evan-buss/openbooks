@@ -19,7 +19,7 @@ var version = "4.4.0"
 // We only increment ircVersion when irc admins require a fix to be made.
 // They can block / permit certain version numbers. ircVersion is the current permitted
 // version number.
-const ircVersion = "4.3.0"
+var ircVersion = "4.3.0"
 
 type GlobalFlags struct {
 	UserName  string
@@ -37,12 +37,6 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&globalFlags.SearchBot, "searchbot", "search", "The IRC bot that handles search queries. Try 'searchook' if 'search' is down.")
 }
 
-// var rootCmd = &cobra.Command{
-// 	Use:     "openbooks",
-// 	Short:   "Quickly and easily download eBooks from IRCHighway.",
-// 	Version: version,
-// }
-
 var rootCmd = &cobra.Command{
 	Use:   "openbooks",
 	Short: "Quickly and easily download eBooks from IRCHighway.",
@@ -50,7 +44,6 @@ var rootCmd = &cobra.Command{
 	PreRun: func(cmd *cobra.Command, args []string) {
 		bindGlobalFlags()
 		serverConfig.DisableBrowserDownloads = true
-		serverConfig.OpenBrowser = false
 		serverConfig.Basepath = "/"
 		serverConfig.Persist = true
 	},

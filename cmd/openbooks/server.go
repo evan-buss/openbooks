@@ -8,11 +8,13 @@ import (
 	"time"
 
 	"github.com/evan-buss/openbooks/server"
+	"github.com/evan-buss/openbooks/util"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
 
+var openBrowser = false
 var serverConfig server.Config
 
 func init() {
@@ -26,7 +28,7 @@ func init() {
 	serverCmd.Flags().AddFlagSet(sharedFlags)
 	serverCmd.Flags().BoolVar(&serverConfig.DisableBrowserDownloads, "no-browser-downloads", false, "The browser won't recieve and download eBook files, but they are still saved to the defined 'dir' path.")
 	serverCmd.Flags().StringVar(&serverConfig.Basepath, "basepath", "/", `Base path where the application is accessible. For example "/openbooks/".`)
-	serverCmd.Flags().BoolVarP(&serverConfig.OpenBrowser, "browser", "b", false, "Open the browser on server start.")
+	serverCmd.Flags().BoolVarP(&openBrowser, "browser", "b", false, "Open the browser on server start.")
 	serverCmd.Flags().BoolVar(&serverConfig.Persist, "persist", false, "Persist eBooks in 'dir'. Default is to delete after sending.")
 	serverCmd.Flags().StringVarP(&serverConfig.DownloadDir, "dir", "d", filepath.Join(os.TempDir(), "openbooks"), "The directory where eBooks are saved when persist enabled.")
 
@@ -57,6 +59,11 @@ var serverCmd = &cobra.Command{
 		serverConfig.Basepath = sanitizePath(serverConfig.Basepath)
 	},
 	Run: func(cmd *cobra.Command, args []string) {
+		if openBrowser {
+			browserUrl := "http://127.0.0.1:" + path.Join(serverConfig.Port+serverConfig.Basepath)
+			util.OpenBrowser(browserUrl)
+		}
+
 		server.Start(serverConfig)
 	},
 }
