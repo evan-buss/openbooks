@@ -16,11 +16,8 @@
     "phosphor-react": "^1.4.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
-    "react-is": "^17.0.2",
     "react-redux": "^8.0.2",
-    "react-use": "^17.4.0",
-    "remove": "^0.1.5",
-    "use-local-storage-state": "^15.0.0"
+    "react-use": "^17.4.0"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.182",
