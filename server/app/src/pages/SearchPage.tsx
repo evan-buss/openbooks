@@ -1,17 +1,16 @@
 import { Button, majorScale, Pane, SearchInput, Text } from "evergreen-ui";
 import React, { FormEvent, useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { BooksGrid } from "../components/BooksGrid/BooksGrid";
 import { sendMessage, sendSearch } from "../state/stateSlice";
-import { RootState } from "../state/store";
+import { RootState, useAppDispatch } from "../state/store";
 import ErrorsGrid from "../components/ErrorsGrid/ErrorsGrid";
 import { MessageType } from "../state/messages";
 import { Warning } from "phosphor-react";
 import image from "../assets/reading.svg";
-import { AnyAction } from "@reduxjs/toolkit";
 
 export default function SearchPage() {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const activeItem = useSelector((store: RootState) => store.state.activeItem);
   const [searchQuery, setSearchQuery] = useState("");
   const [showErrors, setShowErrors] = useState(false);
@@ -40,7 +39,7 @@ export default function SearchPage() {
         })
       );
     } else {
-      dispatch(sendSearch(searchQuery) as unknown as AnyAction);
+      dispatch(sendSearch(searchQuery));
     }
 
     setSearchQuery("");

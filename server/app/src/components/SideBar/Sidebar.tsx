@@ -1,7 +1,7 @@
 import { Heading, Pane, Paragraph, Tab, Tablist } from "evergreen-ui";
 import React from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../../state/store";
+import { useSelector } from "react-redux";
+import { RootState, useAppDispatch } from "../../state/store";
 import SearchHistory from "./SearchHistory";
 import Pulse from "./Pulse";
 import NotificationDrawer from "./NotificationDrawer";
@@ -14,7 +14,7 @@ const Sidebar: React.FC = () => {
   const [selectedIndex, setIndex] = useLocalStorage("index", 0);
   const connected = useSelector((store: RootState) => store.state.isConnected);
   const username = useSelector((store: RootState) => store.state.username);
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   return (
     <>

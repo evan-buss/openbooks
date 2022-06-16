@@ -11,20 +11,20 @@ import {
 } from "evergreen-ui";
 import { Eye, EyeSlash, MagnifyingGlass, Trash } from "phosphor-react";
 import React from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import {
   deleteHistoryItem,
   HistoryItem,
   selectHistory
 } from "../../state/historySlice";
 import { setActiveItem } from "../../state/stateSlice";
-import { RootState } from "../../state/store";
+import { RootState, useAppDispatch } from "../../state/store";
 
 const SearchHistory: React.FC = () => {
   const history = useSelector(selectHistory);
   const activeTS =
     useSelector((store: RootState) => store.state.activeItem?.timestamp) ?? -1;
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   return (
     <>
@@ -38,7 +38,7 @@ const SearchHistory: React.FC = () => {
           />
         ))
       ) : (
-        <p className="text-center my-4 text-gray-500 text-sm">
+        <p className="my-4 text-sm text-center text-gray-500">
           History is a mystery.
         </p>
       )}

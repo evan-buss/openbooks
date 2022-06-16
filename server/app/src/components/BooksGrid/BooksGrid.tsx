@@ -9,12 +9,13 @@ import {
   Tooltip
 } from "evergreen-ui";
 import React, { useEffect, useMemo, useState } from "react";
-import { useDispatch } from "react-redux";
-import { BookDetail, MessageType } from "../../state/messages";
-import { sendMessage } from "../../state/stateSlice";
+import { BookDetail } from "../../state/messages";
+import { sendDownload } from "../../state/stateSlice";
 import SelectMenuHeader, { makeStatusMenuItem } from "./SelectMenuHeader";
 import { useGetServersQuery } from "../../state/api";
 import { useHeight } from "../../state/hooks";
+import "./BooksGrid.css";
+import { useAppDispatch } from "../../state/store";
 
 const stringContains = (first: string, second: string): boolean => {
   return first.toLowerCase().includes(second.toLowerCase());
@@ -179,23 +180,24 @@ export const BooksGrid: React.FC<Props> = ({ books }: Props) => {
 };
 
 function DownloadButton({ book }: { book: string }) {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const [disabled, setDisabled] = useState(false);
 
   // Prevent hitting the same button multiple times
   const onClick = () => {
     if (disabled) return;
-    dispatch(
-      sendMessage({
-        type: MessageType.DOWNLOAD,
-        payload: { book }
-      })
-    );
+    dispatch(sendDownload(book));
     setDisabled(true);
   };
 
   return (
-    <Button appearance="primary" size="small" onClick={onClick}>
+    <Button
+      appearance="primary"
+      size="small"
+      width="100px"
+      disabled={true}
+      onClick={onClick}>
+      {/* <div className="dot-flashing"></div> */}
       Download
     </Button>
   );

@@ -4,7 +4,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "serve": "vite preview"
+    "serve": "vite preview",
+    "prettier": "prettier --write 'src/**/*.{ts,tsx,js,vue}'"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^1.8.2",
