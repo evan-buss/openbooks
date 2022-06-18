@@ -27,6 +27,7 @@ type Download struct {
 	Size     int64
 }
 
+// ParseString parses the important data of a DCC SEND string
 func ParseString(text string) (*Download, error) {
 	groups := dccRegex.FindStringSubmatch(text)
 
@@ -93,7 +94,6 @@ func (download Download) Download(writer io.Writer) error {
 	return nil
 }
 
-// ParseDCC parses the important data of a DCC SEND string
 // Convert a given 32 bit IP integer to an IP string
 // Ex) 2907707975 -> 192.168.1.1
 func stringToIP(nn string) (string, error) {

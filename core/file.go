@@ -16,7 +16,7 @@ func DownloadExtractDCCString(baseDir, dccStr string, progress io.Writer) (strin
 		return "", err
 	}
 
-	dccPath := filepath.Join(baseDir, download.Filename)
+	dccPath := filepath.Join(baseDir, download.Filename+".temp")
 	file, err := os.Create(dccPath)
 	if err != nil {
 		return "", err
@@ -34,7 +34,7 @@ func DownloadExtractDCCString(baseDir, dccStr string, progress io.Writer) (strin
 	}
 	file.Close()
 	if !util.IsArchive(dccPath) {
-		return dccPath, nil
+		return renameTempFile(dccPath), nil
 	}
 
 	extractedPath, err := util.ExtractArchive(dccPath)
@@ -42,5 +42,15 @@ func DownloadExtractDCCString(baseDir, dccStr string, progress io.Writer) (strin
 		return "", err
 	}
 
-	return extractedPath, nil
+	return renameTempFile(extractedPath), nil
+}
+
+func renameTempFile(filePath string) string {
+	if filepath.Ext(filePath) == ".temp" {
+		newPath := filePath[:len(filePath)-len(".temp")]
+		os.Rename(filePath, newPath)
+		return newPath
+	}
+
+	return filePath
 }

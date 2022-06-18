@@ -92,8 +92,9 @@ func Start(config Config) {
 	server.registerGracefulShutdown(cancel)
 	router.Mount(config.Basepath, routes)
 
-	server.log.Printf("Base Path: %v\n", config.Basepath)
+	server.log.Printf("Base Path: %s\n", config.Basepath)
 	server.log.Printf("OpenBooks is listening on port %v", config.Port)
+	server.log.Printf("Download Directory: %s\n", config.DownloadDir)
 	server.log.Printf("Open http://localhost:%v%s in your browser.", config.Port, config.Basepath)
 	server.log.Fatal(http.ListenAndServe(":"+config.Port, router))
 }
