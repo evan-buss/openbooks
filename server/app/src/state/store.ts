@@ -1,4 +1,4 @@
-import { Action, configureStore, ThunkAction } from "@reduxjs/toolkit";
+import { configureStore } from "@reduxjs/toolkit";
 import throttle from "lodash/throttle";
 import historyReducer from "./historySlice";
 import notificationReducer from "./notificationSlice";
@@ -7,7 +7,7 @@ import stateReducer from "./stateSlice";
 import { enableMapSet } from "immer";
 import { getWebsocketURL } from "./util";
 import { openbooksApi } from "./api";
-import { setupListeners } from "@reduxjs/toolkit/dist/query";
+import { setupListeners } from "@reduxjs/toolkit/query/react";
 import { useDispatch } from "react-redux";
 
 enableMapSet();
