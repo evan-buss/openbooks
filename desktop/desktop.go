@@ -1,5 +1,4 @@
 //go:build !webview
-// +build !webview
 
 package desktop
 
