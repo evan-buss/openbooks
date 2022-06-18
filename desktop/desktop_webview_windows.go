@@ -1,4 +1,5 @@
-//go:build windows
+//go:build windows && webview
+// +build windows,webview
 
 package desktop
 
