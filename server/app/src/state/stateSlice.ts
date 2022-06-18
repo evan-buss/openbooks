@@ -1,12 +1,18 @@
-import { createAction, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import {
+  createAction,
+  createAsyncThunk,
+  createSlice,
+  PayloadAction
+} from "@reduxjs/toolkit";
 import { MessageType, SearchResponse } from "./messages";
 import { addHistoryItem, HistoryItem, updateHistoryItem } from "./historySlice";
-import { AppThunk } from "./store";
+import { AppDispatch, RootState } from "./store";
 
 interface AppState {
   isConnected: boolean;
   activeItem: HistoryItem | null;
   username?: string;
+  inFlightDownloads: string[];
 }
 
 const loadActive = (): HistoryItem | null => {
@@ -20,7 +26,8 @@ const loadActive = (): HistoryItem | null => {
 const initialState: AppState = {
   isConnected: false,
   activeItem: loadActive(),
-  username: undefined
+  username: undefined,
+  inFlightDownloads: []
 };
 
 const stateSlice = createSlice({
@@ -35,6 +42,12 @@ const stateSlice = createSlice({
     },
     setUsername(state, action: PayloadAction<string>) {
       state.username = action.payload;
+    },
+    addInFlightDownload(state, action: PayloadAction<string>) {
+      state.inFlightDownloads.push(action.payload);
+    },
+    removeInFlightDownload(state) {
+      state.inFlightDownloads.shift();
     }
   }
 });
@@ -44,10 +57,23 @@ const sendMessage = createAction("socket/send_message", (message: any) => ({
   payload: { message: JSON.stringify(message) }
 }));
 
+const sendDownload = createAsyncThunk(
+  "state/send_download",
+  (book: string, { dispatch }) => {
+    dispatch(addInFlightDownload(book));
+    dispatch(
+      sendMessage({
+        type: MessageType.DOWNLOAD,
+        payload: { book }
+      })
+    );
+  }
+);
+
 // Send a search to the server. Add to query history and set loading.
-const sendSearch =
-  (queryString: string): AppThunk =>
-  (dispatch) => {
+const sendSearch = createAsyncThunk(
+  "state/send_sendSearch",
+  (queryString: string, { dispatch }) => {
     // Send the books search query to the server
     dispatch(
       sendMessage({
@@ -63,12 +89,17 @@ const sendSearch =
     // Add query to item history.
     dispatch(addHistoryItem({ query: queryString, timestamp }));
     dispatch(setActiveItem({ query: queryString, timestamp: timestamp }));
-  };
+  }
+);
 
-const setSearchResults =
-  ({ books, errors }: SearchResponse): AppThunk =>
-  (dispatch, getStore) => {
-    const activeItem = getStore().state.activeItem;
+const setSearchResults = createAsyncThunk<
+  Promise<void>,
+  SearchResponse,
+  { dispatch: AppDispatch; state: RootState }
+>(
+  "state/set_search_results",
+  async ({ books, errors }: SearchResponse, { dispatch, getState }) => {
+    const activeItem = getState().state.activeItem;
     if (activeItem === null) {
       return;
     }
@@ -81,17 +112,27 @@ const setSearchResults =
 
     dispatch(setActiveItem(updatedItem));
     dispatch(updateHistoryItem(updatedItem));
-  };
-const { setActiveItem, setConnectionState, setUsername } = stateSlice.actions;
+  }
+);
+
+const {
+  setActiveItem,
+  setConnectionState,
+  setUsername,
+  addInFlightDownload,
+  removeInFlightDownload
+} = stateSlice.actions;
 
 export {
   stateSlice,
   sendMessage,
   setActiveItem,
+  sendDownload,
   setConnectionState,
   sendSearch,
   setSearchResults,
-  setUsername
+  setUsername,
+  removeInFlightDownload
 };
 
 export default stateSlice.reducer;

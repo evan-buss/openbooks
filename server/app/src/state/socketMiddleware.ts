@@ -1,4 +1,11 @@
-import { AnyAction, PayloadAction, Store } from "@reduxjs/toolkit";
+import {
+  AnyAction,
+  Dispatch,
+  Middleware,
+  MiddlewareAPI,
+  PayloadAction,
+  Store
+} from "@reduxjs/toolkit";
 import {
   Response,
   Notification,
@@ -10,6 +17,7 @@ import {
 } from "./messages";
 import { displayNotification, downloadFile } from "./util";
 import {
+  removeInFlightDownload,
   sendMessage,
   setConnectionState,
   setSearchResults,
@@ -18,20 +26,22 @@ import {
 import { addNotification } from "./notificationSlice";
 import { openbooksApi } from "./api";
 import { deleteHistoryItem } from "./historySlice";
+import { AppDispatch, RootState } from "./store";
 
 // Web socket redux middleware.
 // Listens to socket and dispatches handlers.
 // Handles send_message actions by sending to socket.
-export const websocketConn = (wsUrl: string): any => {
-  return (store: Store) => {
+export const websocketConn =
+  (wsUrl: string): Middleware =>
+  ({ dispatch, getState }: MiddlewareAPI<AppDispatch, RootState>) => {
     const socket = new WebSocket(wsUrl);
 
-    socket.onopen = () => onOpen(store);
-    socket.onclose = () => onClose(store);
-    socket.onmessage = (message) => route(store, message);
+    socket.onopen = () => onOpen(dispatch);
+    socket.onclose = () => onClose(dispatch);
+    socket.onmessage = (message) => route(dispatch, message);
     socket.onerror = (event) => console.error(event);
 
-    return (next: any) => (action: PayloadAction<any>) => {
+    return (next: Dispatch<AnyAction>) => (action: PayloadAction<any>) => {
       // Send Message action? Send data to the socket.
       if (sendMessage.match(action)) {
         if (socket.readyState === socket.OPEN) {
@@ -48,20 +58,19 @@ export const websocketConn = (wsUrl: string): any => {
       return next(action);
     };
   };
-};
 
-const onOpen = (store: Store): void => {
+const onOpen = (dispatch: AppDispatch): void => {
   console.log("WebSocket connected.");
-  store.dispatch(setConnectionState(true));
-  store.dispatch(sendMessage({ type: MessageType.CONNECT, payload: {} }));
+  dispatch(setConnectionState(true));
+  dispatch(sendMessage({ type: MessageType.CONNECT, payload: {} }));
 };
 
-const onClose = (store: Store): void => {
+const onClose = (dispatch: AppDispatch): void => {
   console.log("WebSocket closed.");
-  store.dispatch(setConnectionState(false));
+  dispatch(setConnectionState(false));
 };
 
-const route = (store: Store, msg: MessageEvent<any>): void => {
+const route = (dispatch: AppDispatch, msg: MessageEvent<any>): void => {
   const getNotif = (): Notification => {
     let response = JSON.parse(msg.data) as Response;
     const timestamp = new Date().getTime();
@@ -74,19 +83,18 @@ const route = (store: Store, msg: MessageEvent<any>): void => {
       case MessageType.STATUS:
         return notification;
       case MessageType.CONNECT:
-        store.dispatch(setUsername((response as ConnectionResponse).name));
+        dispatch(setUsername((response as ConnectionResponse).name));
         return notification;
       case MessageType.SEARCH:
-        store.dispatch(
-          setSearchResults(response as SearchResponse) as unknown as AnyAction
-        );
+        dispatch(setSearchResults(response as SearchResponse));
         return notification;
       case MessageType.DOWNLOAD:
         downloadFile((response as DownloadResponse)?.downloadPath);
-        store.dispatch(openbooksApi.util.invalidateTags(["books"]));
+        dispatch(openbooksApi.util.invalidateTags(["books"]));
+        dispatch(removeInFlightDownload());
         return notification;
       case MessageType.RATELIMIT:
-        store.dispatch(deleteHistoryItem() as unknown as AnyAction);
+        dispatch(deleteHistoryItem());
         return notification;
       default:
         console.error(response);
@@ -99,6 +107,6 @@ const route = (store: Store, msg: MessageEvent<any>): void => {
   };
 
   const notif = getNotif();
-  store.dispatch(addNotification(notif));
+  dispatch(addNotification(notif));
   displayNotification(notif);
 };

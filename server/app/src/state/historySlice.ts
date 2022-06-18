@@ -1,7 +1,7 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { BookDetail, ParseError } from "./messages";
 import { setActiveItem } from "./stateSlice";
-import { AppThunk, RootState } from "./store";
+import { AppDispatch, RootState } from "./store";
 
 // HistoryItem represents a single search history item
 type HistoryItem = {
@@ -51,25 +51,27 @@ export const historySlice = createSlice({
 });
 
 // Delete an item from history. Clear current item and loading state if deleting active search
-const deleteHistoryItem =
-  (timeStamp?: number): AppThunk =>
-  (dispatch, getStore) => {
-    if (timeStamp === undefined) {
-      dispatch(setActiveItem(null));
-      const toRemove = getStore().history.items.at(0)?.timestamp;
-      if (toRemove) {
-        dispatch(historySlice.actions.deleteByTimetamp(toRemove));
-      }
-      return;
+const deleteHistoryItem = createAsyncThunk<
+  Promise<void>,
+  number | undefined,
+  { dispatch: AppDispatch; state: RootState }
+>("history/delete_item", async (timeStamp, { dispatch, getState }) => {
+  if (timeStamp === undefined) {
+    dispatch(setActiveItem(null));
+    const toRemove = getState().history.items.at(0)?.timestamp;
+    if (toRemove) {
+      dispatch(historySlice.actions.deleteByTimetamp(toRemove));
     }
+    return;
+  }
 
-    const activeItem = getStore().state.activeItem;
-    if (activeItem?.timestamp === timeStamp) {
-      dispatch(setActiveItem(null));
-    }
+  const activeItem = getState().state.activeItem;
+  if (activeItem?.timestamp === timeStamp) {
+    dispatch(setActiveItem(null));
+  }
 
-    dispatch(historySlice.actions.deleteByTimetamp(timeStamp));
-  };
+  dispatch(historySlice.actions.deleteByTimetamp(timeStamp));
+});
 
 const { addHistoryItem, updateHistoryItem } = historySlice.actions;
 

@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"time"
 )
 
 type DccServer struct {
@@ -40,7 +41,24 @@ func (dcc *DccServer) handler(conn net.Conn) {
 	}()
 
 	dcc.log.Println("Received a connection...")
-	n, err := io.Copy(conn, dcc.Reader)
+
+	var err error
+	var n int
+	// n, err := io.Copy(conn, dcc.Reader)
+
+	// Use below to slow download speed for testing
+	bytes := make([]byte, 4096)
+	for {
+		n, _ = dcc.Reader.Read(bytes)
+		_, err = conn.Write(bytes[:n])
+
+		time.Sleep(time.Millisecond * 250)
+
+		if n == 0 {
+			break
+		}
+	}
+
 	if err != nil {
 		dcc.log.Println(err)
 	} else {

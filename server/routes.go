@@ -13,6 +13,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/evan-buss/openbooks/irc"
@@ -153,20 +154,22 @@ func (server *server) getAllBooksHandler() http.HandlerFunc {
 
 		output := make([]download, 0)
 		for _, book := range books {
-			if !book.IsDir() {
-				info, err := book.Info()
-				if err != nil {
-					server.log.Println(err)
-				}
-
-				dl := download{
-					Name:         book.Name(),
-					DownloadLink: path.Join("library", book.Name()),
-					Time:         info.ModTime(),
-				}
-
-				output = append(output, dl)
+			if book.IsDir() || strings.HasPrefix(book.Name(), ".") || filepath.Ext(book.Name()) == ".temp" {
+				continue
 			}
+
+			info, err := book.Info()
+			if err != nil {
+				server.log.Println(err)
+			}
+
+			dl := download{
+				Name:         book.Name(),
+				DownloadLink: path.Join("library", book.Name()),
+				Time:         info.ModTime(),
+			}
+
+			output = append(output, dl)
 		}
 
 		w.Header().Add("Content-Type", "application/json")

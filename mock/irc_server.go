@@ -7,6 +7,7 @@ import (
 	"net"
 	"os"
 	"strings"
+	"time"
 )
 
 type IrcServer struct {
@@ -79,5 +80,6 @@ func (irc *IrcServer) searchHandler(request string, conn net.Conn) {
 
 func (irc *IrcServer) downloadHandler(request string, conn net.Conn) {
 	irc.log.Println("Sending book file.")
+	time.Sleep(time.Second * 4)
 	fmt.Fprint(conn, ":SearchOok!ook@only.ook PRIVMSG evan_28 :DCC SEND great-gatsby.epub 2130706433 6669 358887\r\n")
 }

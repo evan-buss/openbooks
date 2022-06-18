@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/evan-buss/openbooks/cli"
 	"github.com/spf13/cobra"
 )
@@ -14,7 +15,7 @@ import (
 var cliConfig cli.Config
 
 func init() {
-	rootCmd.AddCommand(cliCmd)
+	desktopCmd.AddCommand(cliCmd)
 	cliCmd.AddCommand(downloadCmd)
 	cliCmd.AddCommand(searchCmd)
 
@@ -23,8 +24,6 @@ func init() {
 		log.Fatalln("Could not get current working directory.", err)
 	}
 
-	// Change the default to CWD for CLI mode.
-	cliCmd.InheritedFlags().StringVarP(&cliConfig.Dir, "dir", "d", cwd, "Directory where files are downloaded.")
 	cliCmd.PersistentFlags().StringVarP(&cliConfig.Dir, "dir", "d", cwd, "Directory where files are downloaded.")
 }
 
@@ -37,6 +36,10 @@ var cliCmd = &cobra.Command{
 		cliConfig.Server = globalFlags.Server
 		cliConfig.Log = globalFlags.Log
 		cliConfig.SearchBot = globalFlags.SearchBot
+
+		if debug {
+			spew.Dump(cliConfig)
+		}
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		cli.StartInteractive(cliConfig)
