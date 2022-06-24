@@ -8,6 +8,8 @@ openbooks_api
 !openbooks/
 *.DS_Store
 **/dist
+proto/gen
+sources/
 # end persist
 
 

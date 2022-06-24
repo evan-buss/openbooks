@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package openbooks.v1;
+
+import "google/api/annotations.proto";
+import "google/protobuf/duration.proto";
+
+message SearchRequest {
+  // Search term  
+  string query = 1;
+}
+
+message SearchResponse {
+  repeated string results = 1;
+  google.protobuf.Duration duration = 2;
+  uint64 total = 3;
+}
+
+message Book {
+  string server = 1;
+  string author = 2;
+  string title = 3;
+  string format = 4;
+  string size = 5;
+  string full = 6;
+  string line = 7;
+}
+
+service OpenBooksService {
+  rpc Search(SearchRequest) returns (SearchResponse) {
+    option (google.api.http) = {
+      post: "/v1/search"
+    };
+  }
+}
