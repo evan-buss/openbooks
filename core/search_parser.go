@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"sort"
 	"strings"
@@ -182,6 +183,12 @@ func ParseSearchV2(reader io.Reader) ([]BookDetail, []ParseError) {
 }
 
 func parseLineV2(line string) (BookDetail, error) {
+	defer func() {
+		if a := recover(); a != nil {
+			log.Println("Recovered from ", a)
+		}
+	}()
+
 	getServer := func(line string) (string, error) {
 		if line[0] != '!' {
 			return "", errors.New("result lines must start with '!'")

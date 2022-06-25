@@ -40,7 +40,7 @@ export interface SearchResponse extends Response {
 // DownloadResponse is received after file is downloaded from IRC and ready for
 // user download.
 export interface DownloadResponse extends Response {
-  downloadPath: string;
+  downloadPath?: string;
 }
 
 export interface BookDetail {

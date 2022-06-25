@@ -24,8 +24,9 @@ func Join(irc *irc.Conn, url string) error {
 }
 
 // SearchBook sends a search query to the search bot
-func SearchBook(irc *irc.Conn, query string) {
-	irc.SendMessage("@search " + query)
+func SearchBook(irc *irc.Conn, searchBot string, query string) {
+	searchBot = strings.TrimPrefix(searchBot, "@")
+	irc.SendMessage(fmt.Sprintf("@%s %s", searchBot, query))
 }
 
 // DownloadBook sends the book string to the download bot

@@ -1,10 +1,11 @@
 package core
 
 import (
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestSearchParser(t *testing.T) {
@@ -123,6 +124,7 @@ For easier searching, use sbClient script (also very fast local searches). You c
 
 
 
+!Oatmeal theMystery.doc - Matt McIntosh.epub ::INFO:: 23.71MB
 !dragnbreaker Fitzgerald, F Scott - Novel 03 - The Great Gatsby (retail).epub  ::INFO:: 1.7MB
 !DV8 F. Scott Fitzgerald - The Great Gatsby (Epub).rar  ::INFO:: 394.7KB
 !Horla F Scott Fitzgerald - The Great Gatsby (retail) (epub).epub
