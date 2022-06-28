@@ -1,6 +1,7 @@
-package bleve
+package library
 
 import (
+	"context"
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
@@ -20,7 +21,7 @@ type BleveSearcher struct {
 	Index bleve.Index
 }
 
-func NewBleveSeacher() (*BleveSearcher, error) {
+func NewBleveSeacher(indexFolder string) (*BleveSearcher, error) {
 	bookMapping := bleve.NewDocumentMapping()
 
 	serverMapping := bleve.NewKeywordFieldMapping()
@@ -58,7 +59,7 @@ func NewBleveSeacher() (*BleveSearcher, error) {
 	mapping.DefaultType = "book"
 	mapping.AddDocumentMapping("book", bookMapping)
 
-	index, err := useIndexFolder("openbooks.bleve", mapping)
+	index, err := useIndexFolder(indexFolder, mapping)
 	if err != nil {
 		return nil, err
 	}
@@ -66,87 +67,89 @@ func NewBleveSeacher() (*BleveSearcher, error) {
 	return &BleveSearcher{Index: index}, nil
 }
 
-func (b *BleveSearcher) Search(q string) openbooksv1.SearchResponse {
+func (b *BleveSearcher) Search(ctx context.Context, q string) (*openbooksv1.SearchResponse, error) {
+	stats, _ := b.Index.Stats().MarshalJSON()
+	log.Println(string(stats))
+
 	// search for some text
-	query := bleve.NewMatchQuery(q)
+	query := bleve.NewQueryStringQuery(q)
 	search := bleve.NewSearchRequest(query)
 	search.Fields = []string{"line"}
 	search.Size = 1000
-	searchResults, err := b.Index.Search(search)
+	searchResults, err := b.Index.SearchInContext(ctx, search)
 	if err != nil {
-		fmt.Println(err)
-		return openbooksv1.SearchResponse{
-			Duration: durationpb.New(0),
-			Results:  []string{},
-			Total:    0,
-		}
+		return nil, err
 	}
 	results := make([]string, 0, searchResults.Total)
 
 	for _, hit := range searchResults.Hits {
-		if line, ok := hit.Fields["line"].(string); ok {
-			results = append(results, line)
-			continue
+		line, ok := hit.Fields["line"].(string)
+		if !ok {
+			return nil, err
 		}
-		log.Println("Unable to get field 'Line' from search result. Check SearchRequest.Fields...")
+		results = append(results, line)
 	}
 
-	return openbooksv1.SearchResponse{
+	response := &openbooksv1.SearchResponse{
 		Total:    searchResults.Total,
 		Results:  results,
 		Duration: durationpb.New(searchResults.Took),
 	}
+
+	return response, nil
 }
 
-func (b *BleveSearcher) AddDocument(doc *openbooksv1.Book) {
-	hash := md5.Sum([]byte(doc.Full))
-	err := b.Index.Index(hex.EncodeToString(hash[:]), doc)
-	if err != nil {
-		log.Println(err)
-	}
-}
-
-func (b *BleveSearcher) AddDocuments(documents <-chan *openbooksv1.Book) time.Duration {
+func (b *BleveSearcher) AddDocuments(ctx context.Context, documents <-chan *openbooksv1.Book) (time.Duration, error) {
 	batchSize := 1000
 	count := 0
 	startTime := time.Now()
 	batch := b.Index.NewBatch()
 	batchCount := 0
+
 	for bookDetail := range documents {
 		hash := md5.Sum([]byte(bookDetail.Full))
-		batch.Index(hex.EncodeToString(hash[:]), bookDetail)
+		hashStr := hex.EncodeToString(hash[:])
+
+		if ctx.Err() != nil {
+			return 0, ctx.Err()
+		}
+
+		// Don't index if we already have the line in the index
+		doc, err := b.Index.Document(hashStr)
+		if doc != nil {
+			continue
+		}
+
+		if err != nil {
+			return 0, ctx.Err()
+		}
+
+		err = batch.Index(hashStr, bookDetail)
+		if err != nil {
+			return 0, err
+		}
 
 		batchCount++
 
 		if batchCount >= batchSize {
 			err := b.Index.Batch(batch)
 			if err != nil {
-				log.Fatal(err)
+				return 0, err
 			}
 			batch.Reset()
 			batchCount = 0
 		}
 		count++
-		if count%1000 == 0 {
-			indexDuration := time.Since(startTime)
-			indexDurationSeconds := float64(indexDuration) / float64(time.Second)
-			timePerDoc := float64(indexDuration) / float64(count)
-			log.Printf("Indexed %d documents, in %.2fs (average %.2fms/doc)", count, indexDurationSeconds, timePerDoc/float64(time.Millisecond))
-		}
 	}
 	// flush the last batch
 	if batchCount > 0 {
 		err := b.Index.Batch(batch)
 		if err != nil {
-			log.Fatal(err)
+			return 0, fmt.Errorf("flushing last batch of %d documents. %w", batchCount, err)
 		}
 	}
-	indexDuration := time.Since(startTime)
-	indexDurationSeconds := float64(indexDuration) / float64(time.Second)
-	timePerDoc := float64(indexDuration) / float64(count)
-	log.Printf("Indexed %d documents, in %.2fs (average %.2fms/doc)", count, indexDurationSeconds, timePerDoc/float64(time.Millisecond))
 
-	return indexDuration
+	return time.Since(startTime), nil
 }
 
 func useIndexFolder(path string, mapping *mapping.IndexMappingImpl) (bleve.Index, error) {

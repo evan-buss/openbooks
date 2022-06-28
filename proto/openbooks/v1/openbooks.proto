@@ -4,15 +4,41 @@ package openbooks.v1;
 
 import "google/api/annotations.proto";
 import "google/protobuf/duration.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+
+
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+  info: {
+    title: "OpenBooks Service";
+    version: "0.0.1";
+    contact: {
+      name: "evan-buss";
+      url: "https://github.com/evan-buss/openbooks";
+    };
+    license: {
+      name: "MIT";
+      url: "https://github.com/evan-buss/openbooks/LICENSE";
+    };
+  };
+
+  schemes: HTTP;
+  schemes: HTTPS;
+  consumes: "application/json";
+  produces: "application/json";
+};
 
 message SearchRequest {
-  // Search term  
-  string query = 1;
+  // Search term. For advanced usage see: http://blevesearch.com/docs/Query-String-Query/
+  string query = 1 [(google.api.field_behavior) = REQUIRED];
 }
 
 message SearchResponse {
+  // Plain IRC search response strings. These need to be sanitized and parsed from the client.
+  // We return the same format that you would see when parsing the raw search result file for client compatibility.
   repeated string results = 1;
+  // The total time it took to find matches for the query. Returned by the internal full-text-search library.
   google.protobuf.Duration duration = 2;
+  // Total results for the query. The count of results array may be less as there is a configured limit (default 1000)
   uint64 total = 3;
 }
 
@@ -26,10 +52,26 @@ message Book {
   string line = 7;
 }
 
+//OpenBooksService is open to the public
 service OpenBooksService {
+  // Submit a search query and receive a response of all lines that matched.
   rpc Search(SearchRequest) returns (SearchResponse) {
     option (google.api.http) = {
       post: "/v1/search"
+    };
+  }
+}
+
+message StartIndexRequest {}
+
+message StartIndexResponse {}
+
+// AdminService requires authentication to access any of the endpoints.
+service AdminService {
+  // Kick off the indexing process of all text files in the configured "index-dir".
+  rpc StartIndex(StartIndexRequest) returns (StartIndexResponse){
+    option (google.api.http) = {
+      post: "/v1/index"
     };
   }
 }

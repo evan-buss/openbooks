@@ -2,12 +2,12 @@ package main
 
 import (
 	"context"
-	"log"
+	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
+	"go.uber.org/zap"
 	"net/http"
 
 	"github.com/evan-buss/openbooks/cmd/service/util"
 	openbooksv1 "github.com/evan-buss/openbooks/proto/gen/proto/go/openbooks/v1"
-	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -17,11 +17,16 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+var protectedServices = []string{"/openbooks.v1.AdminService/"}
+
 func (s *server) StartGrpc() *grpc.Server {
-	grpcServer := grpc.NewServer(
-		grpc_middleware.WithUnaryServerChain(rateLimit()),
-	)
+
+	authzInterceptor := NewAuthZInterceptor("evan", protectedServices)
+
+	grpcServer := grpc.NewServer(grpc_middleware.WithUnaryServerChain(grpcLogger(s.log), authzInterceptor.Unary()))
 	openbooksv1.RegisterOpenBooksServiceServer(grpcServer, s)
+
+	openbooksv1.RegisterAdminServiceServer(grpcServer, s)
 
 	if s.config.debug {
 		reflection.Register(grpcServer)
@@ -43,14 +48,45 @@ func (s *server) StartGrpcGateway() http.Handler {
 		panic(err)
 	}
 
+	err = openbooksv1.RegisterAdminServiceHandlerFromEndpoint(
+		context.Background(),
+		grpcGatewayMux,
+		"localhost:"+s.config.port,
+		[]grpc.DialOption{grpc.WithTransportCredentials(credentials)},
+	)
+
+	if err != nil {
+		panic(err)
+	}
+
 	return grpcGatewayMux
+}
+
+func grpcLogger(logger *zap.SugaredLogger) grpc.UnaryServerInterceptor {
+	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+		logger.Infow("grpc request", "method", info.FullMethod)
+
+		resp, err = handler(ctx, req)
+
+		if err != nil {
+			logger.Warnw("grpc request error", "err", err)
+		}
+
+		return
+	}
+}
+
+func requireAuthorization(serviceName string) grpc.UnaryServerInterceptor {
+	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+		return handler(ctx, req)
+	}
 }
 
 func rateLimit() grpc.UnaryServerInterceptor {
 	rl := util.NewRateLimiter()
-	log.Println("NEW RATELIMITER")
 
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+
 		p, ok := peer.FromContext(ctx)
 		if !ok {
 			return nil, status.Error(codes.Unavailable, "Unable to find IP address.")

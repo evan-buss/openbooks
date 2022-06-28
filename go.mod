@@ -34,14 +34,19 @@ require (
 	github.com/soheilhy/cmux v0.1.5
 	github.com/spf13/viper v1.12.0
 	github.com/swaggo/http-swagger v1.3.0
-	github.com/swaggo/swag v1.8.3
+	go.uber.org/zap v1.17.0
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	google.golang.org/genproto v0.0.0-20220519153652-3a47de7e79bd
 	google.golang.org/grpc v1.46.2
 	google.golang.org/protobuf v1.28.0
 )
 
-require github.com/andres-erbsen/clock v0.0.0-20160526145045-9e14626cd129 // indirect
+require (
+	github.com/andres-erbsen/clock v0.0.0-20160526145045-9e14626cd129 // indirect
+	github.com/swaggo/swag v1.8.3 // indirect
+	go.uber.org/atomic v1.7.0 // indirect
+	go.uber.org/multierr v1.6.0 // indirect
+)
 
 require (
 	git.wow.st/gmp/jni v0.0.0-20210610011705-34026c7e22d0 // indirect

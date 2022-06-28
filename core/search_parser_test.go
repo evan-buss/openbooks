@@ -109,7 +109,7 @@ func TestSpecialCases(t *testing.T) {
 	}
 
 	for _, input := range cases {
-		result, err := parseLineV2(input.original)
+		result, err := ParseLineV2(input.original)
 		require.NoError(t, err)
 		assert.Equal(t, input.download, result)
 	}

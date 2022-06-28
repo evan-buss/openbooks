@@ -168,7 +168,7 @@ func ParseSearchV2(reader io.Reader) ([]BookDetail, []ParseError) {
 	for scanner.Scan() {
 		line := scanner.Text()
 		if strings.HasPrefix(line, "!") {
-			dat, err := parseLineV2(line)
+			dat, err := ParseLineV2(line)
 			if err != nil {
 				parseErrors = append(parseErrors, ParseError{Line: line, Error: err})
 			} else {
@@ -182,7 +182,7 @@ func ParseSearchV2(reader io.Reader) ([]BookDetail, []ParseError) {
 	return books, parseErrors
 }
 
-func parseLineV2(line string) (BookDetail, error) {
+func ParseLineV2(line string) (BookDetail, error) {
 	defer func() {
 		if a := recover(); a != nil {
 			log.Println("Recovered from ", a)
