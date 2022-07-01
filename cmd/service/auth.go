@@ -11,11 +11,16 @@ import (
 
 type AuthZInterceptor struct {
 	password         string
+	authKey          string
 	protectedMethods []string
 }
 
-func NewAuthZInterceptor(password string, protectedMethods []string) *AuthZInterceptor {
-	return &AuthZInterceptor{password, protectedMethods}
+func NewAuthInterceptor(password, authKey string, protectedMethods []string) *AuthZInterceptor {
+	return &AuthZInterceptor{
+		password,
+		authKey,
+		protectedMethods,
+	}
 }
 
 func (interceptor *AuthZInterceptor) Unary() grpc.UnaryServerInterceptor {

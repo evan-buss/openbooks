@@ -1,8 +1,9 @@
 syntax = "proto3";
 
-package openbooks.v1;
+package openbooks;
 
 import "google/api/annotations.proto";
+import "google/api/field_behavior.proto";
 import "google/protobuf/duration.proto";
 import "protoc-gen-openapiv2/options/annotations.proto";
 

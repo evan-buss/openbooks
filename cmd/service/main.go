@@ -3,6 +3,8 @@ package main
 import (
 	"flag"
 	openbooksv1 "github.com/evan-buss/openbooks/proto/gen/proto/go/openbooks/v1"
+	"github.com/evan-buss/openbooks/search"
+	"github.com/go-chi/chi/v5/middleware"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 	"log"
@@ -11,14 +13,13 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/evan-buss/openbooks/cmd/service/library"
 	"github.com/go-chi/chi/v5"
 	"github.com/soheilhy/cmux"
 )
 
 type server struct {
-	searcher library.Searcher
-	indexer  library.Indexer
+	searcher search.Searcher
+	indexer  search.Indexer
 	config   *serverConfig
 	log      *zap.SugaredLogger
 
@@ -34,7 +35,7 @@ type serverConfig struct {
 
 func main() {
 	server := &server{config: &serverConfig{}}
-	flag.StringVar(&server.config.port, "port", "8080", "Port to listen on.")
+	flag.StringVar(&server.config.port, "port", "8000", "Port to listen on.")
 	flag.StringVar(&server.config.indexDir, "index-dir", "openbooks.bleve", "The place where files are downloaded and processed.")
 	flag.BoolVar(&server.config.debug, "debug", true, "Enable addition debug functionality.")
 	flag.Parse()
@@ -46,17 +47,22 @@ func main() {
 
 	logger := zapLogger.Sugar()
 	server.log = logger
-	defer logger.Sync()
+	defer func(logger *zap.SugaredLogger) {
+		err := logger.Sync()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}(logger)
 
 	dir, err := os.Getwd()
 	if err != nil {
 		panic(err)
 	}
 
-	indexer := &library.DirectoryIndexer{Path: filepath.Join(dir, "sources")}
+	indexer := search.NewDirectoryIndexer(filepath.Join(dir, "sources"), logger)
 	server.indexer = indexer
 
-	searcher, err := library.NewBleveSeacher(server.config.indexDir)
+	searcher, err := search.NewBleveSeacher(server.config.indexDir)
 	if err != nil {
 		panic(err)
 	}
@@ -66,14 +72,13 @@ func main() {
 	grpcGatewayMux := server.StartGrpcGateway()
 
 	router := chi.NewRouter()
+	router.Use(middleware.Recoverer)
 	router.Mount("/", grpcGatewayMux)
 	router.Mount("/swagger", server.SwaggerDocHandlers())
 
-	httpServer := http.Server{
-		Handler: router,
-	}
+	httpServer := http.Server{Handler: router}
 
-	l, err := net.Listen("tcp", ":"+server.config.port)
+	l, err := net.Listen("tcp", "0.0.0.0:"+server.config.port)
 	if err != nil {
 		panic(err)
 	}

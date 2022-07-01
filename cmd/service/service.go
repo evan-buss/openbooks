@@ -32,7 +32,7 @@ func (s *server) Search(ctx context.Context, req *openbooksv1.SearchRequest) (*o
 func (s *server) StartIndex(ctx context.Context, req *openbooksv1.StartIndexRequest) (*openbooksv1.StartIndexResponse, error) {
 	s.log.Infow("started re-indexing")
 
-	duration, err := s.searcher.AddDocuments(ctx, s.indexer.Index())
+	duration, err := s.searcher.AddDocuments(ctx, s.indexer.Index(ctx))
 	if err != nil {
 		s.log.Errorw("indexing error", "err", err)
 		return nil, status.Error(codes.Internal, "Error occurred during indexing.")
