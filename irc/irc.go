@@ -1,6 +1,7 @@
 package irc
 
 import (
+	"crypto/tls"
 	"net"
 )
 
@@ -24,8 +25,15 @@ func New(username, realname string) *Conn {
 }
 
 // Connect connects to the given server at port 6667
-func (i *Conn) Connect(address string) error {
-	conn, err := net.Dial("tcp", address+":6667")
+func (i *Conn) Connect(address string, enableTLS bool) error {
+	var conn net.Conn
+	var err error
+	if enableTLS {
+		conn, err = tls.Dial("tcp", address, &tls.Config{InsecureSkipVerify: true})
+	} else {
+		conn, err = net.Dial("tcp", address)
+	}
+
 	if err != nil {
 		return err
 	}

@@ -14,6 +14,7 @@ type Config struct {
 	Log       bool   // True if IRC messages should be logged
 	Dir       string
 	Server    string
+	EnableTLS bool
 	SearchBot string
 	Version   string
 	irc       *irc.Conn

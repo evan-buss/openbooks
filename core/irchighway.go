@@ -11,8 +11,8 @@ import (
 // Specific irc.irchighway.net commands
 
 // Join connects to the irc.irchighway.net server and joins the #ebooks channel
-func Join(irc *irc.Conn, url string) error {
-	err := irc.Connect(url)
+func Join(irc *irc.Conn, address string, enableTLS bool) error {
+	err := irc.Connect(address, enableTLS)
 	if err != nil {
 		return err
 	}
