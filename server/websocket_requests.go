@@ -49,7 +49,7 @@ func (server *server) routeMessage(message Request, c *Client) {
 
 // handle ConnectionRequests and either connect to the server or do nothing
 func (c *Client) startIrcConnection(server *server) {
-	err := core.Join(c.irc, server.config.Server)
+	err := core.Join(c.irc, server.config.Server, server.config.EnableTLS)
 	if err != nil {
 		c.log.Println(err)
 		c.send <- newErrorResponse("Unable to connect to IRC server.")
