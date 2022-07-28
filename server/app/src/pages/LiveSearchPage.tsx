@@ -66,9 +66,9 @@ export function FirstTimePopup() {
         title="Welcome to the Live Book Search"
         isShown={isShown}
         onCloseComplete={() => setIsShown(false)}>
-        IRC Highway's eBook search lists are parsed and indexed to provide a
-        live search experience. Searches return results quickly and don't
-        require sending a request to the IRC server.
+        IRC Highway's eBook lists are parsed and indexed to provide a live
+        search experience. Searches return results quickly and don't require
+        sending a request to the IRC server.
       </CornerDialog>
     </>
   );
