@@ -67,12 +67,39 @@ message StartIndexRequest {}
 
 message StartIndexResponse {}
 
+message LogInRequest {
+  string username = 1;
+  string password = 2;
+}
+
+message LogInResponse {}
+
 // AdminService requires authentication to access any of the endpoints.
 service AdminService {
-  // Kick off the indexing process of all text files in the configured "index-dir".
   rpc StartIndex(StartIndexRequest) returns (StartIndexResponse){
+    // Kick off the indexing process of all text files in the configured "index-dir".
     option (google.api.http) = {
       post: "/v1/index"
+    };
+  }
+
+  rpc LogIn(LogInRequest) returns (LogInResponse) {
+    option (google.api.http) = {
+      post: "/v1/login"
+      body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      responses: {
+        key: "401"
+        value: {
+          description: "Invalid credentials."
+          schema: {
+            json_schema: {
+              ref: ".openbooks.LogInResponse"
+            }
+          }
+        }
+      }
     };
   }
 }

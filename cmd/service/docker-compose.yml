@@ -1,0 +1,30 @@
+version: "3"
+
+services:
+  typesense:
+    container_name: typesense
+    image: typesense/typesense:0.23.1
+    volumes:
+      - ./typesense:/data
+    ports:
+      - "8108:8108"
+    restart: unless-stopped
+    environment:
+      TYPESENSE_DATA_DIR: /data
+      TYPESENSE_API_KEY: Hu52dwsas2AdxdE
+
+  # typesense_dashboard:
+  #   container_name: typesense_dashboard
+  #   image: typesense-dashboard
+  #   ports:
+  #     - "8109:80"
+
+  meilisearch:
+    container_name: meilisearch
+    image: getmeili/meilisearch:v0.28
+    ports:
+      - "7700:7700"
+    volumes:
+      - ./meilisearch:/meili_data
+    environment:
+      MEILI_MASTER_KEY: masterKey

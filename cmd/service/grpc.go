@@ -2,22 +2,21 @@ package main
 
 import (
 	"context"
-	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
-	"go.uber.org/zap"
-	"net/http"
-
 	openbooksv1 "github.com/evan-buss/openbooks/proto/gen/proto/go/openbooks/v1"
+	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/reflection"
+	"net/http"
 )
 
-var protectedServices = []string{"/openbooks.AdminService/"}
+var protectedServices = []string{"/openbooks.AdminService/StartIndex"}
 
 func (s *server) StartGrpc() *grpc.Server {
 
-	authInterceptor := NewAuthInterceptor("evan", "authorization", protectedServices)
+	authInterceptor := NewAuthInterceptor(s.config.Key, protectedServices)
 	rateLimiter := NewRateLimiter()
 
 	interceptors := grpc_middleware.WithUnaryServerChain(
@@ -31,7 +30,7 @@ func (s *server) StartGrpc() *grpc.Server {
 	openbooksv1.RegisterOpenBooksServiceServer(grpcServer, s)
 	openbooksv1.RegisterAdminServiceServer(grpcServer, s)
 
-	if s.config.debug {
+	if s.config.Debug {
 		reflection.Register(grpcServer)
 	}
 
@@ -39,12 +38,18 @@ func (s *server) StartGrpc() *grpc.Server {
 }
 
 func (s *server) StartGrpcGateway() http.Handler {
-	grpcGatewayMux := runtime.NewServeMux()
+	grpcGatewayMux := runtime.NewServeMux(
+		// Remove any GRPC-Metadata from headers
+		runtime.WithOutgoingHeaderMatcher(runtime.DefaultHeaderMatcher),
+		runtime.WithForwardResponseOption(ForwardTokenToCookie),
+		runtime.WithMetadata(SetMetadataTokenFromCookie),
+	)
+
 	credentials := insecure.NewCredentials()
 	err := openbooksv1.RegisterOpenBooksServiceHandlerFromEndpoint(
 		context.Background(),
 		grpcGatewayMux,
-		"localhost:"+s.config.port,
+		"localhost:"+s.config.Port,
 		[]grpc.DialOption{grpc.WithTransportCredentials(credentials)},
 	)
 	if err != nil {
@@ -54,7 +59,7 @@ func (s *server) StartGrpcGateway() http.Handler {
 	err = openbooksv1.RegisterAdminServiceHandlerFromEndpoint(
 		context.Background(),
 		grpcGatewayMux,
-		"localhost:"+s.config.port,
+		"localhost:"+s.config.Port,
 		[]grpc.DialOption{grpc.WithTransportCredentials(credentials)},
 	)
 

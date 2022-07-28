@@ -8,6 +8,7 @@ import ErrorsGrid from "../components/ErrorsGrid/ErrorsGrid";
 import { MessageType } from "../state/messages";
 import { Warning } from "phosphor-react";
 import image from "../assets/reading.svg";
+import { Link } from "react-router-dom";
 
 export default function SearchPage() {
   const dispatch = useAppDispatch();
@@ -106,18 +107,25 @@ export default function SearchPage() {
           {errorMode() ? "Download" : "Search"}
         </Button>
       </form>
-      {activeItem?.errors?.length && (
-        <Button
-          appearance={errorMode() ? "primary" : "minimal"}
-          onClick={() => setShowErrors((show) => !show)}
-          className="self-start mb-2"
-          iconBefore={<Warning size={18} />}
-          marginRight={12}
-          size="small">
-          {activeItem?.errors?.length} Parsing{" "}
-          {activeItem?.errors?.length === 1 ? "Error" : "Errors"}
-        </Button>
-      )}
+      <div className="flex flex-row justify-between w-full">
+        {activeItem?.errors?.length && (
+          <Button
+            appearance={errorMode() ? "primary" : "minimal"}
+            onClick={() => setShowErrors((show) => !show)}
+            className="self-start mb-2"
+            iconBefore={<Warning size={18} />}
+            marginRight={12}
+            size="small">
+            {activeItem?.errors?.length} Parsing{" "}
+            {activeItem?.errors?.length === 1 ? "Error" : "Errors"}
+          </Button>
+        )}
+        <Link to="/live-search">
+          <Button appearance="minimal" className="self-end mb-2" size="small">
+            Switch to Live Book Search
+          </Button>
+        </Link>
+      </div>
       {renderBody()}
     </Pane>
   );

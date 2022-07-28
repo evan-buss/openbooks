@@ -54,7 +54,8 @@ func (server *server) serveWs() http.HandlerFunc {
 				Expires:  time.Now().Add(time.Hour * 24 * 7),
 				SameSite: http.SameSiteStrictMode,
 			}
-			w.Header().Add("Set-Cookie", cookie.String())
+
+			http.SetCookie(w, cookie)
 		}
 
 		userId := uuid.MustParse(cookie.Value)

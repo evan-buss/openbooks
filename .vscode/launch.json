@@ -19,6 +19,13 @@
       "mode": "debug",
       "program": "cmd/openbooks",
       "args": ["cli", "download", "--server", "localhost", "!test"]
+    },
+    {
+      "name": "Launch OpenBooks Search Service",
+      "type": "go",
+      "request": "launch",
+      "mode": "debug",
+      "program": "cmd/service"
     }
   ]
 }

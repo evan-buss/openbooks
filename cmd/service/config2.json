@@ -1,0 +1,22 @@
+{
+  "debug": true,
+  "indexing": {
+    "sourcedirectory": "sources/",
+    "storedirectory": "openbooks.bleve"
+  },
+  "irc": {
+    "searchcommand": "search",
+    "servers": [
+      "Oatmeal",
+      "FWServer"
+    ],
+    "url": "irc.irchighway.net"
+  },
+  "port": 5228,
+  "users": [
+    {
+      "password": "password",
+      "username": "evan"
+    }
+  ]
+}

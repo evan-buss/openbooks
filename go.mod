@@ -20,7 +20,7 @@ require (
 
 require (
 	github.com/spf13/pflag v1.0.5
-	github.com/stretchr/testify v1.7.2
+	github.com/stretchr/testify v1.8.0
 	github.com/webview/webview v0.0.0-20220613032649-1df219123fb2
 )
 
@@ -30,10 +30,13 @@ require (
 	github.com/go-chi/httprate v0.5.3
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.10.3
 	github.com/inkeliz/gowebview v1.0.1
+	github.com/lestrrat-go/jwx/v2 v2.0.3
 	github.com/robfig/cron/v3 v3.0.1
+	github.com/samber/lo v1.21.0
 	github.com/soheilhy/cmux v0.1.5
 	github.com/spf13/viper v1.12.0
 	github.com/swaggo/http-swagger v1.3.0
+	github.com/typesense/typesense-go v0.5.0
 	go.uber.org/zap v1.17.0
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	google.golang.org/genproto v0.0.0-20220519153652-3a47de7e79bd
@@ -43,9 +46,24 @@ require (
 
 require (
 	github.com/andres-erbsen/clock v0.0.0-20160526145045-9e14626cd129 // indirect
+	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.0.1 // indirect
+	github.com/deepmap/oapi-codegen v1.9.0 // indirect
+	github.com/goccy/go-json v0.9.7 // indirect
+	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
+	github.com/lestrrat-go/blackmagic v1.0.1 // indirect
+	github.com/lestrrat-go/httpcc v1.0.1 // indirect
+	github.com/lestrrat-go/httprc v1.0.2 // indirect
+	github.com/lestrrat-go/iter v1.0.2 // indirect
+	github.com/lestrrat-go/option v1.0.0 // indirect
+	github.com/meilisearch/meilisearch-go v0.20.0 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
+	github.com/sony/gobreaker v0.5.0 // indirect
 	github.com/swaggo/swag v1.8.3 // indirect
+	github.com/valyala/bytebufferpool v1.0.0 // indirect
+	github.com/valyala/fasthttp v1.37.1-0.20220607072126-8a320890c08d // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
+	golang.org/x/exp v0.0.0-20220303212507-bbda1eaf7a17 // indirect
 )
 
 require (
@@ -69,7 +87,7 @@ require (
 	github.com/blevesearch/zapx/v14 v14.3.3 // indirect
 	github.com/blevesearch/zapx/v15 v15.3.3 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
-	github.com/fsnotify/fsnotify v1.5.4 // indirect
+	github.com/fsnotify/fsnotify v1.5.4
 	github.com/go-openapi/jsonpointer v0.19.5 // indirect
 	github.com/go-openapi/jsonreference v0.20.0 // indirect
 	github.com/go-openapi/spec v0.20.5 // indirect
@@ -83,7 +101,7 @@ require (
 	github.com/klauspost/compress v1.15.6 // indirect
 	github.com/klauspost/pgzip v1.2.5 // indirect
 	github.com/magiconair/properties v1.8.6 // indirect
-	github.com/mailru/easyjson v0.7.6 // indirect
+	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-runewidth v0.0.13 // indirect
 	github.com/mitchellh/colorstring v0.0.0-20190213212951-d06e56a500db // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect

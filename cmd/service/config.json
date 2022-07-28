@@ -1,0 +1,23 @@
+{
+  "debug": true,
+  "port": "8080",
+  "key": "thisisthejwtkeyforsigning",
+  "users": [
+    {
+      "username":  "evan",
+      "password": "password123"
+    }
+  ],
+  "indexing": {
+    "sourceDirectory": "sources/",
+    "storeDirectory": "openbooks.bleve"
+  },
+  "irc": {
+    "url": "irc.irchighway.net",
+    "searchCommand": "search",
+    "servers": [
+      "Oatmeal",
+      "FWServer"
+    ]
+  }
+}

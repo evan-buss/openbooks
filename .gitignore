@@ -10,6 +10,8 @@ openbooks_api
 **/dist
 proto/gen
 sources/
+typesense/
+meilisearch/
 # end persist
 
 
