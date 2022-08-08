@@ -12,6 +12,8 @@ services:
     environment:
       TYPESENSE_DATA_DIR: /data
       TYPESENSE_API_KEY: Hu52dwsas2AdxdE
+      TYPESENSE_ENABLE_CORS: true
+      # TYPESENSE_CORS_DOMAINS: "https://bfritscher.github.io,http://localhost:5173,http://localhost:5699"
 
   # typesense_dashboard:
   #   container_name: typesense_dashboard
@@ -19,12 +21,12 @@ services:
   #   ports:
   #     - "8109:80"
 
-  meilisearch:
-    container_name: meilisearch
-    image: getmeili/meilisearch:v0.28
-    ports:
-      - "7700:7700"
-    volumes:
-      - ./meilisearch:/meili_data
-    environment:
-      MEILI_MASTER_KEY: masterKey
+  # meilisearch:
+  #   container_name: meilisearch
+  #   image: getmeili/meilisearch:v0.28
+  #   ports:
+  #     - "7700:7700"
+  #   volumes:
+  #     - ./meilisearch:/meili_data
+  #   environment:
+  #     MEILI_MASTER_KEY: masterKey

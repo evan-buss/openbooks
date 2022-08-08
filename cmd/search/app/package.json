@@ -1,0 +1,45 @@
+{
+  "name": "app",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "generate": "orval --config ./orval.config.ts",
+    "prepare": "cd ../../../ && husky install cmd/search/app/.husky"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.10.0",
+    "@mantine/core": "^5.0.2",
+    "@mantine/form": "^5.0.2",
+    "@mantine/hooks": "^5.0.2",
+    "@tanstack/react-query": "^4.0.10",
+    "axios": "^0.27.2",
+    "orval": "^6.9.6",
+    "phosphor-react": "^1.4.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.3.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.15",
+    "@types/react-dom": "^18.0.6",
+    "@typescript-eslint/eslint-plugin": "^5.32.0",
+    "@typescript-eslint/parser": "^5.32.0",
+    "@vitejs/plugin-react": "^2.0.0",
+    "eslint": "^8.21.0",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-jsx-a11y": "^6.6.1",
+    "eslint-plugin-react": "^7.30.1",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "husky": "^8.0.1",
+    "lint-staged": "^13.0.3",
+    "prettier": "2.7.1",
+    "typescript": "^4.6.4",
+    "vite": "^3.0.0"
+  }
+}

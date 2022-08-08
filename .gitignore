@@ -12,6 +12,7 @@ proto/gen
 sources/
 typesense/
 meilisearch/
+*.db
 # end persist
 
 

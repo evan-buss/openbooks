@@ -1,21 +1,22 @@
-import React from "react";
-import TypesenseAdapter from "typesense-instantsearch-adapter";
-import { InstantSearch } from "react-instantsearch-hooks-web";
-import { Pagination as CustomPagination } from "../components/InstantSearch/Pagination";
-import { Grid as CustomGrid } from "../components/InstantSearch/Grid";
+import { CornerDialog } from "evergreen-ui";
 import { Hit as AlgoliaHit } from "instantsearch.js/es/types";
-import { SearchBox } from "../components/InstantSearch/SearchBox";
-import { CornerDialog, Button } from "evergreen-ui";
+import React from "react";
+import { InstantSearch } from "react-instantsearch-hooks-web";
 import { useLocalStorage } from "react-use";
+import TypesenseAdapter from "typesense-instantsearch-adapter";
+import { Grid as CustomGrid } from "../components/InstantSearch/Grid";
+import { Pagination as CustomPagination } from "../components/InstantSearch/Pagination";
+import { SearchBox } from "../components/InstantSearch/SearchBox";
 
 const typesenseInstantsearchAdapter = new TypesenseAdapter({
   server: {
     apiKey: "5neo5QvlAxxtrxX0YEfoq5S9xUkHlmmF", // Be sure to use an API key that only allows search operations
+    // m8yIAmgBGBLDo4MGgGiY5aAbYtbgKqDA
     nodes: [
       {
         host: "localhost",
-        port: 8108,
-        protocol: "http"
+        port: 7189,
+        protocol: "https"
       }
     ],
     cacheSearchResultsForSeconds: 2 * 60 // Cache search results from server. Defaults to 2 minutes. Set to 0 to disable caching.

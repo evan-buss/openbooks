@@ -18,10 +18,11 @@ type TypesenseSearcher struct {
 	client *typesense.Client
 }
 
-func NewTypesenseSearcher() (*TypesenseSearcher, error) {
+func NewTypesenseSearcher(url, masterKey string) (*TypesenseSearcher, error) {
 	client := typesense.NewClient(
-		typesense.WithServer("http://localhost:8108"),
-		typesense.WithAPIKey("Hu52dwsas2AdxdE"))
+		typesense.WithServer(url),
+		typesense.WithAPIKey(masterKey),
+	)
 
 	return &TypesenseSearcher{client}, nil
 }

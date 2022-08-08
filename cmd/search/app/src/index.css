@@ -1,0 +1,6 @@
+html,
+body,
+#root,
+#root:first-child {
+  height: 100%;
+}

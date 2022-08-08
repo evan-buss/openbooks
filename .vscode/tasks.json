@@ -1,0 +1,28 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Swagger Generate - Search Service",
+      "command": "swag init --parseDependency",
+      "type": "shell",
+      "options": {
+        "cwd": "cmd/search"
+      }
+    },
+    {
+      "label": "Orval Generate - Search Service",
+      "command": "npm run generate",
+      "type": "shell",
+      "options": {
+        "cwd": "cmd/search/app"
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "id": "entityName",
+      "type": "promptString",
+      "description": "Entity Name"
+    }
+  ]
+}
