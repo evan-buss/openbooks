@@ -19,12 +19,13 @@ func generateUserName() string {
 }
 
 // Update a server config struct from globalFlags
-func bindGlobalFlags(config *server.Config) {
+func bindGlobalServerFlags(config *server.Config) {
 	config.Version = fmt.Sprintf("OpenBooks Server %s", ircVersion)
 	config.UserName = globalFlags.UserName
 	config.Log = globalFlags.Log
 	config.Server = globalFlags.Server
 	config.SearchBot = globalFlags.SearchBot
+	config.EnableTLS = globalFlags.EnableTLS
 }
 
 // Make sure the server config has a valid rate limit.

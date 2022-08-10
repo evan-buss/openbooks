@@ -8,16 +8,16 @@ import {
   Text,
   Tooltip
 } from "evergreen-ui";
+import { AnimatePresence } from "framer-motion";
 import React, { useEffect, useMemo, useState } from "react";
-import { BookDetail } from "../../state/messages";
-import { sendDownload } from "../../state/stateSlice";
-import SelectMenuHeader, { makeStatusMenuItem } from "./SelectMenuHeader";
+import { useSelector } from "react-redux";
 import { useGetServersQuery } from "../../state/api";
 import { useHeight } from "../../state/hooks";
+import { BookDetail } from "../../state/messages";
+import { sendDownload } from "../../state/stateSlice";
 import { RootState, useAppDispatch } from "../../state/store";
-import { useSelector } from "react-redux";
+import SelectMenuHeader, { makeStatusMenuItem } from "./SelectMenuHeader";
 import ThreeDotWave from "./ThreeDotWave";
-import { AnimatePresence } from "framer-motion";
 
 const stringContains = (first: string, second: string): boolean => {
   return first.toLowerCase().includes(second.toLowerCase());
@@ -183,26 +183,21 @@ export const BooksGrid: React.FC<Props> = ({ books }: Props) => {
 
 function DownloadButton({ book }: { book: string }) {
   const dispatch = useAppDispatch();
-  const [disabled, setDisabled] = useState(false);
-
+  
+  const [clicked, setClicked] = useState(false);
   const isInFlight = useSelector((state: RootState) =>
     state.state.inFlightDownloads.includes(book)
   );
 
   // Prevent hitting the same button multiple times
   const onClick = () => {
-    if (disabled) return;
+    if (clicked) return;
     dispatch(sendDownload(book));
-    setDisabled(true);
+    setClicked(true);
   };
 
   return (
-    <Button
-      appearance="primary"
-      size="small"
-      width="100px"
-      disabled={disabled}
-      onClick={onClick}>
+    <Button appearance="primary" size="small" width="100px" onClick={onClick}>
       <AnimatePresence>
         {isInFlight ? <ThreeDotWave /> : <span>Download</span>}
       </AnimatePresence>

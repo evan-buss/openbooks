@@ -23,7 +23,7 @@ func init() {
 	serverCmd.Flags().StringVar(&serverConfig.Basepath, "basepath", "/", `Base path where the application is accessible. For example "/openbooks/".`)
 	serverCmd.Flags().BoolVarP(&openBrowser, "browser", "b", false, "Open the browser on server start.")
 	serverCmd.Flags().BoolVar(&serverConfig.Persist, "persist", false, "Persist eBooks in 'dir'. Default is to delete after sending.")
-	serverCmd.LocalFlags().StringVarP(&serverConfig.DownloadDir, "dir", "d", filepath.Join(os.TempDir(), "openbooks"), "The directory where eBooks are saved when persist enabled.")
+	serverCmd.Flags().StringVarP(&serverConfig.DownloadDir, "dir", "d", filepath.Join(os.TempDir(), "openbooks"), "The directory where eBooks are saved when persist enabled.")
 }
 
 var serverCmd = &cobra.Command{
@@ -31,7 +31,7 @@ var serverCmd = &cobra.Command{
 	Short: "Run OpenBooks in server mode.",
 	Long:  "Run OpenBooks in server mode. This allows you to use a web interface to search and download eBooks.",
 	PreRun: func(cmd *cobra.Command, args []string) {
-		bindGlobalFlags(&serverConfig)
+		bindGlobalServerFlags(&serverConfig)
 		rateLimit, _ := cmd.Flags().GetInt("rate-limit")
 		ensureValidRate(rateLimit, &serverConfig)
 		// If cli flag isn't set (default value) check for the presence of an
