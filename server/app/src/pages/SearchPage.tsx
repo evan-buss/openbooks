@@ -1,13 +1,13 @@
 import { Button, majorScale, Pane, SearchInput, Text } from "evergreen-ui";
+import { Warning } from "phosphor-react";
 import React, { FormEvent, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
+import image from "../assets/reading.svg";
 import { BooksGrid } from "../components/BooksGrid/BooksGrid";
-import { sendMessage, sendSearch } from "../state/stateSlice";
-import { RootState, useAppDispatch } from "../state/store";
 import ErrorsGrid from "../components/ErrorsGrid/ErrorsGrid";
 import { MessageType } from "../state/messages";
-import { Warning } from "phosphor-react";
-import image from "../assets/reading.svg";
+import { sendMessage, sendSearch } from "../state/stateSlice";
+import { RootState, useAppDispatch } from "../state/store";
 
 export default function SearchPage() {
   const dispatch = useAppDispatch();
@@ -19,8 +19,7 @@ export default function SearchPage() {
     setShowErrors(false);
   }, [activeItem]);
 
-  const hasErrors = () =>
-    activeItem?.errors?.length && activeItem?.errors?.length > 0;
+  const hasErrors = () => (activeItem?.errors ?? []).length > 0;
   const errorMode = () => showErrors && activeItem;
   const validInput = () => {
     if (errorMode()) {
