@@ -1,190 +1,167 @@
-import { createStyles, Navbar, SegmentedControl, Text } from "@mantine/core";
 import {
-  Icon2fa,
-  IconBellRinging,
-  IconDatabaseImport,
-  IconFileAnalytics,
-  IconFingerprint,
-  IconKey,
-  IconLicense,
-  IconLogout,
-  IconMessage2,
-  IconMessages,
-  IconReceipt2,
-  IconReceiptRefund,
-  IconSettings,
-  IconShoppingCart,
-  IconSwitchHorizontal,
-  IconUsers
-} from "@tabler/icons";
-import React from "react";
+  ActionIcon,
+  Burger,
+  createStyles,
+  Group,
+  MediaQuery,
+  Navbar,
+  ScrollArea,
+  SegmentedControl,
+  Text,
+  Transition,
+  useMantineColorScheme
+} from "@mantine/core";
+import { IconMoonStars, IconSun } from "@tabler/icons";
+import { IdentificationBadge } from "phosphor-react";
+import { useState } from "react";
+import { useSelector } from "react-redux";
+import { useLocalStorage } from "react-use";
+import { toggleDrawer } from "../../state/notificationSlice";
+import { RootState, useAppDispatch } from "../../state/store";
+import BookList from "../SideBar/BookList";
+import Pulse from "../SideBar/Pulse";
+import SearchHistoryNeo from "./History";
 
 const useStyles = createStyles((theme, _params, getRef) => {
-  const icon = getRef("icon");
-
   return {
     navbar: {
       backgroundColor:
         theme.colorScheme === "dark" ? theme.colors.dark[7] : theme.white
     },
-
-    title: {
-      textTransform: "uppercase",
-      letterSpacing: -0.25
-    },
-
-    link: {
-      ...theme.fn.focusStyles(),
-      "display": "flex",
-      "alignItems": "center",
-      "textDecoration": "none",
-      "fontSize": theme.fontSizes.sm,
-      "color":
-        theme.colorScheme === "dark"
-          ? theme.colors.dark[1]
-          : theme.colors.gray[7],
-      "padding": `${theme.spacing.xs}px ${theme.spacing.sm}px`,
-      "borderRadius": theme.radius.sm,
-      "fontWeight": 500,
-
-      "&:hover": {
-        backgroundColor:
-          theme.colorScheme === "dark"
-            ? theme.colors.dark[6]
-            : theme.colors.gray[0],
-        color: theme.colorScheme === "dark" ? theme.white : theme.black,
-
-        [`& .${icon}`]: {
-          color: theme.colorScheme === "dark" ? theme.white : theme.black
-        }
-      }
-    },
-
-    linkIcon: {
-      ref: icon,
-      color:
-        theme.colorScheme === "dark"
-          ? theme.colors.dark[2]
-          : theme.colors.gray[6],
-      marginRight: theme.spacing.sm
-    },
-
-    linkActive: {
-      "&, &:hover": {
-        backgroundColor: theme.fn.variant({
-          variant: "light",
-          color: theme.primaryColor
-        }).background,
-        color: theme.fn.variant({ variant: "light", color: theme.primaryColor })
-          .color,
-        [`& .${icon}`]: {
-          color: theme.fn.variant({
-            variant: "light",
-            color: theme.primaryColor
-          }).color
-        }
-      }
-    },
-
     footer: {
       borderTop: `1px solid ${
         theme.colorScheme === "dark"
           ? theme.colors.dark[4]
           : theme.colors.gray[3]
       }`,
-      paddingTop: theme.spacing.md
+      paddingTop: theme.spacing.sm
     }
   };
 });
 
-const tabs = {
-  account: [
-    { link: "", label: "Notifications", icon: IconBellRinging },
-    { link: "", label: "Billing", icon: IconReceipt2 },
-    { link: "", label: "Security", icon: IconFingerprint },
-    { link: "", label: "SSH Keys", icon: IconKey },
-    { link: "", label: "Databases", icon: IconDatabaseImport },
-    { link: "", label: "Authentication", icon: Icon2fa },
-    { link: "", label: "Other Settings", icon: IconSettings }
-  ],
-  general: [
-    { link: "", label: "Orders", icon: IconShoppingCart },
-    { link: "", label: "Receipts", icon: IconLicense },
-    { link: "", label: "Reviews", icon: IconMessage2 },
-    { link: "", label: "Messages", icon: IconMessages },
-    { link: "", label: "Customers", icon: IconUsers },
-    { link: "", label: "Refunds", icon: IconReceiptRefund },
-    { link: "", label: "Files", icon: IconFileAnalytics }
-  ]
-};
-
-export function SidebarNeo() {
-  const { classes, cx } = useStyles();
-  const [section, setSection] = React.useState<"account" | "general">(
-    "account"
+export default function SidebarNeo() {
+  const { classes } = useStyles();
+  const [opened, setOpened] = useState(true);
+  const username = useSelector((store: RootState) => store.state.username);
+  const [index, setIndex] = useLocalStorage<"books" | "history">(
+    "newIndex",
+    "history"
   );
-  const [active, setActive] = React.useState("Billing");
 
-  const links = tabs[section].map((item) => (
-    <a
-      className={cx(classes.link, {
-        [classes.linkActive]: item.label === active
-      })}
-      href={item.link}
-      key={item.label}
-      onClick={(event) => {
-        event.preventDefault();
-        setActive(item.label);
-      }}>
-      <item.icon className={classes.linkIcon} stroke={1.5} />
-      <span>{item.label}</span>
-    </a>
-  ));
+  const { colorScheme, toggleColorScheme } = useMantineColorScheme();
+  const connected = useSelector((store: RootState) => store.state.isConnected);
+  const dispatch = useAppDispatch();
 
   return (
-    <Navbar height={840} width={{ sm: 300 }} p="md" className={classes.navbar}>
-      <Navbar.Section>
-        <Text
-          weight={500}
-          size="sm"
-          className={classes.title}
-          color="dimmed"
-          mb="xs">
-          bgluesticker@mantine.dev
+    <Navbar
+      width={{ sm: 300 }}
+      hiddenBreakpoint="sm"
+      hidden={!opened}
+      className={classes.navbar}>
+      <Navbar.Section p="sm">
+        <Group position="apart">
+          <Text weight="bold" size="lg">
+            OpenBooks
+          </Text>
+          <div>
+            <MediaQuery largerThan="sm" styles={{ display: "none" }}>
+              <Burger
+                opened={opened}
+                onClick={() => setOpened((o) => !o)}
+                size="sm"
+                mr="xl"
+              />
+            </MediaQuery>
+            <Pulse
+              enabled={connected}
+              onClick={() => dispatch(toggleDrawer())}
+            />
+          </div>
+        </Group>
+
+        <Text size="sm" color="dimmed">
+          Download eBooks from IRC Highway
         </Text>
 
         <SegmentedControl
-          value={section}
-          onChange={(value: "account" | "general") => setSection(value)}
+          size="sm"
+          styles={(theme) => ({
+            root: {
+              marginTop: theme.spacing.md
+            },
+            label: {
+              fontSize: theme.fontSizes.xs
+            }
+          })}
+          transitionDuration={500}
           transitionTimingFunction="ease"
-          fullWidth
+          value={index}
+          onChange={(value: "books" | "history") => setIndex(value)}
           data={[
-            { label: "TEST123", value: "account" },
-            { label: "System", value: "general" }
+            { label: "Search History", value: "history" },
+            { label: "Previous Downloads", value: "books" }
           ]}
+          fullWidth
         />
       </Navbar.Section>
 
-      <Navbar.Section grow mt="xl">
-        {links}
+      <Navbar.Section grow component={ScrollArea} p="xs">
+        <Transition
+          mounted={index === "history"}
+          transition="fade"
+          duration={1000}
+          exitDuration={0}
+          timingFunction="ease">
+          {(styles) => (
+            <div style={styles}>
+              <SearchHistoryNeo />
+            </div>
+          )}
+        </Transition>
+
+        <Transition
+          mounted={index === "books"}
+          transition="fade"
+          duration={1000}
+          exitDuration={0}
+          timingFunction="ease">
+          {(styles) => (
+            <div style={styles}>
+              <BookList />
+            </div>
+          )}
+        </Transition>
       </Navbar.Section>
 
-      <Navbar.Section className={classes.footer}>
-        <a
-          href="#"
-          className={classes.link}
-          onClick={(event) => event.preventDefault()}>
-          <IconSwitchHorizontal className={classes.linkIcon} stroke={1.5} />
-          <span>Change account</span>
-        </a>
+      <Navbar.Section className={classes.footer} p="sm">
+        <Group position="apart">
+          {username && (
+            <Group>
+              <IdentificationBadge size={24} className="mr-4" />
+              <Text size="sm">{username}</Text>
+            </Group>
+          )}
 
-        <a
-          href="#"
-          className={classes.link}
-          onClick={(event) => event.preventDefault()}>
-          <IconLogout className={classes.linkIcon} stroke={1.5} />
-          <span>Logout</span>
-        </a>
+          <ActionIcon
+            onClick={() => toggleColorScheme()}
+            size="lg"
+            sx={(theme) => ({
+              backgroundColor:
+                theme.colorScheme === "dark"
+                  ? theme.colors.dark[6]
+                  : theme.colors.gray[0],
+              color:
+                theme.colorScheme === "dark"
+                  ? theme.colors.yellow[4]
+                  : theme.colors.brand[4]
+            })}>
+            {colorScheme === "dark" ? (
+              <IconSun size={18} />
+            ) : (
+              <IconMoonStars size={18} />
+            )}
+          </ActionIcon>
+        </Group>
       </Navbar.Section>
     </Navbar>
   );
