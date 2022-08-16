@@ -1,11 +1,4 @@
-import {
-  Badge,
-  Button,
-  createStyles,
-  Menu,
-  Stack,
-  Tooltip
-} from "@mantine/core";
+import { Badge, Button, Menu, Stack, Tooltip } from "@mantine/core";
 import { Dispatch } from "@reduxjs/toolkit";
 import { Eye, EyeSlash, MagnifyingGlass, Trash } from "phosphor-react";
 import React from "react";
@@ -17,6 +10,7 @@ import {
 } from "../../state/historySlice";
 import { setActiveItem } from "../../state/stateSlice";
 import { RootState, useAppDispatch } from "../../state/store";
+import { useSidebarButtonStyle } from "./styles";
 
 export default function SearchHistoryNeo() {
   const history = useSelector(selectHistory);
@@ -50,60 +44,11 @@ type Props = {
   dispatch: Dispatch<any>;
 };
 
-const useHistoryCardStyles = createStyles(
-  (theme, { active }: { active: boolean }) => {
-    const isDark = theme.colorScheme === "dark";
-
-    return {
-      root: {
-        "backgroundColor": isDark ? theme.colors.dark[4] : "white",
-        "borderColor": active
-          ? theme.fn.primaryColor()
-          : isDark
-          ? theme.colors.gray[8]
-          : theme.colors.gray[3],
-        "boxShadow": active ? theme.shadows.sm : "none",
-
-        "&:hover": {
-          backgroundColor: isDark ? theme.colors.dark[5] : theme.colors.gray[1]
-        }
-      },
-      inner: {
-        color: isDark ? "white" : "black",
-        fontWeight: "normal",
-        justifyContent: "space-between"
-      },
-      label: {
-        paddingLeft: theme.spacing.sm,
-        width: "100%",
-        textAlign: "start"
-      }
-    };
-  }
-);
-
 const HistoryCard: React.FC<Props> = ({ activeTS, item, dispatch }: Props) => {
   const isActive = activeTS === item.timestamp;
-  const { classes } = useHistoryCardStyles({ active: isActive });
+  const { classes } = useSidebarButtonStyle({ isActive });
 
-  //   const loading = !item.results?.length && !item.errors?.length;
-  const loading = false;
-
-  const badge = loading ? (
-    <></>
-  ) : (
-    <Badge
-      sx={(theme) => ({
-        color:
-          theme.colorScheme === "dark"
-            ? theme.colors.brand[2]
-            : theme.colors.brand[5]
-      })}
-      color="brand"
-      radius="sm"
-      size="sm"
-      variant="light">{`${item.results?.length} RESULTS`}</Badge>
-  );
+  const loading = !item.results?.length && !item.errors?.length;
 
   return (
     <Menu shadow="md" width={200}>
@@ -115,7 +60,11 @@ const HistoryCard: React.FC<Props> = ({ activeTS, item, dispatch }: Props) => {
             radius="sm"
             variant="outline"
             leftIcon={<MagnifyingGlass size={18} weight="bold" />}
-            rightIcon={badge}
+            rightIcon={
+              <Badge color="brand" radius="sm" size="sm" variant="light">
+                {`${item.results?.length} RESULTS`}
+              </Badge>
+            }
             loaderPosition="right"
             loaderProps={{ color: "brand" }}>
             {item.query}

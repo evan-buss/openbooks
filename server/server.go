@@ -79,7 +79,7 @@ func Start(config Config) {
 
 	corsConfig := cors.Options{
 		AllowCredentials: true,
-		AllowedOrigins:   []string{"http://localhost:3000"},
+		AllowedOrigins:   []string{"http://127.0.0.1:5173"},
 		AllowedHeaders:   []string{"*"},
 		AllowedMethods:   []string{"GET", "DELETE"},
 	}

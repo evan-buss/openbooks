@@ -7,6 +7,7 @@ import {
   MediaQuery
 } from "@mantine/core";
 import { useState } from "react";
+import NotificationDrawer from "./components/SideBar/NotificationDrawer";
 import SidebarNeo from "./components/SidebarNeo/Sidebar";
 import SearchPage from "./pages/SearchPage";
 
@@ -59,6 +60,7 @@ function App() {
               <Burger opened={false} size="sm" mr="xl" />
             </MediaQuery>
             <SearchPage />
+            <NotificationDrawer />
           </div>
         </AppShell>
       </MantineProvider>

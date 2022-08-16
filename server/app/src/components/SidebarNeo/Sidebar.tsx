@@ -8,19 +8,19 @@ import {
   ScrollArea,
   SegmentedControl,
   Text,
+  Tooltip,
   Transition,
   useMantineColorScheme
 } from "@mantine/core";
 import { IconMoonStars, IconSun } from "@tabler/icons";
-import { IdentificationBadge } from "phosphor-react";
+import { BellSimple, IdentificationBadge } from "phosphor-react";
 import { useState } from "react";
 import { useSelector } from "react-redux";
 import { useLocalStorage } from "react-use";
 import { toggleDrawer } from "../../state/notificationSlice";
 import { RootState, useAppDispatch } from "../../state/store";
-import BookList from "../SideBar/BookList";
-import Pulse from "../SideBar/Pulse";
 import SearchHistoryNeo from "./History";
+import Library from "./Library";
 
 const useStyles = createStyles((theme, _params, getRef) => {
   return {
@@ -72,10 +72,18 @@ export default function SidebarNeo() {
                 mr="xl"
               />
             </MediaQuery>
-            <Pulse
-              enabled={connected}
-              onClick={() => dispatch(toggleDrawer())}
-            />
+            <Tooltip
+              label={`OpenBooks server ${
+                connected ? "connected" : "disconnected"
+              }.`}>
+              <ActionIcon
+                color="brand"
+                size="md"
+                disabled={!connected}
+                onClick={() => dispatch(toggleDrawer())}>
+                <BellSimple weight="bold" size={18} />
+              </ActionIcon>
+            </Tooltip>
           </div>
         </Group>
 
@@ -109,7 +117,7 @@ export default function SidebarNeo() {
         <Transition
           mounted={index === "history"}
           transition="fade"
-          duration={1000}
+          duration={500}
           exitDuration={0}
           timingFunction="ease">
           {(styles) => (
@@ -122,12 +130,12 @@ export default function SidebarNeo() {
         <Transition
           mounted={index === "books"}
           transition="fade"
-          duration={1000}
+          duration={500}
           exitDuration={0}
           timingFunction="ease">
           {(styles) => (
             <div style={styles}>
-              <BookList />
+              <Library />
             </div>
           )}
         </Transition>
@@ -135,26 +143,19 @@ export default function SidebarNeo() {
 
       <Navbar.Section className={classes.footer} p="sm">
         <Group position="apart">
-          {username && (
-            <Group>
-              <IdentificationBadge size={24} className="mr-4" />
-              <Text size="sm">{username}</Text>
-            </Group>
-          )}
+          <Group>
+            {username && (
+              <>
+                <IdentificationBadge size={24} />
+                <Text size="sm">{username}</Text>
+              </>
+            )}
+          </Group>
 
           <ActionIcon
             onClick={() => toggleColorScheme()}
             size="lg"
-            sx={(theme) => ({
-              backgroundColor:
-                theme.colorScheme === "dark"
-                  ? theme.colors.dark[6]
-                  : theme.colors.gray[0],
-              color:
-                theme.colorScheme === "dark"
-                  ? theme.colors.yellow[4]
-                  : theme.colors.brand[4]
-            })}>
+            color="brand">
             {colorScheme === "dark" ? (
               <IconSun size={18} />
             ) : (
