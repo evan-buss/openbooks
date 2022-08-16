@@ -1,14 +1,30 @@
-import { SideSheet, Alert, IntentTypes, IconButton, Text } from "evergreen-ui";
-import React from "react";
+import {
+  ActionIcon,
+  Alert,
+  Center,
+  Drawer,
+  Group,
+  Stack,
+  Text,
+  Tooltip,
+  useMantineColorScheme
+} from "@mantine/core";
+import {
+  BellSimpleSlash,
+  CheckCircle,
+  Info,
+  Warning,
+  WarningCircle
+} from "phosphor-react";
+import { ReactNode } from "react";
 import { useSelector } from "react-redux";
+import { NotificationType } from "../../state/messages";
 import {
   clearNotifications,
   dismissNotification,
   toggleDrawer
 } from "../../state/notificationSlice";
 import { RootState, useAppDispatch } from "../../state/store";
-import { BellSimpleSlash } from "phosphor-react";
-import { NotificationType } from "../../state/messages";
 
 const NotificationDrawer = () => {
   const { isOpen, notifications } = useSelector(
@@ -16,61 +32,98 @@ const NotificationDrawer = () => {
   );
   const dispatch = useAppDispatch();
 
-  const getIntent = (type: NotificationType): IntentTypes => {
+  const { colorScheme } = useMantineColorScheme();
+
+  const getMIntent = (
+    type: NotificationType
+  ): { icon: ReactNode; color: string } => {
     switch (type) {
       case NotificationType.NOTIFY:
-        return "none";
+        return {
+          icon: <Info weight="fill" size={20} />,
+          color: colorScheme === "dark" ? "brand.2" : "brand"
+        };
       case NotificationType.DANGER:
-        return "danger";
+        return {
+          icon: <WarningCircle weight="fill" size={20} />,
+          color: "red"
+        };
       case NotificationType.SUCCESS:
-        return "success";
+        return {
+          icon: <CheckCircle weight="fill" size={20} />,
+          color: "green"
+        };
       case NotificationType.WARNING:
-        return "warning";
+        return {
+          icon: <Warning weight="fill" size={20} />,
+          color: "yellow"
+        };
     }
   };
 
   return (
-    <SideSheet
-      isShown={isOpen}
-      width={400}
-      onCloseComplete={() => dispatch(toggleDrawer())}>
-      <div className="flex flex-row justify-between p-3 border-b border-gray-300">
-        <h2 className="text-xl">Notifications</h2>
-        <IconButton
-          disabled={notifications.length === 0}
-          icon={
-            <BellSimpleSlash
-              color={notifications.length === 0 ? "gray" : "black"}
-              weight="bold"
-            />
-          }
-          onClick={() => dispatch(clearNotifications())}></IconButton>
-      </div>
-      <div className="flex flex-col gap-2 p-2">
-        {notifications.length === 0 ? (
-          <Text marginX="auto" marginY={16} color="muted">
+    <Drawer
+      opened={isOpen}
+      onClose={() => dispatch(toggleDrawer())}
+      styles={{
+        title: {
+          width: "100%",
+          marginRight: 0
+        }
+      }}
+      title={
+        <Group position="apart">
+          <Text weight="bold" size="lg">
+            Notifications
+          </Text>
+          <Tooltip label="Clear Notifications" position="left">
+            <ActionIcon
+              color="brand"
+              size="md"
+              disabled={notifications.length === 0}
+              onClick={() => dispatch(clearNotifications())}>
+              <BellSimpleSlash weight="bold" size={18} />
+            </ActionIcon>
+          </Tooltip>
+        </Group>
+      }
+      withCloseButton={false}
+      position="right"
+      padding="sm"
+      size={350}>
+      {notifications.length === 0 ? (
+        <Center>
+          <Text size="sm" color="dimmed">
             No notifications.
           </Text>
-        ) : (
-          notifications.map((notif) => (
+        </Center>
+      ) : (
+        <Stack spacing="xs">
+          {notifications.map((notif) => (
             <div key={notif.timestamp}>
-              <p className="mb-1 text-xs font-semibold text-gray-600">
+              <Text
+                color="dimmed"
+                size="xs"
+                weight={500}
+                style={{ marginBottom: "0.25rem" }}>
                 {new Date(notif.timestamp).toLocaleTimeString("en-US", {
                   timeStyle: "short"
                 })}
-              </p>
+              </Text>
               <Alert
-                intent={getIntent(notif.appearance)}
+                {...getMIntent(notif.appearance)}
                 title={notif.title}
-                onRemove={() => dispatch(dismissNotification(notif))}
-                isRemoveable>
+                variant="outline"
+                radius="md"
+                withCloseButton
+                onClose={() => dispatch(dismissNotification(notif))}>
                 {notif.detail}
               </Alert>
             </div>
-          ))
-        )}
-      </div>
-    </SideSheet>
+          ))}
+        </Stack>
+      )}
+    </Drawer>
   );
 };
 
