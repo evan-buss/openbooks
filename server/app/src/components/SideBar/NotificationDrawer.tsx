@@ -101,15 +101,21 @@ const NotificationDrawer = () => {
         <Stack spacing="xs">
           {notifications.map((notif) => (
             <div key={notif.timestamp}>
-              <Text
-                color="dimmed"
-                size="xs"
-                weight={500}
-                style={{ marginBottom: "0.25rem" }}>
-                {new Date(notif.timestamp).toLocaleTimeString("en-US", {
-                  timeStyle: "short"
-                })}
-              </Text>
+              <Tooltip
+                position="left"
+                label={new Date(notif.timestamp).toLocaleTimeString("en-US", {
+                  timeStyle: "medium"
+                })}>
+                <Text
+                  color="dimmed"
+                  size="xs"
+                  weight={500}
+                  style={{ marginBottom: "0.25rem" }}>
+                  {new Date(notif.timestamp).toLocaleTimeString("en-US", {
+                    timeStyle: "short"
+                  })}
+                </Text>
+              </Tooltip>
               <Alert
                 {...getMIntent(notif.appearance)}
                 title={notif.title}

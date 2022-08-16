@@ -1,6 +1,11 @@
-import { Button, majorScale, Pane, SearchInput, Text } from "evergreen-ui";
-import { Warning } from "phosphor-react";
-import React, { FormEvent, useEffect, useState } from "react";
+import {
+  Button as MButton,
+  TextInput,
+  useMantineColorScheme
+} from "@mantine/core";
+import { Button, majorScale, Pane, Text } from "evergreen-ui";
+import { MagnifyingGlass, Warning } from "phosphor-react";
+import { FormEvent, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import image from "../assets/reading.svg";
 import { BooksGrid } from "../components/BooksGrid/BooksGrid";
@@ -68,6 +73,8 @@ export default function SearchPage() {
     }
   };
 
+  const { colorScheme } = useMantineColorScheme();
+
   return (
     <Pane
       margin={majorScale(4)}
@@ -85,27 +92,30 @@ export default function SearchPage() {
           marginBottom: majorScale(4)
         }}
         onSubmit={(e) => searchHandler(e)}>
-        <SearchInput
+        <TextInput
+          sx={(theme) => ({ width: "100%", marginRight: theme.spacing.xl })}
           disabled={activeItem !== null && !activeItem.results}
           value={searchQuery}
           onChange={(e: any) => setSearchQuery(e.target.value)}
           placeholder={
             errorMode() ? "Download a book manually." : "Search for a book."
           }
-          height={majorScale(5)}
-          className="rounded-md"
-          marginRight={majorScale(4)}
-          width="100%"
+          radius="md"
+          size="md"
+          type="search"
+          icon={<MagnifyingGlass weight="bold" size={22} />}
+          required
         />
-        <Button
+
+        <MButton
           type="submit"
-          className="rounded-md"
-          width={majorScale(16)}
-          height={majorScale(5)}
-          appearance="primary"
-          disabled={!validInput()}>
+          color={colorScheme === "dark" ? "brand.2" : "brand"}
+          disabled={!validInput()}
+          size="md"
+          radius="md"
+          variant="outline">
           {errorMode() ? "Download" : "Search"}
-        </Button>
+        </MButton>
       </form>
       {hasErrors() && (
         <Button
@@ -118,6 +128,21 @@ export default function SearchPage() {
           {activeItem?.errors?.length} Parsing{" "}
           {activeItem?.errors?.length === 1 ? "Error" : "Errors"}
         </Button>
+
+        // <MButton
+        //   sx={(theme) => ({
+        //     alignSelf: "start",
+        //     marginBottom: theme.spacing.xs,
+        //     fontWeight: "normal"
+        //   })}
+        //   color="dark"
+        //   variant={errorMode() ? "filled" : "subtle"}
+        //   onClick={() => setShowErrors((show) => !show)}
+        //   leftIcon={<Warning size={18} />}
+        //   size="xs">
+        //   {activeItem?.errors?.length} Parsing{" "}
+        //   {activeItem?.errors?.length === 1 ? "Error" : "Errors"}
+        // </MButton>
       )}
       {renderBody()}
     </Pane>
