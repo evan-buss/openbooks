@@ -28,12 +28,13 @@ const stringContains = (first: string, second: string): boolean => {
 
 const useStyles = createStyles((theme) => {
   const border = `1px solid ${
-    theme.colorScheme === "dark" ? theme.colors.dark[3] : theme.colors.gray[3]
+    theme.colorScheme === "dark" ? theme.colors.dark[4] : theme.colors.gray[3]
   }`;
 
   return {
     header: {
-      padding: 8
+      padding: 6,
+      textTransform: "none"
     },
     search: {
       borderTop: border,
@@ -45,7 +46,8 @@ const useStyles = createStyles((theme) => {
     },
     container: {
       maxHeight: 200,
-      overflow: "auto"
+      overflow: "auto",
+      textTransform: "none"
     },
     entry: {
       ...theme.fn.focusStyles(),
@@ -63,6 +65,12 @@ const useStyles = createStyles((theme) => {
             ? theme.colors.dark[7]
             : theme.colors.gray[0]
       }
+    },
+    entrySelected: {
+      backgroundColor:
+        theme.colorScheme === "dark"
+          ? theme.colors.dark[7]
+          : theme.colors.gray[0]
     },
     indicator: {
       width: 2,
@@ -85,7 +93,7 @@ export default function FacetFilter({
   table
 }: FacetFilterProps) {
   const [filter, setFilter] = useState("");
-  const { classes } = useStyles();
+  const { classes, theme } = useStyles();
   const { data: onlineServers, refetch } = useGetServersQuery(null);
 
   const facets = Array.from(column.getFacetedUniqueValues().keys());
@@ -115,8 +123,8 @@ export default function FacetFilter({
           variant="subtle"
           size="xs"
           compact
-          color="dark.4"
           uppercase
+          color={theme.colorScheme === "dark" ? "dark.3" : "dark.1"}
           onClick={() => setOpened((o) => !o)}
           rightIcon={<CaretDown weight="bold" />}>
           {placeholder}
@@ -124,7 +132,7 @@ export default function FacetFilter({
       </Popover.Target>
       <Popover.Dropdown>
         <Group position="apart" className={classes.header}>
-          <Text weight="normal" size="xs">
+          <Text weight="normal" size="xs" color="dark">
             Filter {placeholder}
           </Text>
           <CloseButton
@@ -143,6 +151,19 @@ export default function FacetFilter({
           size="xs"
           onChange={(e) => setFilter(e.currentTarget.value)}
           placeholder="Filter..."
+          rightSection={
+            column.getIsFiltered() && (
+              <Button
+                style={{ marginRight: 25, fontWeight: "normal" }}
+                size="xs"
+                compact
+                variant="subtle"
+                color="brand"
+                onClick={() => column.setFilterValue(null)}>
+                Reset
+              </Button>
+            )
+          }
         />
 
         <div ref={listRef} className={classes.container} data-autofocus>
@@ -195,12 +216,12 @@ function FacetEntry({ entry, onClick, selected, style }: FacetEntryProps) {
   return (
     <Box
       tabIndex={0}
-      className={classes.entry}
+      className={cx(classes.entry, {[classes.entrySelected]: selected})}
       style={style}
       onClick={() => onClick(entry)}>
       <div className={cx({ [classes.indicator]: selected })}></div>
 
-      <Text size={12} weight="normal" style={{ marginLeft: 20 }}>
+      <Text size={12} weight="normal" color="dark" style={{ marginLeft: 20 }}>
         <Indicator position="middle-start" offset={-16} size={6} color="green">
           {entry}
         </Indicator>

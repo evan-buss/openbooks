@@ -34,6 +34,7 @@ export default function App() {
         withNormalizeCSS
         theme={{
           colorScheme,
+          activeStyles: { transform: "none" },
           primaryColor: "brand",
           primaryShade: { light: 4, dark: 2 },
           colors: {
@@ -51,7 +52,7 @@ export default function App() {
             ]
           }
         }}>
-        <NotificationsProvider position="bottom-right">
+        <NotificationsProvider position="top-center">
           <AppShell
             navbar={<SidebarNeo />}
             padding={0}
@@ -64,7 +65,6 @@ export default function App() {
               }
             })}>
             <div className="flex flex-row max-h-screen min-h-screen flex-nowrap">
-              {/* <Sidebar /> */}
               <MediaQuery largerThan="sm" styles={{ display: "none" }}>
                 <Burger opened={false} size="sm" mr="xl" />
               </MediaQuery>

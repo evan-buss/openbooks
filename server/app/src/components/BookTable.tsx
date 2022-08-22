@@ -1,4 +1,4 @@
-import { Box, Button, createStyles, Table, Text } from "@mantine/core";
+import { Box, Button, createStyles, Loader, Table, Text } from "@mantine/core";
 import { useElementSize, useMergedRef } from "@mantine/hooks";
 import {
   createColumnHelper,
@@ -12,8 +12,11 @@ import {
 } from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { MagnifyingGlass, User } from "phosphor-react";
-import { useMemo, useRef } from "react";
+import { useMemo, useRef, useState } from "react";
+import { useSelector } from "react-redux";
 import { BookDetail } from "../state/messages";
+import { sendDownload } from "../state/stateSlice";
+import { RootState, useAppDispatch } from "../state/store";
 import FacetFilter from "./FacetFilter";
 import { TextFilter } from "./TextFilter";
 
@@ -139,14 +142,8 @@ export default function BookTable({ books: data }: Props) {
         header: "Download",
         size: cols(1),
         enableColumnFilter: false,
-        cell: (props) => (
-          <Button
-            compact
-            size="xs"
-            radius="xs"
-            sx={{ fontWeight: "normal", width: 100 }}>
-            Download
-          </Button>
+        cell: ({ row }) => (
+          <DownloadButton book={row.original.full}></DownloadButton>
         )
       })
     ];
@@ -184,7 +181,7 @@ export default function BookTable({ books: data }: Props) {
 
   return (
     <Box ref={mergedRef} className={classes.container}>
-      <Table highlightOnHover verticalSpacing="xs" fontSize="xs">
+      <Table highlightOnHover verticalSpacing="sm" fontSize="xs">
         <thead className={classes.head}>
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>
@@ -192,7 +189,10 @@ export default function BookTable({ books: data }: Props) {
                 <th
                   key={header.id}
                   style={{
-                    color: theme.colors.dark[4],
+                    color:
+                      theme.colorScheme === "dark"
+                        ? theme.colors.dark[3]
+                        : theme.colors.dark[1],
                     width: header.getSize(),
                     position: "relative",
                     textTransform: "uppercase"
@@ -248,5 +248,36 @@ export default function BookTable({ books: data }: Props) {
         </tbody>
       </Table>
     </Box>
+  );
+}
+
+function DownloadButton({ book }: { book: string }) {
+  const dispatch = useAppDispatch();
+
+  const [clicked, setClicked] = useState(false);
+  const isInFlight = useSelector((state: RootState) =>
+    state.state.inFlightDownloads.includes(book)
+  );
+
+  // Prevent hitting the same button multiple times
+  const onClick = () => {
+    if (clicked) return;
+    dispatch(sendDownload(book));
+    setClicked(true);
+  };
+
+  return (
+    <Button
+      compact
+      size="xs"
+      radius="sm"
+      onClick={onClick}
+      sx={{ fontWeight: "normal", width: 100 }}>
+      {isInFlight ? (
+        <Loader variant="dots" color="gray" />
+      ) : (
+        <span>Download</span>
+      )}
+    </Button>
   );
 }

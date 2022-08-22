@@ -13,8 +13,12 @@ import {
   useMantineColorScheme
 } from "@mantine/core";
 import { useLocalStorage } from "@mantine/hooks";
-import { IconMoonStars, IconSun } from "@tabler/icons";
-import { BellSimple, IdentificationBadge } from "phosphor-react";
+import {
+  BellSimple,
+  IdentificationBadge,
+  MoonStars,
+  Sun
+} from "phosphor-react";
 import { useState } from "react";
 import { useSelector } from "react-redux";
 import { toggleDrawer } from "../../state/notificationSlice";
@@ -157,9 +161,9 @@ export default function SidebarNeo() {
             size="lg"
             color="brand">
             {colorScheme === "dark" ? (
-              <IconSun size={18} />
+              <Sun size={18} weight="bold" />
             ) : (
-              <IconMoonStars size={18} />
+              <MoonStars size={18} weight="bold" />
             )}
           </ActionIcon>
         </Group>

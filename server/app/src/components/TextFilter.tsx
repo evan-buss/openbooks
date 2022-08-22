@@ -20,7 +20,7 @@ export function TextFilter({
   const [filterValue, setFilterValue] = useState(
     column.getFilterValue() as string
   );
-  const [debounced] = useDebouncedValue(filterValue, 500);
+  const [debounced] = useDebouncedValue(filterValue, 200);
 
   useEffect(() => {
     column.setFilterValue(debounced);
@@ -30,11 +30,22 @@ export function TextFilter({
     <TextInput
       icon={icon}
       size="xs"
+      styles={(theme) => ({
+        input: {
+          color:
+            theme.colorScheme === "dark"
+              ? theme.colors.dark[3]
+              : theme.colors.dark[1]
+        }
+      })}
       sx={(theme) => ({
         ["& input::placeholder"]: {
-          color: theme.colors.dark[4],
           fontWeight: "bold",
-          textTransform: "uppercase"
+          textTransform: "uppercase",
+          color:
+            theme.colorScheme === "dark"
+              ? theme.colors.dark[3]
+              : theme.colors.dark[1]
         }
       })}
       placeholder={placeholder}
