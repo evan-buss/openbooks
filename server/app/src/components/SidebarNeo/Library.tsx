@@ -47,7 +47,7 @@ export default function Library() {
   }
 
   return (
-    <Stack spacing="xs" sx={{ width: "278px" }}>
+    <Stack spacing="xs">
       {new Array(20).fill(data![0])?.map((book) => (
         <Menu shadow="md" width={200}>
           <Menu.Target>
