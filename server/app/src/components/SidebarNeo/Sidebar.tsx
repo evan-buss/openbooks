@@ -12,11 +12,11 @@ import {
   Transition,
   useMantineColorScheme
 } from "@mantine/core";
+import { useLocalStorage } from "@mantine/hooks";
 import { IconMoonStars, IconSun } from "@tabler/icons";
 import { BellSimple, IdentificationBadge } from "phosphor-react";
 import { useState } from "react";
 import { useSelector } from "react-redux";
-import { useLocalStorage } from "react-use";
 import { toggleDrawer } from "../../state/notificationSlice";
 import { RootState, useAppDispatch } from "../../state/store";
 import SearchHistoryNeo from "./History";
@@ -43,10 +43,10 @@ export default function SidebarNeo() {
   const { classes } = useStyles();
   const [opened, setOpened] = useState(true);
   const username = useSelector((store: RootState) => store.state.username);
-  const [index, setIndex] = useLocalStorage<"books" | "history">(
-    "newIndex",
-    "history"
-  );
+  const [index, setIndex] = useLocalStorage<"books" | "history">({
+    key: "sidebar-state",
+    defaultValue: "history"
+  });
 
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
   const connected = useSelector((store: RootState) => store.state.isConnected);

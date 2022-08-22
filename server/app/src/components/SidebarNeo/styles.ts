@@ -10,7 +10,7 @@ export const useSidebarButtonStyle = createStyles(
 
     return {
       root: {
-        "backgroundColor": isDark ? theme.colors.dark[4] : "white",
+        "backgroundColor": isDark ? theme.colors.dark[6] : "white",
         "borderColor": isActive
           ? theme.fn.primaryColor()
           : isDark

@@ -1,46 +1,28 @@
-import { Box, Button, createStyles, Table } from "@mantine/core";
+import { Box, Button, createStyles, Table, Text } from "@mantine/core";
+import { useElementSize, useMergedRef } from "@mantine/hooks";
 import {
   createColumnHelper,
   flexRender,
   getCoreRowModel,
+  getFacetedRowModel,
+  getFacetedUniqueValues,
+  getFilteredRowModel,
   Row,
   useReactTable
 } from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { useRef } from "react";
+import { MagnifyingGlass, User } from "phosphor-react";
+import { useMemo, useRef } from "react";
 import { BookDetail } from "../state/messages";
-import "./BookTable.css";
+import FacetFilter from "./FacetFilter";
+import { TextFilter } from "./TextFilter";
 
 export interface Props {
   books: BookDetail[];
 }
 const columnHelper = createColumnHelper<BookDetail>();
 
-const columns = [
-  columnHelper.accessor("server", {
-    header: "Server",
-    minSize: 50,
-    size: 50
-  }),
-  columnHelper.accessor("author", {
-    header: "Author"
-  }),
-  columnHelper.accessor("title", {
-    header: "Title"
-  }),
-  columnHelper.accessor("format", {
-    header: "Format"
-  }),
-  columnHelper.accessor("size", {
-    header: "Size"
-  }),
-  columnHelper.display({
-    header: "Download",
-    cell: (props) => <Button>Download</Button>
-  })
-];
-
-const useStyles = createStyles((theme) => ({
+const useTableStyles = createStyles((theme) => ({
   container: {
     border: `1px solid ${
       theme.colorScheme === "dark" ? theme.colors.dark[3] : theme.colors.gray[3]
@@ -52,7 +34,6 @@ const useStyles = createStyles((theme) => ({
     overflow: "auto",
     width: "100%"
   },
-  table: {},
   head: {
     position: "sticky",
     top: 0,
@@ -90,65 +71,136 @@ const useStyles = createStyles((theme) => ({
     ["&:hover"]: {
       opacity: 1
     }
-  },
-  th: {
-    position: "relative"
-  },
-  row: {}
+  }
 }));
 
 export default function BookTable({ books: data }: Props) {
-  const { classes, cx } = useStyles();
+  const { classes, cx, theme } = useTableStyles();
 
-  const tableContainerRef = useRef<HTMLDivElement>(null);
-  const rowVirtualizer = useVirtualizer({
-    count: data.length,
-    getScrollElement: () => tableContainerRef.current,
-    estimateSize: () => 57,
-    overscan: 10
-  });
+  const { ref: elementSizeRef, height, width } = useElementSize();
+  const virtualizerRef = useRef();
+  const mergedRef = useMergedRef(elementSizeRef, virtualizerRef);
 
-  const paddingTop =
-    rowVirtualizer.getVirtualItems().length > 0
-      ? rowVirtualizer.getVirtualItems()?.[0]?.start || 0
-      : 0;
-  const paddingBottom =
-    rowVirtualizer.getVirtualItems().length > 0
-      ? rowVirtualizer.getTotalSize() -
-        (rowVirtualizer.getVirtualItems()?.[
-          rowVirtualizer.getVirtualItems().length - 1
-        ]?.end || 0)
-      : 0;
+  const columns = useMemo(() => {
+    const cols = (cols: number) => (width / 12) * cols;
+    return [
+      columnHelper.accessor("server", {
+        header: (props) => (
+          <FacetFilter
+            placeholder="Server"
+            column={props.column}
+            table={props.table}></FacetFilter>
+        ),
+        size: cols(1),
+        enableColumnFilter: true,
+        filterFn: "includesString"
+      }),
+      columnHelper.accessor("author", {
+        header: (props) => (
+          <TextFilter
+            icon={<User />}
+            placeholder="Author"
+            column={props.column}
+            table={props.table}
+          />
+        ),
+        size: cols(2),
+        enableColumnFilter: false
+      }),
+      columnHelper.accessor("title", {
+        header: (props) => (
+          <TextFilter
+            icon={<MagnifyingGlass />}
+            placeholder="Title"
+            column={props.column}
+            table={props.table}
+          />
+        ),
+        minSize: 20,
+        size: cols(6),
+        enableColumnFilter: false
+      }),
+      columnHelper.accessor("format", {
+        header: (props) => (
+          <FacetFilter
+            placeholder="Format"
+            column={props.column}
+            table={props.table}></FacetFilter>
+        ),
+        size: cols(1),
+        enableColumnFilter: false
+      }),
+      columnHelper.accessor("size", {
+        header: "Size",
+        size: cols(1),
+        enableColumnFilter: false
+      }),
+      columnHelper.display({
+        header: "Download",
+        size: cols(1),
+        enableColumnFilter: false,
+        cell: (props) => (
+          <Button
+            compact
+            size="xs"
+            radius="xs"
+            sx={{ fontWeight: "normal", width: 100 }}>
+            Download
+          </Button>
+        )
+      })
+    ];
+  }, [width]);
 
   const table = useReactTable({
     data,
     columns: columns,
+    enableFilters: true,
     columnResizeMode: "onChange",
-    getCoreRowModel: getCoreRowModel()
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getFacetedRowModel: getFacetedRowModel(),
+    getFacetedUniqueValues: getFacetedUniqueValues()
   });
 
   const { rows: tableRows } = table.getRowModel();
 
+  const rowVirtualizer = useVirtualizer({
+    count: tableRows.length,
+    getScrollElement: () => virtualizerRef.current,
+    estimateSize: () => 43,
+    overscan: 10
+  });
+
+  const virtualItems = rowVirtualizer.getVirtualItems();
+
+  const paddingTop =
+    virtualItems.length > 0 ? virtualItems?.[0]?.start || 0 : 0;
+  const paddingBottom =
+    virtualItems.length > 0
+      ? rowVirtualizer.getTotalSize() -
+        (virtualItems?.[virtualItems.length - 1]?.end || 0)
+      : 0;
+
   return (
-    <Box ref={tableContainerRef} className={classes.container}>
-      <Table highlightOnHover verticalSpacing="xs">
+    <Box ref={mergedRef} className={classes.container}>
+      <Table highlightOnHover verticalSpacing="xs" fontSize="xs">
         <thead className={classes.head}>
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
                 <th
-                  className={classes.th}
                   key={header.id}
                   style={{
-                    width: header.getSize()
+                    color: theme.colors.dark[4],
+                    width: header.getSize(),
+                    position: "relative",
+                    textTransform: "uppercase"
                   }}>
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
-
+                  {flexRender(
+                    header.column.columnDef.header,
+                    header.getContext()
+                  )}
                   <div
                     onMouseDown={header.getResizeHandler()}
                     onTouchStart={header.getResizeHandler()}
@@ -161,7 +213,7 @@ export default function BookTable({ books: data }: Props) {
             </tr>
           ))}
         </thead>
-        <tbody style={{ height: "100px", maxHeight: "100px" }}>
+        <tbody>
           {paddingTop > 0 && (
             <tr>
               <td style={{ height: `${paddingTop}px` }} />
@@ -172,14 +224,16 @@ export default function BookTable({ books: data }: Props) {
               virtualRow.index
             ] as unknown as Row<BookDetail>;
             return (
-              <tr key={row.id} className={classes.row}>
+              <tr key={row.id}>
                 {row.getVisibleCells().map((cell) => {
                   return (
                     <td key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
+                      <Text lineClamp={1} color="dark">
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </Text>
                     </td>
                   );
                 })}

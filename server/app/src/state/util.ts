@@ -1,3 +1,4 @@
+import { showNotification } from "@mantine/notifications";
 import { toaster } from "evergreen-ui";
 import { Notification, NotificationType } from "./messages";
 
@@ -25,7 +26,7 @@ export const getApiURL = (): URL => {
   return apiURL;
 };
 
-export const displayNotification = ({
+export const displayNotificationEveregreen = ({
   appearance = NotificationType.NOTIFY,
   title,
   detail
@@ -49,6 +50,44 @@ export const displayNotification = ({
     case NotificationType.DANGER:
       toaster.danger(title, {
         description: detail
+      });
+      break;
+  }
+};
+
+export const displayNotification = ({
+  appearance = NotificationType.NOTIFY,
+  title,
+  detail
+}: Notification) => {
+  switch (appearance) {
+    case NotificationType.NOTIFY:
+      showNotification({
+        color: "brand",
+        title: title,
+        message: detail
+      });
+      break;
+    case NotificationType.SUCCESS:
+      showNotification({
+        color: "green",
+        title: title,
+        message: detail
+      });
+
+      break;
+    case NotificationType.WARNING:
+      showNotification({
+        color: "yellow",
+        title: title,
+        message: detail
+      });
+      break;
+    case NotificationType.DANGER:
+      showNotification({
+        color: "red",
+        title: title,
+        message: detail
       });
       break;
   }
