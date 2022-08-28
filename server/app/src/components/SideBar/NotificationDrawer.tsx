@@ -1,22 +1,16 @@
 import {
   ActionIcon,
-  Alert,
   Center,
   Drawer,
   Group,
+  Notification,
   Stack,
   Text,
   Tooltip,
   useMantineColorScheme
 } from "@mantine/core";
-import {
-  BellSimpleSlash,
-  CheckCircle,
-  Info,
-  Warning,
-  WarningCircle
-} from "phosphor-react";
-import { ReactNode } from "react";
+import { AnimatePresence } from "framer-motion";
+import { BellSimpleSlash } from "phosphor-react";
 import { useSelector } from "react-redux";
 import { NotificationType } from "../../state/messages";
 import {
@@ -25,8 +19,9 @@ import {
   toggleDrawer
 } from "../../state/notificationSlice";
 import { RootState, useAppDispatch } from "../../state/store";
+import AnimatedElement from "../AnimatedElement";
 
-const NotificationDrawer = () => {
+export default function NotificationDrawer() {
   const { isOpen, notifications } = useSelector(
     (store: RootState) => store.notifications
   );
@@ -34,30 +29,16 @@ const NotificationDrawer = () => {
 
   const { colorScheme } = useMantineColorScheme();
 
-  const getMIntent = (
-    type: NotificationType
-  ): { icon: ReactNode; color: string } => {
+  const getIntent = (type: NotificationType): string => {
     switch (type) {
       case NotificationType.NOTIFY:
-        return {
-          icon: <Info weight="fill" size={20} />,
-          color: colorScheme === "dark" ? "brand.2" : "brand"
-        };
+        return colorScheme === "dark" ? "brand.2" : "brand";
       case NotificationType.DANGER:
-        return {
-          icon: <WarningCircle weight="fill" size={20} />,
-          color: "red"
-        };
+        return "red";
       case NotificationType.SUCCESS:
-        return {
-          icon: <CheckCircle weight="fill" size={20} />,
-          color: "green"
-        };
+        return "green";
       case NotificationType.WARNING:
-        return {
-          icon: <Warning weight="fill" size={20} />,
-          color: "yellow"
-        };
+        return "yellow";
     }
   };
 
@@ -99,38 +80,40 @@ const NotificationDrawer = () => {
         </Center>
       ) : (
         <Stack spacing="xs">
-          {notifications.map((notif) => (
-            <div key={notif.timestamp}>
-              <Tooltip
-                position="left"
-                label={new Date(notif.timestamp).toLocaleTimeString("en-US", {
-                  timeStyle: "medium"
-                })}>
-                <Text
-                  color="dimmed"
-                  size="xs"
-                  weight={500}
-                  style={{ marginBottom: "0.25rem" }}>
-                  {new Date(notif.timestamp).toLocaleTimeString("en-US", {
-                    timeStyle: "short"
-                  })}
-                </Text>
-              </Tooltip>
-              <Alert
-                {...getMIntent(notif.appearance)}
-                title={notif.title}
-                variant="outline"
-                radius="md"
-                withCloseButton
-                onClose={() => dispatch(dismissNotification(notif))}>
-                {notif.detail}
-              </Alert>
-            </div>
-          ))}
+          <AnimatePresence mode="popLayout">
+            {notifications.map((notif) => (
+              <AnimatedElement key={notif.timestamp}>
+                <Tooltip
+                  position="left"
+                  label={new Date(notif.timestamp).toLocaleTimeString("en-US", {
+                    timeStyle: "medium"
+                  })}>
+                  <Text
+                    color="dimmed"
+                    size="xs"
+                    weight={500}
+                    style={{ marginBottom: "0.25rem" }}>
+                    {new Date(notif.timestamp).toLocaleTimeString("en-US", {
+                      timeStyle: "short"
+                    })}
+                  </Text>
+                </Tooltip>
+                <Notification
+                  color={getIntent(notif.appearance)}
+                  styles={{
+                    root: {
+                      boxShadow: "none"
+                    }
+                  }}
+                  title={notif.title}
+                  onClose={() => dispatch(dismissNotification(notif))}>
+                  {notif.detail}
+                </Notification>
+              </AnimatedElement>
+            ))}
+          </AnimatePresence>
         </Stack>
       )}
     </Drawer>
   );
-};
-
-export default NotificationDrawer;
+}

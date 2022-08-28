@@ -3,19 +3,20 @@ import {
   Dispatch,
   Middleware,
   MiddlewareAPI,
-  PayloadAction,
-  Store
+  PayloadAction
 } from "@reduxjs/toolkit";
+import { openbooksApi } from "./api";
+import { deleteHistoryItem } from "./historySlice";
 import {
-  Response,
-  Notification,
-  MessageType,
-  NotificationType,
-  SearchResponse,
   ConnectionResponse,
-  DownloadResponse
+  DownloadResponse,
+  MessageType,
+  Notification,
+  NotificationType,
+  Response,
+  SearchResponse
 } from "./messages";
-import { displayNotification, downloadFile } from "./util";
+import { addNotification } from "./notificationSlice";
 import {
   removeInFlightDownload,
   sendMessage,
@@ -23,10 +24,8 @@ import {
   setSearchResults,
   setUsername
 } from "./stateSlice";
-import { addNotification } from "./notificationSlice";
-import { openbooksApi } from "./api";
-import { deleteHistoryItem } from "./historySlice";
 import { AppDispatch, RootState } from "./store";
+import { displayNotification, downloadFile } from "./util";
 
 // Web socket redux middleware.
 // Listens to socket and dispatches handlers.
@@ -39,7 +38,12 @@ export const websocketConn =
     socket.onopen = () => onOpen(dispatch);
     socket.onclose = () => onClose(dispatch);
     socket.onmessage = (message) => route(dispatch, message);
-    socket.onerror = (event) => console.error(event);
+    socket.onerror = (event) =>
+      displayNotification({
+        appearance: NotificationType.DANGER,
+        title: "Unable to connect to websocket.",
+        timestamp: new Date().getTime()
+      });
 
     return (next: Dispatch<AnyAction>) => (action: PayloadAction<any>) => {
       // Send Message action? Send data to the socket.

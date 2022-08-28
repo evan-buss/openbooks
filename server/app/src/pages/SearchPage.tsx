@@ -9,11 +9,13 @@ import {
   TextInput
 } from "@mantine/core";
 import { MagnifyingGlass, Warning } from "phosphor-react";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import image from "../assets/reading.svg";
-import BookTable from "../components/BookTable";
+import { BooksGrid } from "../components/BooksGrid/BooksGrid";
 import ErrorsGrid from "../components/ErrorsGrid/ErrorsGrid";
+import BookTable from "../components/Tables/BookTable";
+import ErrorTable from "../components/Tables/ErrorTable";
 import { MessageType } from "../state/messages";
 import { sendMessage, sendSearch } from "../state/stateSlice";
 import { RootState, useAppDispatch } from "../state/store";
@@ -55,7 +57,7 @@ const useStyles = createStyles(
   })
 );
 
-export default function SearchPage() {
+export default function SearchPage({ legacy }: { legacy?: boolean }) {
   const dispatch = useAppDispatch();
   const activeItem = useSelector((store: RootState) => store.state.activeItem);
   const [searchQuery, setSearchQuery] = useState("");
@@ -90,6 +92,21 @@ export default function SearchPage() {
     setSearchQuery("");
   };
 
+  const bookTable = useMemo(
+    () => <BookTable books={activeItem?.results ?? []} />,
+    [activeItem?.results]
+  );
+
+  const errorTable = useMemo(
+    () => (
+      <ErrorTable
+        errors={activeItem?.errors ?? []}
+        setSearchQuery={setSearchQuery}
+      />
+    ),
+    [activeItem?.errors]
+  );
+
   const renderBody = () => {
     if (activeItem === null) {
       return (
@@ -103,12 +120,19 @@ export default function SearchPage() {
         </Center>
       );
     }
-    // <BooksGrid books={activeItem?.results} />
-    return errorMode ? (
-      <ErrorsGrid errors={activeItem?.errors} setSearchQuery={setSearchQuery} />
-    ) : (
-      <BookTable books={activeItem?.results ?? []} />
-    );
+
+    if (legacy) {
+      return errorMode ? (
+        <ErrorsGrid
+          errors={activeItem?.errors ?? []}
+          setSearchQuery={setSearchQuery}
+        />
+      ) : (
+        <BooksGrid books={activeItem?.results ?? []} />
+      );
+    }
+
+    return errorMode ? errorTable : bookTable;
   };
 
   return (

@@ -9,6 +9,7 @@ import {
 } from "@mantine/core";
 import { useLocalStorage } from "@mantine/hooks";
 import { NotificationsProvider } from "@mantine/notifications";
+import { Route, Routes } from "react-router-dom";
 import NotificationDrawer from "./components/SideBar/NotificationDrawer";
 import SidebarNeo from "./components/SidebarNeo/Sidebar";
 import SearchPage from "./pages/SearchPage";
@@ -68,7 +69,10 @@ export default function App() {
               <MediaQuery largerThan="sm" styles={{ display: "none" }}>
                 <Burger opened={false} size="sm" mr="xl" />
               </MediaQuery>
-              <SearchPage />
+              <Routes>
+                <Route path="/" element={<SearchPage />} />
+                <Route path="legacy" element={<SearchPage legacy />} />
+              </Routes>
               <NotificationDrawer />
             </div>
           </AppShell>

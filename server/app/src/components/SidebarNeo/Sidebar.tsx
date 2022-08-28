@@ -17,6 +17,7 @@ import {
   BellSimple,
   IdentificationBadge,
   MoonStars,
+  Plugs,
   Sun
 } from "phosphor-react";
 import { useState } from "react";
@@ -148,14 +149,18 @@ export default function SidebarNeo() {
       <Navbar.Section className={classes.footer} p="sm">
         <Group position="apart">
           <Group>
-            {username && (
+            {username ? (
               <>
                 <IdentificationBadge size={24} />
                 <Text size="sm">{username}</Text>
               </>
+            ) : (
+              <>
+                <Plugs size={24} />
+                <Text size="sm">Not connected.</Text>
+              </>
             )}
           </Group>
-
           <ActionIcon
             onClick={() => toggleColorScheme()}
             size="lg"

@@ -13,14 +13,7 @@ import { Column, Table } from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { CaretDown, MagnifyingGlass } from "phosphor-react";
 import { CSSProperties, useRef, useState } from "react";
-import { useGetServersQuery } from "../state/api";
-import { BookDetail } from "../state/messages";
-
-interface FacetFilterProps {
-  placeholder: string;
-  column: Column<BookDetail, string>;
-  table: Table<BookDetail>;
-}
+import { useGetServersQuery } from "../../../state/api";
 
 const stringContains = (first: string, second: string): boolean => {
   return first.toLowerCase().includes(second.toLowerCase());
@@ -49,64 +42,60 @@ const useStyles = createStyles((theme) => {
       overflow: "auto",
       textTransform: "none"
     },
-    entry: {
-      ...theme.fn.focusStyles(),
-      height: 30,
-      position: "relative",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "start",
-      padding: "0 8px",
-      cursor: "pointer",
-      borderBottom: border,
-      ["&:hover, &:focus"]: {
+    button: {
+      color:
+        theme.colorScheme === "dark"
+          ? theme.colors.dark[0]
+          : theme.colors.gray[7],
+      ["&:hover"]: {
         backgroundColor:
           theme.colorScheme === "dark"
-            ? theme.colors.dark[7]
+            ? theme.colors.dark[5]
             : theme.colors.gray[0]
       }
-    },
-    entrySelected: {
-      backgroundColor:
-        theme.colorScheme === "dark"
-          ? theme.colors.dark[7]
-          : theme.colors.gray[0]
-    },
-    indicator: {
-      width: 2,
-      height: "100%",
-      position: "absolute",
-      top: 0,
-      left: 0,
-      backgroundColor:
-        theme.colorScheme === "dark"
-          ? theme.colors.brand[3]
-          : theme.colors.brand[4],
-      borderRadius: theme.radius.xl
     }
   };
 });
 
+interface FacetFilterProps {
+  placeholder: string;
+  column: Column<any, string>;
+  table: Table<any>;
+  Entry: React.FC<FacetEntryProps>;
+}
+
 export default function FacetFilter({
   placeholder,
   column,
-  table
+  table,
+  Entry
 }: FacetFilterProps) {
   const [filter, setFilter] = useState("");
-  const { classes, theme } = useStyles();
-  const { data: onlineServers, refetch } = useGetServersQuery(null);
-
-  const facets = Array.from(column.getFacetedUniqueValues().keys());
-  const visible = facets.filter((x) => stringContains(x, filter));
   const [opened, setOpened] = useState(false);
+
+  const options = Array.from(column.getFacetedUniqueValues().keys());
+  const filteredOptions = options.filter((x) => stringContains(x, filter));
+
+  const { classes, theme } = useStyles();
   const listRef = useRef<HTMLDivElement>(null);
 
   const rowVirtualizer = useVirtualizer({
-    count: visible.length,
+    count: filteredOptions.length,
     getScrollElement: () => listRef.current,
     estimateSize: () => 30,
     overscan: 10
   });
+
+  const filterValue = (column.getFilterValue() ?? []) as string[];
+
+  const buttonColor =
+    theme.colorScheme === "dark"
+      ? filterValue.length > 0
+        ? "brand.3"
+        : "dark.3"
+      : filterValue.length > 0
+      ? "brand.4"
+      : "dark.1";
 
   return (
     <Popover
@@ -122,9 +111,10 @@ export default function FacetFilter({
         <Button
           variant="subtle"
           size="xs"
+          className={classes.button}
           compact
           uppercase
-          color={theme.colorScheme === "dark" ? "dark.3" : "dark.1"}
+          color={buttonColor}
           onClick={() => setOpened((o) => !o)}
           rightIcon={<CaretDown weight="bold" />}>
           {placeholder}
@@ -157,9 +147,10 @@ export default function FacetFilter({
                 style={{ marginRight: 25, fontWeight: "normal" }}
                 size="xs"
                 compact
-                variant="subtle"
+                variant="default"
                 color="brand"
-                onClick={() => column.setFilterValue(null)}>
+                disabled={filterValue.length === 0}
+                onClick={() => column.setFilterValue([])}>
                 Reset
               </Button>
             )
@@ -174,10 +165,11 @@ export default function FacetFilter({
               position: "relative"
             }}>
             {rowVirtualizer.getVirtualItems().map((virtualRow) => {
-              const selected =
-                column.getFilterValue() === visible[virtualRow.index];
+              const selected = filterValue.includes(
+                filteredOptions[virtualRow.index]
+              );
               return (
-                <FacetEntry
+                <Entry
                   key={virtualRow.index}
                   style={{
                     position: "absolute",
@@ -187,12 +179,16 @@ export default function FacetFilter({
                     height: virtualRow.size,
                     transform: `translateY(${virtualRow.start}px)`
                   }}
-                  entry={visible[virtualRow.index]}
+                  entry={filteredOptions[virtualRow.index]}
                   selected={selected}
                   onClick={(entry) =>
                     selected
-                      ? column.setFilterValue(null)
-                      : column.setFilterValue(entry)
+                      ? column.setFilterValue(
+                          filterValue.filter(
+                            (x) => x !== filteredOptions[virtualRow.index]
+                          )
+                        )
+                      : column.setFilterValue([...filterValue, entry])
                   }
                 />
               );
@@ -204,27 +200,105 @@ export default function FacetFilter({
   );
 }
 
-interface FacetEntryProps {
+const useFacetStyles = createStyles((theme) => {
+  const border = `1px solid ${
+    theme.colorScheme === "dark" ? theme.colors.dark[4] : theme.colors.gray[3]
+  }`;
+
+  return {
+    entry: {
+      ...theme.fn.focusStyles(),
+      height: 30,
+      position: "relative",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "start",
+      padding: "0 8px",
+      cursor: "pointer",
+      borderBottom: border,
+      userSelect: "none",
+      ["&:hover, &:focus"]: {
+        backgroundColor:
+          theme.colorScheme === "dark"
+            ? theme.colors.dark[7]
+            : theme.colors.gray[0]
+      }
+    },
+    entrySelected: {
+      backgroundColor:
+        theme.colorScheme === "dark"
+          ? theme.colors.dark[7]
+          : theme.colors.gray[0]
+    },
+    indicator: {
+      width: 2,
+      height: "80%",
+      position: "absolute",
+      left: 0,
+      backgroundColor:
+        theme.colorScheme === "dark"
+          ? theme.colors.brand[3]
+          : theme.colors.brand[4],
+      borderRadius: theme.radius.xl
+    }
+  };
+});
+
+export interface FacetEntryProps {
   entry: string;
   selected: boolean;
   onClick: (entry: string) => void;
   style: CSSProperties;
 }
 
-function FacetEntry({ entry, onClick, selected, style }: FacetEntryProps) {
-  const { classes, cx } = useStyles();
+export function ServerFacetEntry({
+  entry,
+  onClick,
+  selected,
+  style
+}: FacetEntryProps) {
+  const { classes, cx } = useFacetStyles();
+  const { data: servers } = useGetServersQuery(null);
+  const serverOnline = servers?.includes(entry) ?? false;
+
   return (
     <Box
       tabIndex={0}
-      className={cx(classes.entry, {[classes.entrySelected]: selected})}
+      className={cx(classes.entry, { [classes.entrySelected]: selected })}
       style={style}
       onClick={() => onClick(entry)}>
       <div className={cx({ [classes.indicator]: selected })}></div>
 
       <Text size={12} weight="normal" color="dark" style={{ marginLeft: 20 }}>
-        <Indicator position="middle-start" offset={-16} size={6} color="green">
+        <Indicator
+          position="middle-start"
+          offset={-16}
+          size={6}
+          color={serverOnline ? "green.6" : "gray"}>
           {entry}
         </Indicator>
+      </Text>
+    </Box>
+  );
+}
+
+export function StandardFacetEntry({
+  entry,
+  onClick,
+  selected,
+  style
+}: FacetEntryProps): JSX.Element {
+  const { classes, cx } = useFacetStyles();
+  return (
+    <Box
+      tabIndex={0}
+      className={cx(classes.entry, { [classes.entrySelected]: selected })}
+      style={style}
+      onClick={() => onClick(entry)}>
+      <div className={cx({ [classes.indicator]: selected })}></div>
+
+      <Text size={12} weight="normal" color="dark">
+        {entry}
       </Text>
     </Box>
   );

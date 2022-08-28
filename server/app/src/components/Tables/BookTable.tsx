@@ -1,7 +1,16 @@
-import { Box, Button, createStyles, Loader, Table, Text } from "@mantine/core";
+import {
+  Button,
+  Indicator,
+  Loader,
+  ScrollArea,
+  Table,
+  Text,
+  Tooltip
+} from "@mantine/core";
 import { useElementSize, useMergedRef } from "@mantine/hooks";
 import {
   createColumnHelper,
+  FilterFn,
   flexRender,
   getCoreRowModel,
   getFacetedRowModel,
@@ -14,71 +23,32 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import { MagnifyingGlass, User } from "phosphor-react";
 import { useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
-import { BookDetail } from "../state/messages";
-import { sendDownload } from "../state/stateSlice";
-import { RootState, useAppDispatch } from "../state/store";
-import FacetFilter from "./FacetFilter";
-import { TextFilter } from "./TextFilter";
+import { useGetServersQuery } from "../../state/api";
+import { BookDetail } from "../../state/messages";
+import { sendDownload } from "../../state/stateSlice";
+import { RootState, useAppDispatch } from "../../state/store";
+import FacetFilter, {
+  ServerFacetEntry,
+  StandardFacetEntry
+} from "./Filters/FacetFilter";
+import { TextFilter } from "./Filters/TextFilter";
+import { useTableStyles } from "./styles";
 
-export interface Props {
-  books: BookDetail[];
-}
 const columnHelper = createColumnHelper<BookDetail>();
 
-const useTableStyles = createStyles((theme) => ({
-  container: {
-    border: `1px solid ${
-      theme.colorScheme === "dark" ? theme.colors.dark[3] : theme.colors.gray[3]
-    }`,
-    borderRadius: theme.radius.md,
-    backgroundColor:
-      theme.colorScheme === "dark" ? theme.colors.dark[6] : "white",
-    height: "100%",
-    overflow: "auto",
-    width: "100%"
-  },
-  head: {
-    position: "sticky",
-    top: 0,
-    backgroundColor:
-      theme.colorScheme === "dark" ? theme.colors.dark[6] : "white",
-    zIndex: 1,
-    // Border bottom doesn't work since the table is border-collapse: collapse.
-    boxShadow: `0px 1px 0px 0px ${
-      theme.colorScheme === "dark" ? theme.colors.dark[3] : theme.colors.gray[3]
-    }`
-  },
-  resizer: {
-    position: "absolute",
-    right: 0,
-    top: 0,
-    height: "100%",
-    width: "2px",
-    background:
-      theme.colorScheme === "dark"
-        ? theme.colors.dark[3]
-        : theme.colors.gray[6],
-    cursor: "col-resize",
-    userSelect: "none",
-    touchAction: "none",
-    opacity: 0,
+const stringInArray: FilterFn<any> = (
+  row,
+  columnId: string,
+  filterValue: string[] | undefined
+) => {
+  if (!filterValue || filterValue.length === 0) return true;
 
-    ["&.isResizing"]: {
-      background:
-        theme.colorScheme === "dark"
-          ? theme.colors.brand[3]
-          : theme.colors.brand[4],
-      opacity: 1
-    },
+  return filterValue.includes(row.getValue<string>(columnId));
+};
 
-    ["&:hover"]: {
-      opacity: 1
-    }
-  }
-}));
-
-export default function BookTable({ books: data }: Props) {
+export default function BookTable({ books }: { books: BookDetail[] }) {
   const { classes, cx, theme } = useTableStyles();
+  const { data: servers } = useGetServersQuery(null);
 
   const { ref: elementSizeRef, height, width } = useElementSize();
   const virtualizerRef = useRef();
@@ -92,16 +62,41 @@ export default function BookTable({ books: data }: Props) {
           <FacetFilter
             placeholder="Server"
             column={props.column}
-            table={props.table}></FacetFilter>
+            table={props.table}
+            Entry={ServerFacetEntry}
+          />
         ),
+        cell: (props) => {
+          const online = servers?.includes(props.getValue());
+          return (
+            <Text
+              size={12}
+              weight="normal"
+              color="dark"
+              style={{ marginLeft: 20 }}>
+              <Tooltip
+                position="top-start"
+                label={online ? "Online" : "Offline"}>
+                <Indicator
+                  zIndex={0}
+                  position="middle-start"
+                  offset={-16}
+                  size={6}
+                  color={online ? "green.6" : "gray"}>
+                  {props.getValue()}
+                </Indicator>
+              </Tooltip>
+            </Text>
+          );
+        },
         size: cols(1),
         enableColumnFilter: true,
-        filterFn: "includesString"
+        filterFn: stringInArray
       }),
       columnHelper.accessor("author", {
         header: (props) => (
           <TextFilter
-            icon={<User />}
+            icon={<User weight="bold" />}
             placeholder="Author"
             column={props.column}
             table={props.table}
@@ -113,7 +108,7 @@ export default function BookTable({ books: data }: Props) {
       columnHelper.accessor("title", {
         header: (props) => (
           <TextFilter
-            icon={<MagnifyingGlass />}
+            icon={<MagnifyingGlass weight="bold" />}
             placeholder="Title"
             column={props.column}
             table={props.table}
@@ -128,10 +123,13 @@ export default function BookTable({ books: data }: Props) {
           <FacetFilter
             placeholder="Format"
             column={props.column}
-            table={props.table}></FacetFilter>
+            table={props.table}
+            Entry={StandardFacetEntry}
+          />
         ),
         size: cols(1),
-        enableColumnFilter: false
+        enableColumnFilter: false,
+        filterFn: stringInArray
       }),
       columnHelper.accessor("size", {
         header: "Size",
@@ -150,7 +148,7 @@ export default function BookTable({ books: data }: Props) {
   }, [width]);
 
   const table = useReactTable({
-    data,
+    data: books,
     columns: columns,
     enableFilters: true,
     columnResizeMode: "onChange",
@@ -165,7 +163,7 @@ export default function BookTable({ books: data }: Props) {
   const rowVirtualizer = useVirtualizer({
     count: tableRows.length,
     getScrollElement: () => virtualizerRef.current,
-    estimateSize: () => 43,
+    estimateSize: () => 50,
     overscan: 10
   });
 
@@ -180,7 +178,13 @@ export default function BookTable({ books: data }: Props) {
       : 0;
 
   return (
-    <Box ref={mergedRef} className={classes.container}>
+    <ScrollArea
+      viewportRef={mergedRef}
+      className={classes.container}
+      type="hover"
+      scrollbarSize={6}
+      styles={{ thumb: { ["&::before"]: { minWidth: 4 } } }}
+      offsetScrollbars={false}>
       <Table highlightOnHover verticalSpacing="sm" fontSize="xs">
         <thead className={classes.head}>
           {table.getHeaderGroups().map((headerGroup) => (
@@ -188,14 +192,9 @@ export default function BookTable({ books: data }: Props) {
               {headerGroup.headers.map((header) => (
                 <th
                   key={header.id}
+                  className={classes.headerCell}
                   style={{
-                    color:
-                      theme.colorScheme === "dark"
-                        ? theme.colors.dark[3]
-                        : theme.colors.dark[1],
-                    width: header.getSize(),
-                    position: "relative",
-                    textTransform: "uppercase"
+                    width: header.getSize()
                   }}>
                   {flexRender(
                     header.column.columnDef.header,
@@ -224,7 +223,7 @@ export default function BookTable({ books: data }: Props) {
               virtualRow.index
             ] as unknown as Row<BookDetail>;
             return (
-              <tr key={row.id}>
+              <tr key={row.id} style={{ height: 50 }}>
                 {row.getVisibleCells().map((cell) => {
                   return (
                     <td key={cell.id}>
@@ -247,7 +246,7 @@ export default function BookTable({ books: data }: Props) {
           )}
         </tbody>
       </Table>
-    </Box>
+    </ScrollArea>
   );
 }
 
