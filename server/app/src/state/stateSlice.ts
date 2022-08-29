@@ -4,12 +4,13 @@ import {
   createSlice,
   PayloadAction
 } from "@reduxjs/toolkit";
-import { MessageType, SearchResponse } from "./messages";
 import { addHistoryItem, HistoryItem, updateHistoryItem } from "./historySlice";
+import { MessageType, SearchResponse } from "./messages";
 import { AppDispatch, RootState } from "./store";
 
 interface AppState {
   isConnected: boolean;
+  isSidebarOpen: boolean;
   activeItem: HistoryItem | null;
   username?: string;
   inFlightDownloads: string[];
@@ -25,6 +26,7 @@ const loadActive = (): HistoryItem | null => {
 
 const initialState: AppState = {
   isConnected: false,
+  isSidebarOpen: true,
   activeItem: loadActive(),
   username: undefined,
   inFlightDownloads: []
@@ -48,6 +50,9 @@ const stateSlice = createSlice({
     },
     removeInFlightDownload(state) {
       state.inFlightDownloads.shift();
+    },
+    toggleSidebar(state) {
+      state.isSidebarOpen = !state.isSidebarOpen;
     }
   }
 });
@@ -115,24 +120,15 @@ const setSearchResults = createAsyncThunk<
   }
 );
 
-const {
+export const {
   setActiveItem,
   setConnectionState,
   setUsername,
   addInFlightDownload,
-  removeInFlightDownload
+  removeInFlightDownload,
+  toggleSidebar
 } = stateSlice.actions;
 
-export {
-  stateSlice,
-  sendMessage,
-  setActiveItem,
-  sendDownload,
-  setConnectionState,
-  sendSearch,
-  setSearchResults,
-  setUsername,
-  removeInFlightDownload
-};
+export { stateSlice, sendMessage, sendDownload, sendSearch, setSearchResults };
 
 export default stateSlice.reducer;

@@ -1,6 +1,6 @@
 module github.com/evan-buss/openbooks
 
-go 1.18
+go 1.19
 
 require (
 	github.com/brianvoe/gofakeit/v5 v5.11.2
