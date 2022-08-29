@@ -88,5 +88,5 @@ that you can visit in your browser.
   - React.js
   - TypeScript
   - Redux / Redux Toolkit
-  - Matine UI / @emotion/react
+  - Mantine UI / @emotion/react
   - Framer Motion
