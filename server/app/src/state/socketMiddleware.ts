@@ -41,7 +41,7 @@ export const websocketConn =
     socket.onerror = (event) =>
       displayNotification({
         appearance: NotificationType.DANGER,
-        title: "Unable to connect to websocket.",
+        title: "Unable to connect to server.",
         timestamp: new Date().getTime()
       });
 

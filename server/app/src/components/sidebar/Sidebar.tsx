@@ -20,11 +20,10 @@ import {
   Plugs,
   Sun
 } from "phosphor-react";
-import { useState } from "react";
-import { useSelector } from "react-redux";
 import { toggleDrawer } from "../../state/notificationSlice";
-import { RootState, useAppDispatch } from "../../state/store";
-import SearchHistoryNeo from "./History";
+import { toggleSidebar } from "../../state/stateSlice";
+import { useAppDispatch, useAppSelector } from "../../state/store";
+import History from "./History";
 import Library from "./Library";
 
 const useStyles = createStyles((theme, _params, getRef) => {
@@ -44,17 +43,17 @@ const useStyles = createStyles((theme, _params, getRef) => {
   };
 });
 
-export default function SidebarNeo() {
+export default function Sidebar() {
   const { classes } = useStyles();
-  const [opened, setOpened] = useState(true);
-  const username = useSelector((store: RootState) => store.state.username);
+  const username = useAppSelector((store) => store.state.username);
+  const opened = useAppSelector((store) => store.state.isSidebarOpen);
   const [index, setIndex] = useLocalStorage<"books" | "history">({
     key: "sidebar-state",
     defaultValue: "history"
   });
 
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
-  const connected = useSelector((store: RootState) => store.state.isConnected);
+  const connected = useAppSelector((store) => store.state.isConnected);
   const dispatch = useAppDispatch();
 
   return (
@@ -68,15 +67,7 @@ export default function SidebarNeo() {
           <Text weight="bold" size="lg">
             OpenBooks
           </Text>
-          <div>
-            <MediaQuery largerThan="sm" styles={{ display: "none" }}>
-              <Burger
-                opened={opened}
-                onClick={() => setOpened((o) => !o)}
-                size="sm"
-                mr="xl"
-              />
-            </MediaQuery>
+          <Group>
             <Tooltip
               label={`OpenBooks server ${
                 connected ? "connected" : "disconnected"
@@ -89,7 +80,14 @@ export default function SidebarNeo() {
                 <BellSimple weight="bold" size={18} />
               </ActionIcon>
             </Tooltip>
-          </div>
+            <MediaQuery largerThan="sm" styles={{ display: "none" }}>
+              <Burger
+                opened={opened}
+                onClick={() => dispatch(toggleSidebar())}
+                size="sm"
+              />
+            </MediaQuery>
+          </Group>
         </Group>
 
         <Text size="sm" color="dimmed">
@@ -106,8 +104,6 @@ export default function SidebarNeo() {
               fontSize: theme.fontSizes.xs
             }
           })}
-          transitionDuration={500}
-          transitionTimingFunction="ease"
           value={index}
           onChange={(value: "books" | "history") => setIndex(value)}
           data={[
@@ -127,7 +123,7 @@ export default function SidebarNeo() {
           timingFunction="ease">
           {(styles) => (
             <div style={styles}>
-              <SearchHistoryNeo />
+              <History />
             </div>
           )}
         </Transition>

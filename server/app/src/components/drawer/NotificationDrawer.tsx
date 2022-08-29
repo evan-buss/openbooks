@@ -9,7 +9,7 @@ import {
   Tooltip,
   useMantineColorScheme
 } from "@mantine/core";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { BellSimpleSlash } from "phosphor-react";
 import { useSelector } from "react-redux";
 import { NotificationType } from "../../state/messages";
@@ -19,7 +19,7 @@ import {
   toggleDrawer
 } from "../../state/notificationSlice";
 import { RootState, useAppDispatch } from "../../state/store";
-import AnimatedElement from "../AnimatedElement";
+import { defaultAnimation } from "../../utils/animation";
 
 export default function NotificationDrawer() {
   const { isOpen, notifications } = useSelector(
@@ -82,7 +82,7 @@ export default function NotificationDrawer() {
         <Stack spacing="xs">
           <AnimatePresence mode="popLayout">
             {notifications.map((notif) => (
-              <AnimatedElement key={notif.timestamp}>
+              <motion.div {...defaultAnimation} key={notif.timestamp}>
                 <Tooltip
                   position="left"
                   label={new Date(notif.timestamp).toLocaleTimeString("en-US", {
@@ -109,7 +109,7 @@ export default function NotificationDrawer() {
                   onClose={() => dispatch(dismissNotification(notif))}>
                   {notif.detail}
                 </Notification>
-              </AnimatedElement>
+              </motion.div>
             ))}
           </AnimatePresence>
         </Stack>

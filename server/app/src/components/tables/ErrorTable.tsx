@@ -17,13 +17,15 @@ import { useTableStyles } from "./styles";
 
 const columnHelper = createColumnHelper<ParseError>();
 
+interface ErrorTableProps {
+  errors: ParseError[];
+  setSearchQuery: (query: string) => void;
+}
+
 export default function ErrorTable({
   errors,
   setSearchQuery
-}: {
-  errors: ParseError[];
-  setSearchQuery: (query: string) => void;
-}) {
+}: ErrorTableProps) {
   const selection = useTextSelection();
   const selectionText = selection?.toString() ?? "";
 
@@ -97,7 +99,7 @@ export default function ErrorTable({
 
   return (
     <>
-      <Text size="sm" color="dimmed" className="w-full" mb={4}>
+      <Text size="sm" color="dimmed" sx={{ width: "100%" }} mb={4}>
         These results could not be parsed to due to their non-standard format.
         To download, copy the line up to the <code>::INFO::</code> or file size
         at the end and paste into the text box above.

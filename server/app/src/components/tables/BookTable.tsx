@@ -46,7 +46,11 @@ const stringInArray: FilterFn<any> = (
   return filterValue.includes(row.getValue<string>(columnId));
 };
 
-export default function BookTable({ books }: { books: BookDetail[] }) {
+interface BookTableProps {
+  books: BookDetail[];
+}
+
+export default function BookTable({ books }: BookTableProps) {
   const { classes, cx, theme } = useTableStyles();
   const { data: servers } = useGetServersQuery(null);
 
@@ -145,7 +149,7 @@ export default function BookTable({ books }: { books: BookDetail[] }) {
         )
       })
     ];
-  }, [width]);
+  }, [width, servers]);
 
   const table = useReactTable({
     data: books,
@@ -271,7 +275,7 @@ function DownloadButton({ book }: { book: string }) {
       size="xs"
       radius="sm"
       onClick={onClick}
-      sx={{ fontWeight: "normal", width: 100 }}>
+      sx={{ fontWeight: "normal", width: 80 }}>
       {isInFlight ? (
         <Loader variant="dots" color="gray" />
       ) : (

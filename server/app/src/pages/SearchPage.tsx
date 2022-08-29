@@ -6,19 +6,17 @@ import {
   Image,
   MediaQuery,
   Stack,
-  TextInput
+  TextInput,
+  Title
 } from "@mantine/core";
 import { MagnifyingGlass, Warning } from "phosphor-react";
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { useSelector } from "react-redux";
 import image from "../assets/reading.svg";
-import { BooksGrid } from "../components/BooksGrid/BooksGrid";
-import ErrorsGrid from "../components/ErrorsGrid/ErrorsGrid";
-import BookTable from "../components/Tables/BookTable";
-import ErrorTable from "../components/Tables/ErrorTable";
+import BookTable from "../components/tables/BookTable";
+import ErrorTable from "../components/tables/ErrorTable";
 import { MessageType } from "../state/messages";
 import { sendMessage, sendSearch } from "../state/stateSlice";
-import { RootState, useAppDispatch } from "../state/store";
+import { useAppDispatch, useAppSelector } from "../state/store";
 
 const useStyles = createStyles(
   (theme, { errorMode }: { errorMode: boolean }) => ({
@@ -57,9 +55,9 @@ const useStyles = createStyles(
   })
 );
 
-export default function SearchPage({ legacy }: { legacy?: boolean }) {
+export default function SearchPage() {
   const dispatch = useAppDispatch();
-  const activeItem = useSelector((store: RootState) => store.state.activeItem);
+  const activeItem = useAppSelector((store) => store.state.activeItem);
   const [searchQuery, setSearchQuery] = useState("");
   const [showErrors, setShowErrors] = useState(false);
 
@@ -111,24 +109,28 @@ export default function SearchPage({ legacy }: { legacy?: boolean }) {
     if (activeItem === null) {
       return (
         <Center style={{ height: "100%", width: "100%" }}>
-          <MediaQuery smallerThan="md" styles={{ display: "none" }}>
-            <Image width={600} fit="contain" src={image} alt="person reading" />
-          </MediaQuery>
-          <MediaQuery largerThan="md" styles={{ display: "none" }}>
-            <Image width={300} fit="contain" src={image} alt="person reading" />
-          </MediaQuery>
+          <Stack align="center">
+            <Title weight="normal" align="center">
+              Search a book to get started.
+            </Title>
+            <MediaQuery smallerThan="md" styles={{ display: "none" }}>
+              <Image
+                width={600}
+                fit="contain"
+                src={image}
+                alt="person reading"
+              />
+            </MediaQuery>
+            <MediaQuery largerThan="md" styles={{ display: "none" }}>
+              <Image
+                width={300}
+                fit="contain"
+                src={image}
+                alt="person reading"
+              />
+            </MediaQuery>
+          </Stack>
         </Center>
-      );
-    }
-
-    if (legacy) {
-      return errorMode ? (
-        <ErrorsGrid
-          errors={activeItem?.errors ?? []}
-          setSearchQuery={setSearchQuery}
-        />
-      ) : (
-        <BooksGrid books={activeItem?.results ?? []} />
       );
     }
 

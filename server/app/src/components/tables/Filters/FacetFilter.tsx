@@ -43,14 +43,10 @@ const useStyles = createStyles((theme) => {
       textTransform: "none"
     },
     button: {
-      color:
-        theme.colorScheme === "dark"
-          ? theme.colors.dark[0]
-          : theme.colors.gray[7],
       ["&:hover"]: {
         backgroundColor:
           theme.colorScheme === "dark"
-            ? theme.colors.dark[5]
+            ? theme.colors.dark[4]
             : theme.colors.gray[0]
       }
     }
@@ -91,11 +87,11 @@ export default function FacetFilter({
   const buttonColor =
     theme.colorScheme === "dark"
       ? filterValue.length > 0
-        ? "brand.3"
-        : "dark.3"
+        ? "brand.2"
+        : "dark.0"
       : filterValue.length > 0
       ? "brand.4"
-      : "dark.1";
+      : "gray.7";
 
   return (
     <Popover
