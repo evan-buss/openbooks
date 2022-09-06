@@ -50,7 +50,7 @@ export default function ErrorTable({
             table={props.table}
           />
         ),
-        cell: (props) => <pre style={{ margin: 0 }}>{props.getValue()}</pre>,
+        cell: (props) => <code style={{ margin: 0 }}>{props.getValue()}</code>,
         size: cols(9),
         enableColumnFilter: true
       }),
