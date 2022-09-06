@@ -149,6 +149,7 @@ export default function SearchPage() {
           </Button>
         </Group>
       </form>
+
       {hasErrors && (
         <Button
           className={classes.errorToggle}
