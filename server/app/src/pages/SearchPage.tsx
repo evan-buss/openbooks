@@ -1,4 +1,5 @@
 import {
+  ActionIcon,
   Button,
   Center,
   createStyles,
@@ -9,13 +10,13 @@ import {
   TextInput,
   Title
 } from "@mantine/core";
-import { MagnifyingGlass, Warning } from "phosphor-react";
+import { MagnifyingGlass, Sidebar, Warning } from "phosphor-react";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import image from "../assets/reading.svg";
 import BookTable from "../components/tables/BookTable";
 import ErrorTable from "../components/tables/ErrorTable";
 import { MessageType } from "../state/messages";
-import { sendMessage, sendSearch } from "../state/stateSlice";
+import { sendMessage, sendSearch, toggleSidebar } from "../state/stateSlice";
 import { useAppDispatch, useAppSelector } from "../state/store";
 
 const useStyles = createStyles(
@@ -58,6 +59,8 @@ const useStyles = createStyles(
 export default function SearchPage() {
   const dispatch = useAppDispatch();
   const activeItem = useAppSelector((store) => store.state.activeItem);
+  const opened = useAppSelector((store) => store.state.isSidebarOpen);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [showErrors, setShowErrors] = useState(false);
 
@@ -105,9 +108,59 @@ export default function SearchPage() {
     [activeItem?.errors]
   );
 
-  const renderBody = () => {
-    if (activeItem === null) {
-      return (
+  return (
+    <Stack
+      spacing={0}
+      align="center"
+      sx={(theme) => ({ width: "100%", margin: theme.spacing.xl })}>
+      <form className={classes.wFull} onSubmit={(e) => searchHandler(e)}>
+        <Group
+          noWrap
+          spacing="md"
+          sx={(theme) => ({ marginBottom: theme.spacing.md })}>
+          {!opened && (
+            <ActionIcon size="lg" onClick={() => dispatch(toggleSidebar())}>
+              <Sidebar weight="bold" size={20}></Sidebar>
+            </ActionIcon>
+          )}
+          <TextInput
+            className={classes.wFull}
+            variant="filled"
+            disabled={activeItem !== null && !activeItem.results}
+            value={searchQuery}
+            onChange={(e: any) => setSearchQuery(e.target.value)}
+            placeholder={
+              errorMode ? "Download a book manually." : "Search for a book."
+            }
+            radius="md"
+            type="search"
+            icon={<MagnifyingGlass weight="bold" size={22} />}
+            required
+          />
+
+          <Button
+            type="submit"
+            color={theme.colorScheme === "dark" ? "brand.2" : "brand"}
+            disabled={!validInput}
+            radius="md"
+            variant={validInput ? "gradient" : "default"}
+            gradient={{ from: "brand.4", to: "brand.3" }}>
+            {errorMode ? "Download" : "Search"}
+          </Button>
+        </Group>
+      </form>
+      {hasErrors && (
+        <Button
+          className={classes.errorToggle}
+          variant={errorMode ? "filled" : "subtle"}
+          onClick={() => setShowErrors((show) => !show)}
+          leftIcon={<Warning size={18} />}
+          size="xs">
+          {activeItem?.errors?.length} Parsing{" "}
+          {activeItem?.errors?.length === 1 ? "Error" : "Errors"}
+        </Button>
+      )}
+      {!activeItem ? (
         <Center style={{ height: "100%", width: "100%" }}>
           <Stack align="center">
             <Title weight="normal" align="center">
@@ -131,60 +184,11 @@ export default function SearchPage() {
             </MediaQuery>
           </Stack>
         </Center>
-      );
-    }
-
-    return errorMode ? errorTable : bookTable;
-  };
-
-  return (
-    <Stack
-      spacing={0}
-      align="center"
-      sx={(theme) => ({ width: "100%", margin: theme.spacing.xl })}>
-      <form className={classes.wFull} onSubmit={(e) => searchHandler(e)}>
-        <Group
-          noWrap
-          spacing="xl"
-          sx={(theme) => ({ marginBottom: theme.spacing.xl })}>
-          <TextInput
-            className={classes.wFull}
-            disabled={activeItem !== null && !activeItem.results}
-            value={searchQuery}
-            onChange={(e: any) => setSearchQuery(e.target.value)}
-            placeholder={
-              errorMode ? "Download a book manually." : "Search for a book."
-            }
-            radius="md"
-            size="md"
-            type="search"
-            icon={<MagnifyingGlass weight="bold" size={22} />}
-            required
-          />
-
-          <Button
-            type="submit"
-            color={theme.colorScheme === "dark" ? "brand.2" : "brand"}
-            disabled={!validInput}
-            size="md"
-            radius="md"
-            variant="outline">
-            {errorMode ? "Download" : "Search"}
-          </Button>
-        </Group>
-      </form>
-      {hasErrors && (
-        <Button
-          className={classes.errorToggle}
-          variant={errorMode ? "filled" : "subtle"}
-          onClick={() => setShowErrors((show) => !show)}
-          leftIcon={<Warning size={18} />}
-          size="xs">
-          {activeItem?.errors?.length} Parsing{" "}
-          {activeItem?.errors?.length === 1 ? "Error" : "Errors"}
-        </Button>
+      ) : errorMode ? (
+        errorTable
+      ) : (
+        bookTable
       )}
-      {renderBody()}
     </Stack>
   );
 }

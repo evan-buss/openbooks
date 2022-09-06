@@ -1,21 +1,21 @@
 import {
-    Badge,
-    Button,
-    Center,
-    Loader,
-    Menu,
-    Stack,
-    Text,
-    Tooltip
+  Badge,
+  Button,
+  Center,
+  Loader,
+  Menu,
+  Stack,
+  Text,
+  Tooltip
 } from "@mantine/core";
 import { Dispatch } from "@reduxjs/toolkit";
 import { AnimatePresence, motion } from "framer-motion";
 import { Eye, EyeSlash, MagnifyingGlass, Trash } from "phosphor-react";
 import { useSelector } from "react-redux";
 import {
-    deleteHistoryItem,
-    HistoryItem,
-    selectHistory
+  deleteHistoryItem,
+  HistoryItem,
+  selectHistory
 } from "../../state/historySlice";
 import { setActiveItem } from "../../state/stateSlice";
 import { useAppDispatch, useAppSelector } from "../../state/store";

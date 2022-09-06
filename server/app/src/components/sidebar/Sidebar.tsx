@@ -5,11 +5,9 @@ import {
   Group,
   MediaQuery,
   Navbar,
-  ScrollArea,
   SegmentedControl,
   Text,
   Tooltip,
-  Transition,
   useMantineColorScheme
 } from "@mantine/core";
 import { useLocalStorage } from "@mantine/hooks";
@@ -18,6 +16,7 @@ import {
   IdentificationBadge,
   MoonStars,
   Plugs,
+  Sidebar as SidebarIcon,
   Sun
 } from "phosphor-react";
 import { toggleDrawer } from "../../state/notificationSlice";
@@ -45,16 +44,21 @@ const useStyles = createStyles((theme, _params, getRef) => {
 
 export default function Sidebar() {
   const { classes } = useStyles();
+  const { colorScheme, toggleColorScheme } = useMantineColorScheme();
+
+  const dispatch = useAppDispatch();
+  const connected = useAppSelector((store) => store.state.isConnected);
   const username = useAppSelector((store) => store.state.username);
   const opened = useAppSelector((store) => store.state.isSidebarOpen);
+
   const [index, setIndex] = useLocalStorage<"books" | "history">({
     key: "sidebar-state",
     defaultValue: "history"
   });
 
-  const { colorScheme, toggleColorScheme } = useMantineColorScheme();
-  const connected = useAppSelector((store) => store.state.isConnected);
-  const dispatch = useAppDispatch();
+  if (!opened) {
+    return <></>;
+  }
 
   return (
     <Navbar
@@ -73,8 +77,6 @@ export default function Sidebar() {
                 connected ? "connected" : "disconnected"
               }.`}>
               <ActionIcon
-                color="brand"
-                size="md"
                 disabled={!connected}
                 onClick={() => dispatch(toggleDrawer())}>
                 <BellSimple weight="bold" size={18} />
@@ -114,41 +116,27 @@ export default function Sidebar() {
         />
       </Navbar.Section>
 
-      <Navbar.Section grow component={ScrollArea} p="xs">
-        <Transition
-          mounted={index === "history"}
-          transition="fade"
-          duration={500}
-          exitDuration={0}
-          timingFunction="ease">
-          {(styles) => (
-            <div style={styles}>
-              <History />
-            </div>
-          )}
-        </Transition>
-
-        <Transition
-          mounted={index === "books"}
-          transition="fade"
-          duration={500}
-          exitDuration={0}
-          timingFunction="ease">
-          {(styles) => (
-            <div style={styles}>
-              <Library />
-            </div>
-          )}
-        </Transition>
+      <Navbar.Section grow p="xs" style={{ overflow: "auto" }}>
+        {index === "history" ? <History /> : <Library />}
       </Navbar.Section>
 
       <Navbar.Section className={classes.footer} p="sm">
-        <Group position="apart">
+        <Group position="apart" noWrap>
           <Group>
             {username ? (
               <>
                 <IdentificationBadge size={24} />
-                <Text size="sm">{username}</Text>
+                <Text
+                  size="sm"
+                  lineClamp={1}
+                  style={{
+                    maxWidth: 150,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap"
+                  }}>
+                  {username}
+                </Text>
               </>
             ) : (
               <>
@@ -157,16 +145,19 @@ export default function Sidebar() {
               </>
             )}
           </Group>
-          <ActionIcon
-            onClick={() => toggleColorScheme()}
-            size="lg"
-            color="brand">
-            {colorScheme === "dark" ? (
-              <Sun size={18} weight="bold" />
-            ) : (
-              <MoonStars size={18} weight="bold" />
-            )}
-          </ActionIcon>
+
+          <Group align="end" spacing="xs">
+            <ActionIcon onClick={() => toggleColorScheme()}>
+              {colorScheme === "dark" ? (
+                <Sun size={18} weight="bold" />
+              ) : (
+                <MoonStars size={18} weight="bold" />
+              )}
+            </ActionIcon>
+            <ActionIcon onClick={() => dispatch(toggleSidebar())}>
+              <SidebarIcon weight="bold" size={18} />
+            </ActionIcon>
+          </Group>
         </Group>
       </Navbar.Section>
     </Navbar>

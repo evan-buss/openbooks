@@ -79,7 +79,9 @@ export default function NotificationDrawer() {
           </Text>
         </Center>
       ) : (
-        <Stack spacing="xs">
+        <Stack
+          spacing="xs"
+          style={{ overflow: "scroll", height: "calc(100% - 44px)" }}>
           <AnimatePresence mode="popLayout">
             {notifications.map((notif) => (
               <motion.div {...defaultAnimation} key={notif.timestamp}>

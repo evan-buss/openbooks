@@ -1,12 +1,10 @@
 import {
   AppShell,
-  Burger,
   ColorScheme,
   ColorSchemeProvider,
   createEmotionCache,
   createStyles,
-  MantineProvider,
-  MediaQuery
+  MantineProvider
 } from "@mantine/core";
 import { useLocalStorage } from "@mantine/hooks";
 import { NotificationsProvider } from "@mantine/notifications";
@@ -14,7 +12,6 @@ import { Route, Routes } from "react-router-dom";
 import NotificationDrawer from "./components/drawer/NotificationDrawer";
 import Sidebar from "./components/sidebar/Sidebar";
 import SearchPage from "./pages/SearchPage";
-import { toggleSidebar } from "./state/stateSlice";
 import { useAppDispatch, useAppSelector } from "./state/store";
 
 const emotionCache = createEmotionCache({ key: "openbooks" });
@@ -66,7 +63,6 @@ export default function App() {
               "#b0c6ff",
               "#7e9fff",
               "#4c79ff",
-              // "#1a53ff",
               "#3366ff",
               "#0039e6",
               "#002db4",
@@ -74,6 +70,14 @@ export default function App() {
               "#001351",
               "#000621"
             ]
+          },
+          components: {
+            ActionIcon: {
+              defaultProps: {
+                radius: "md",
+                color: "brand"
+              }
+            }
           }
         }}>
         <NotificationsProvider position="top-center">
@@ -89,15 +93,6 @@ export default function App() {
               }
             })}>
             <div className={classes.wrapper}>
-              <MediaQuery largerThan="sm" styles={{ display: "none" }}>
-                <Burger
-                  className={classes.burger}
-                  opened={open}
-                  onClick={() => dispatch(toggleSidebar())}
-                  size="sm"
-                  mr="xl"
-                />
-              </MediaQuery>
               <Routes>
                 <Route path="/" element={<SearchPage />} />
               </Routes>
