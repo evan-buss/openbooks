@@ -1,13 +1,14 @@
-import { Action, configureStore, ThunkAction } from "@reduxjs/toolkit";
+import { configureStore } from "@reduxjs/toolkit";
+import { setupListeners } from "@reduxjs/toolkit/query/react";
+import { enableMapSet } from "immer";
 import throttle from "lodash/throttle";
+import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
+import { openbooksApi } from "./api";
 import historyReducer from "./historySlice";
 import notificationReducer from "./notificationSlice";
 import { websocketConn } from "./socketMiddleware";
 import stateReducer from "./stateSlice";
-import { enableMapSet } from "immer";
 import { getWebsocketURL } from "./util";
-import { openbooksApi } from "./api";
-import { setupListeners } from "@reduxjs/toolkit/dist/query";
 
 enableMapSet();
 
@@ -22,7 +23,7 @@ export const store = configureStore({
     getDefaultMiddleware().concat(
       websocketConn(getWebsocketURL().href),
       openbooksApi.middleware
-    )
+    ),
 });
 
 setupListeners(store.dispatch);
@@ -42,9 +43,6 @@ store.subscribe(
 );
 
 export type RootState = ReturnType<typeof store.getState>;
-export type AppThunk<ReturnType = void> = ThunkAction<
-  ReturnType,
-  RootState,
-  unknown,
-  Action<string>
->;
+export type AppDispatch = typeof store.dispatch;
+export const useAppDispatch: () => AppDispatch = useDispatch;
+export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;

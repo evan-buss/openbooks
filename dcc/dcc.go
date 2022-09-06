@@ -4,7 +4,6 @@ import (
 	"encoding/binary"
 	"errors"
 	"io"
-	"log"
 	"net"
 	"regexp"
 	"strconv"
@@ -28,6 +27,7 @@ type Download struct {
 	Size     int64
 }
 
+// ParseString parses the important data of a DCC SEND string
 func ParseString(text string) (*Download, error) {
 	groups := dccRegex.FindStringSubmatch(text)
 
@@ -76,13 +76,13 @@ func (download Download) Download(writer io.Writer) error {
 	bytes := make([]byte, 4096)
 	for int64(received) < download.Size {
 		n, err := conn.Read(bytes)
-
 		if err != nil {
-			log.Fatal("Error Downloading Data", err)
+			return err
 		}
+
 		_, err = writer.Write(bytes[:n])
 		if err != nil {
-			log.Println(err)
+			return err
 		}
 		received += n
 	}
@@ -94,7 +94,6 @@ func (download Download) Download(writer io.Writer) error {
 	return nil
 }
 
-// ParseDCC parses the important data of a DCC SEND string
 // Convert a given 32 bit IP integer to an IP string
 // Ex) 2907707975 -> 192.168.1.1
 func stringToIP(nn string) (string, error) {

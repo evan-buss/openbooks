@@ -6,7 +6,11 @@
 
 Openbooks allows you to download ebooks from irc.irchighway.net quickly and easily.
 
-![openbooks](https://raw.githubusercontent.com/evan-buss/openbooks/master/.github/home_v2.png)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="./.github/home_v3_dark.png">
+  <img alt="openbooks screenshot" src="./.github/home_v3.png">
+</picture>
+
 
 ## Getting Started
 
@@ -42,6 +46,8 @@ two modes; Server or CLI. In CLI mode you interact and download books through
 a terminal interface. In server mode the application runs as a web application
 that you can visit in your browser.
 
+Double clicking the executable will open the UI in your browser. In the future it may use [webviews](https://developer.microsoft.com/en-us/microsoft-edge/webview2/) to provide a "native-like" desktop application. 
+
 ## Development
 
 ### Install the dependencies
@@ -72,6 +78,15 @@ that you can visit in your browser.
   go run . server --server localhost --log
   ```
 
+### Desktop App
+Compile OpenBooks with experimental webview support:
+
+``` shell
+cd cmd/openbooks
+go build -tags webview
+```
+
+
 ## Why / How
 
 - I wrote this as an easier way to search and download books from irchighway.net. It handles all the extraction and data processing for you. You just have to click the book you want. Hopefully you find it much easier than the IRC interface.
@@ -88,5 +103,5 @@ that you can visit in your browser.
   - React.js
   - TypeScript
   - Redux / Redux Toolkit
-  - Tailwind CSS
-  - Evergreen UI
+  - Mantine UI / @emotion/react
+  - Framer Motion

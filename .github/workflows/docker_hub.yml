@@ -7,6 +7,9 @@ name: Publish Image to Docker Hub
 on:
   workflow_dispatch:
   push:
+    branches:
+      - master
+      - development
     tags:
       - 'v*.*.*'
 
@@ -16,40 +19,43 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set Docker Metadata
         id: meta
-        uses: docker/metadata-action@v3
+        uses: docker/metadata-action@v4
         with:
           # list of Docker images to use as base name for tags
           images: |
             evanbuss/openbooks
           # generate Docker tags based on the following events/attributes
+          # 'latest' when push to master with tag
+          # 'edge' when push to development
+          # '1.1.1' when push version tag v1.1.1
           flavor: |
-            latest=true
+            latest=auto
           tags: |
-            type=sha
+            type=semver,pattern={{version}}
+            type=edge,branch=development
             
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
+        uses: docker/setup-qemu-action@v2
 
       - name: Set up Docker Buildx
         id: buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v2
         with:
           version: latest
           install: true
-          use: true
 
       - name: Login to Docker Hub
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2
         with:
             username: ${{ secrets.DOCKER_USERNAME }}
             password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
       - name: Build and Push
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
           context: .
           platforms: linux/amd64,linux/arm64,linux/arm
@@ -58,7 +64,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
 
       - name: Docker Hub Description
-        uses: peter-evans/dockerhub-description@v2
+        uses: peter-evans/dockerhub-description@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}

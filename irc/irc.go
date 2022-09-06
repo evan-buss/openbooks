@@ -1,7 +1,7 @@
 package irc
 
 import (
-	"log"
+	"crypto/tls"
 	"net"
 )
 
@@ -25,11 +25,17 @@ func New(username, realname string) *Conn {
 }
 
 // Connect connects to the given server at port 6667
-func (i *Conn) Connect(address string) {
-	conn, err := net.Dial("tcp", address+":6667")
+func (i *Conn) Connect(address string, enableTLS bool) error {
+	var conn net.Conn
+	var err error
+	if enableTLS {
+		conn, err = tls.Dial("tcp", address, &tls.Config{InsecureSkipVerify: true})
+	} else {
+		conn, err = net.Dial("tcp", address)
+	}
 
 	if err != nil {
-		log.Fatal("IRC Connection Error ", err)
+		return err
 	}
 
 	i.Conn = conn
@@ -39,40 +45,56 @@ func (i *Conn) Connect(address string) {
 
 	i.Write([]byte(user))
 	i.Write([]byte(nick))
+	return nil
 }
 
 // Disconnect closes connection to the IRC server
 func (i *Conn) Disconnect() {
+	if !i.IsConnected() {
+		return
+	}
 	i.Write([]byte("QUIT :Goodbye\r\n"))
 	i.Conn.Close()
 }
 
 // SendMessage sends the given message string to the connected IRC server
 func (i *Conn) SendMessage(message string) {
+	if !i.IsConnected() {
+		return
+	}
 	i.Write([]byte("PRIVMSG #" + i.channel + " :" + message + "\r\n"))
 }
 
 // SendNotice sends a notice message to the specified user
 func (i *Conn) SendNotice(user string, message string) {
+	if !i.IsConnected() {
+		return
+	}
 	i.Write([]byte("NOTICE " + user + " :" + message + "\r\n"))
 }
 
 // JoinChannel joins the channel given by channel string
 func (i *Conn) JoinChannel(channel string) {
-	i.channel = channel
-	_, err := i.Write([]byte("JOIN #" + channel + "\r\n"))
-	if err != nil {
-		log.Fatal(err)
+	if !i.IsConnected() {
+		return
 	}
+	i.channel = channel
+	i.Write([]byte("JOIN #" + channel + "\r\n"))
 }
 
 // GetUsers sends a NAMES request to the IRC server
 func (i *Conn) GetUsers(channel string) {
+	if !i.IsConnected() {
+		return
+	}
 	i.Write([]byte("NAMES #" + channel + "\r\n"))
 }
 
 // Pong sends a Pong message to the server, often used after a PING request
 func (i *Conn) Pong(server string) {
+	if !i.IsConnected() {
+		return
+	}
 	i.Write([]byte("PONG " + server + "\r\n"))
 }
 

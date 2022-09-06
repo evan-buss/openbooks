@@ -13,6 +13,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/evan-buss/openbooks/irc"
@@ -95,7 +96,7 @@ func (server *server) staticFilesHandler(assetPath string) http.Handler {
 	// update the embedded file system's tree so that index.html is at the root
 	app, err := fs.Sub(reactClient, assetPath)
 	if err != nil {
-		server.log.Fatal(err)
+		server.log.Println(err)
 	}
 
 	// strip the predefined base path and serve the static file
@@ -153,20 +154,22 @@ func (server *server) getAllBooksHandler() http.HandlerFunc {
 
 		output := make([]download, 0)
 		for _, book := range books {
-			if !book.IsDir() {
-				info, err := book.Info()
-				if err != nil {
-					server.log.Println(err)
-				}
-
-				dl := download{
-					Name:         book.Name(),
-					DownloadLink: path.Join("library", book.Name()),
-					Time:         info.ModTime(),
-				}
-
-				output = append(output, dl)
+			if book.IsDir() || strings.HasPrefix(book.Name(), ".") || filepath.Ext(book.Name()) == ".temp" {
+				continue
 			}
+
+			info, err := book.Info()
+			if err != nil {
+				server.log.Println(err)
+			}
+
+			dl := download{
+				Name:         book.Name(),
+				DownloadLink: path.Join("library", book.Name()),
+				Time:         info.ModTime(),
+			}
+
+			output = append(output, dl)
 		}
 
 		w.Header().Add("Content-Type", "application/json")

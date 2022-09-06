@@ -10,12 +10,7 @@
       "request": "launch",
       "mode": "debug",
       "program": "cmd/openbooks",
-      "args": [
-        "server",
-        "--log",
-        "--server",
-        "localhost"
-      ],
+      "args": ["server", "--log", "--server", "localhost", "--persist"]
     },
     {
       "name": "Launch OpenBooks CLI",
@@ -23,13 +18,7 @@
       "request": "launch",
       "mode": "debug",
       "program": "cmd/openbooks",
-      "args": [
-        "cli",
-        "download",
-        "--server",
-        "localhost",
-        "!test"
-      ],
+      "args": ["cli", "download", "--server", "localhost", "!test"]
     }
   ]
 }

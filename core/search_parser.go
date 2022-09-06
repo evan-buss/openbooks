@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"sort"
 	"strings"
@@ -64,14 +63,15 @@ func (p ParseError) String() string {
 }
 
 // ParseSearchFile converts a single search file into an array of BookDetail
-func ParseSearchFile(filePath string) ([]BookDetail, []ParseError) {
+func ParseSearchFile(filePath string) ([]BookDetail, []ParseError, error) {
 	file, err := os.Open(filePath)
 	if err != nil {
-		log.Fatal(err)
+		return nil, nil, err
 	}
 	defer file.Close()
 
-	return ParseSearchV2(file)
+	books, errs := ParseSearchV2(file)
+	return books, errs, nil
 }
 
 func ParseSearch(reader io.Reader) ([]BookDetail, []ParseError) {

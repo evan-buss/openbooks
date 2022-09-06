@@ -6,13 +6,11 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"path"
 	"path/filepath"
 	"sync"
 	"syscall"
 	"time"
 
-	"github.com/evan-buss/openbooks/util"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/google/uuid"
@@ -46,16 +44,18 @@ type server struct {
 
 // Config contains settings for server
 type Config struct {
-	Log           bool
-	OpenBrowser   bool
-	Port          string
-	UserName      string
-	Persist       bool
-	DownloadDir   string
-	Basepath      string
-	Server        string
-	SearchTimeout time.Duration
-	Version       string
+	Log                     bool
+	Port                    string
+	UserName                string
+	Persist                 bool
+	DownloadDir             string
+	Basepath                string
+	Server                  string
+	EnableTLS               bool
+	SearchTimeout           time.Duration
+	SearchBot               string
+	DisableBrowserDownloads bool
+	Version                 string
 }
 
 func New(config Config) *server {
@@ -79,7 +79,7 @@ func Start(config Config) {
 
 	corsConfig := cors.Options{
 		AllowCredentials: true,
-		AllowedOrigins:   []string{"http://localhost:3000"},
+		AllowedOrigins:   []string{"http://127.0.0.1:5173"},
 		AllowedHeaders:   []string{"*"},
 		AllowedMethods:   []string{"GET", "DELETE"},
 	}
@@ -93,13 +93,9 @@ func Start(config Config) {
 	server.registerGracefulShutdown(cancel)
 	router.Mount(config.Basepath, routes)
 
-	server.log.Printf("Base Path: %v\n", config.Basepath)
-	if config.OpenBrowser {
-		browserUrl := "http://127.0.0.1:" + path.Join(config.Port+config.Basepath)
-		util.OpenBrowser(browserUrl)
-	}
-
+	server.log.Printf("Base Path: %s\n", config.Basepath)
 	server.log.Printf("OpenBooks is listening on port %v", config.Port)
+	server.log.Printf("Download Directory: %s\n", config.DownloadDir)
 	server.log.Printf("Open http://localhost:%v%s in your browser.", config.Port, config.Basepath)
 	server.log.Fatal(http.ListenAndServe(":"+config.Port, router))
 }
