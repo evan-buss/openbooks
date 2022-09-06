@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  Center,
   CloseButton,
   createStyles,
   Group,
@@ -146,7 +147,10 @@ export default function FacetFilter({
                 variant="default"
                 color="brand"
                 disabled={filterValue.length === 0}
-                onClick={() => column.setFilterValue([])}>
+                onClick={() => {
+                  column.setFilterValue([]);
+                  setFilter("");
+                }}>
                 Reset
               </Button>
             )
@@ -190,6 +194,14 @@ export default function FacetFilter({
               );
             })}
           </div>
+
+          {filteredOptions.length === 0 && (
+            <Center py="xs">
+              <Text color="dimmed" size="xs">
+                No Results
+              </Text>
+            </Center>
+          )}
         </div>
       </Popover.Dropdown>
     </Popover>
