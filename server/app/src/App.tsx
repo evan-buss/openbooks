@@ -8,7 +8,6 @@ import {
 } from "@mantine/core";
 import { useLocalStorage } from "@mantine/hooks";
 import { NotificationsProvider } from "@mantine/notifications";
-import { Route, Routes } from "react-router-dom";
 import NotificationDrawer from "./components/drawer/NotificationDrawer";
 import Sidebar from "./components/sidebar/Sidebar";
 import SearchPage from "./pages/SearchPage";
@@ -93,9 +92,7 @@ export default function App() {
               }
             })}>
             <div className={classes.wrapper}>
-              <Routes>
-                <Route path="/" element={<SearchPage />} />
-              </Routes>
+              <SearchPage />
               <NotificationDrawer />
             </div>
           </AppShell>
