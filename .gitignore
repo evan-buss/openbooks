@@ -4,6 +4,7 @@ openbooks
 !openbooks/
 *.DS_Store
 **/dist
+.task/
 # end persist
 
 
