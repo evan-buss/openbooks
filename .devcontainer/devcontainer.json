@@ -16,7 +16,7 @@
   },
   "customizations": {
     "vscode": {
-      "extensions": ["golang.go", "heybourn.headwind", "esbenp.prettier-vscode", "bradlc.vscode-tailwindcss", "ms-vscode.makefile-tools"]
+      "extensions": ["golang.go", "heybourn.headwind", "esbenp.prettier-vscode", "bradlc.vscode-tailwindcss", "ms-vscode.makefile-tools", "redhat.vscode-yaml"]
     }
   }
 }
