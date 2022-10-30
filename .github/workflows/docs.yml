@@ -42,7 +42,7 @@ jobs:
           python-version: "3.10"
       - name: Build MkDocs Site
         run: |
-          pip install -r requirements
+          pip install -r requirements.txt
           mkdocs build
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1

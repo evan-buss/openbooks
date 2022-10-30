@@ -8,5 +8,3 @@
 [![Docker Pulls](https://img.shields.io/docker/pulls/evanbuss/openbooks.svg)](https://hub.docker.com/r/evanbuss/openbooks/)
 
 Openbooks allows you to download ebooks from irc.irchighway.net quickly and easily.
-
-test
