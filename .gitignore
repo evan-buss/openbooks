@@ -5,6 +5,8 @@ openbooks
 *.DS_Store
 **/dist
 .task/
+docs/venv/
+docs/site/
 # end persist
 
 

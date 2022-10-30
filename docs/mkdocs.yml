@@ -1,0 +1,43 @@
+site_name: OpenBooks
+repo_name: OpenBooks
+repo_url: https://github.com/evan-buss/openbooks
+
+markdown_extensions:
+  - attr_list
+  - md_in_html
+
+theme:
+  name: material
+  features:
+    - navigation.instant
+    - navigation.tabs
+    # - navigation.tabs.sticky
+    - navigation.indexes
+  font:
+    text: Inter
+  icon:
+    logo: fontawesome/solid/book-open
+    repo: fontawesome/brands/github
+
+  palette:
+    # Palette toggle for light mode
+    - scheme: default
+      primary: blue
+      accent: cyan
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+
+    # Palette toggle for dark mode
+    - scheme: slate
+      primary: blue
+      accent: cyan
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+nav:
+  - Home:
+      - Home: index.md
+      - Getting Started: getting-started.md
+  - Developers: developers/index.md

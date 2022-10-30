@@ -1,0 +1,16 @@
+# https://taskfile.dev
+
+version: "3"
+
+tasks:
+  init:
+    dir: docs
+    cmds:
+      - python3 -m venv venv
+      - source ./venv/bin/activate
+      - pip3 install -r requirements.txt
+
+  serve:
+    dir: docs
+    cmds:
+      - mkdocs serve

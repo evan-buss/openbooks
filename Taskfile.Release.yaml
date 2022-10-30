@@ -12,9 +12,11 @@ tasks:
 
   build:
     desc: Build OpenBooks binaries for all supported platforms.
+    deps:
+      - npm-build
     dir: cmd/openbooks
     cmds:
-      - go get ./..
+      - go get
       - env CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -o ./../../build/openbooks.exe
       - env CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o ./../../build/openbooks_mac
       - env CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -o ./../../build/openbooks_mac_arm
