@@ -6,6 +6,7 @@ openbooks
 **/dist
 .task/
 docs/venv/
+docs/site/
 # end persist
 
 
