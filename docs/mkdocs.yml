@@ -60,6 +60,7 @@ nav:
   - Changelog: changelog.md
 
 plugins:
+  - search
   - social:
       cards: true
       cards_dir: assets/images/social
