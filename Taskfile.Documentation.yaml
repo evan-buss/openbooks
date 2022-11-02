@@ -7,10 +7,9 @@ tasks:
     dir: docs
     cmds:
       - python3 -m venv venv
-      - source ./venv/bin/activate
-      - pip3 install -r requirements.txt
+      - venv/bin/python3 -m pip install -r requirements.txt
 
   serve:
     dir: docs
     cmds:
-      - mkdocs serve
+      - venv/bin/mkdocs serve

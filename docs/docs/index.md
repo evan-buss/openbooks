@@ -1,12 +1,12 @@
 # OpenBooks
 
+<figure markdown>
 ![OpenBooks Light Mode](https://github.com/evan-buss/openbooks/blob/master/.github/home_v3.png?raw=true#only-light)
 ![OpenBooks Dark Mode](https://github.com/evan-buss/openbooks/blob/master/.github/home_v3_dark.png?raw=true#only-dark)
+<figcaption>
+    Quickly and easily 
+    <a target="_blank" href="https://web.archive.org/web/20190109001234/http://www.cracked.com/article_18817_5-reasons-future-will-be-ruled-by-b.s..html">download eBooks</a> from IRC Highway
+</figcaption>
+</figure>
 
-> NOTE: Going forward only the latest release will be supported. If you encounter any issues, be sure you are using the latest version.
-
-[![Docker Pulls](https://img.shields.io/docker/pulls/evanbuss/openbooks.svg)](https://hub.docker.com/r/evanbuss/openbooks/)
-
-Openbooks allows you to download ebooks from irc.irchighway.net quickly and easily.
-
-test
+!!! danger "This documentation is a work in progress. It may be incomplete or inaccurate."

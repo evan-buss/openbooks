@@ -1,10 +1,17 @@
 site_name: OpenBooks
+site_url: https://evan-buss.github.io/openbooks
 repo_name: OpenBooks
 repo_url: https://github.com/evan-buss/openbooks
 
 markdown_extensions:
   - attr_list
   - md_in_html
+  - def_list
+  - admonition
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.superfences
+  - footnotes
 
 theme:
   name: material
@@ -40,4 +47,19 @@ nav:
   - Home:
       - Home: index.md
       - Getting Started: getting-started.md
-  - Developers: developers/index.md
+      - Configuration: configuration.md
+      # - Setup:
+      #     - Docker: setup/docker.md
+      #     - Executable: setup/executable.md
+      - IRC Notes: irc-notes.md
+  - Developers:
+      - Home: developers/index.md
+      - Dev Container: developers/dev-container.md
+      - Experimental: developers/experimental.md
+
+  - Changelog: changelog.md
+
+plugins:
+  - social:
+      cards: true
+      cards_dir: assets/images/social

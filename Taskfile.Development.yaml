@@ -36,7 +36,7 @@ tasks:
     dir: cmd/openbooks
     cmds:
       - go build
-      - ./openbooks cli --server localhost:6667
+      - ./openbooks cli --tls=false --server localhost:6667
 
   server:
     desc: Run OpenBooks in Server Mode.
@@ -50,3 +50,9 @@ tasks:
     dir: server/app
     cmds:
       - npm run dev
+
+  desktop:
+    desc: Run OpenBooks in the experimental desktop mode with a WebView GUI.
+    dir: cmd/openbooks
+    cmds:
+      - go run -tags webview

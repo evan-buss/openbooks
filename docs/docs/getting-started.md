@@ -1,33 +1,32 @@
-### Binary
+OpenBooks provides a convenient user interface over [IRC Highway's](https://irchighway.net/) `#ebook` channel.
+It streamlines the process of connecting, searching for, and downloading books.
 
-1. Download the latest release for your platform from the [releases page](https://github.com/evan-buss/openbooks/releases).
-2. Run the binary
-   - Linux users may have to run `chmod +x [binary name]` to make it executable
-3. `./openbooks --help`
-   - This will display all possible configuration values and introduce the two modes; CLI or Server.
+!!! tip "OpenBooks does not host any content, think of it as a single-purpose IRC client."
+
+There are 2 _modes of operation_; CLI or Server.
+
+The majority of users will want to check out the [Server Mode](./configuration.md) where you search and download via a web interface in your browser.
+This allows you to self-host OpenBooks without having to install it on every device.
+
+If you'd prefer to use OpenBooks from your terminal, check out [CLI Mode](./configuration.md).
 
 ### Docker
 
-- Basic config
-  - `docker run -p 8080:80 evanbuss/openbooks`
-- Config to persist all eBook files to disk
-  - `docker run -p 8080:80 -v /home/evan/Downloads/openbooks:/books evanbuss/openbooks --persist`
+`docker run -p 8080:80 evanbuss/openbooks`
 
-### Setting the Base Path
+: Basic configuration that exposes the web interface on [http://localhost:8080](http://localhost:8080) and saves all files to an anonymous volume.
 
-OpenBooks server doesn't have to be hosted at the root of your webserver. The basepath value allows you to host it behind a reverse proxy. The base path value must have opening and closing forward slashes (default "/").
+`docker run -p 8080:80 -v ~/Downloads/openbooks:/books evanbuss/openbooks --persist`
 
-- Docker
-  - `docker run -p 8080:80 -e BASE_PATH=/openbooks/ evanbuss/openbooks`
-- Binary
-  - `./openbooks server --basepath /openbooks/`
+: More advanced configuration that exposes the web interface on [http://localhost:8080](http://localhost:8080) and persists all eBook files to the mounted volume at `~/Downloads/openbooks`.
 
-## Usage
+> For more information see the [docker guide](./setup/docker.md).
 
-For a complete list of features use the `--help` flags on all subcommands.
-For example `openbooks cli --help or openbooks cli download --help`. There are
-two modes; Server or CLI. In CLI mode you interact and download books through
-a terminal interface. In server mode the application runs as a web application
-that you can visit in your browser.
+### Executable
 
-Double clicking the executable will open the UI in your browser. In the future it may use [webviews](https://developer.microsoft.com/en-us/microsoft-edge/webview2/) to provide a "native-like" desktop application.
+1. Download the latest release for your platform from the [releases page](https://github.com/evan-buss/openbooks/releases).
+2. Execute it from your terminal in Server (`./openbooks server`) or CLI (`./openbooks cli`) mode.
+
+   - Linux users may have to run `chmod +x [binary name]` to make it executable
+
+> For more information see the [executable guide](./setup/executable.md).
