@@ -10,8 +10,16 @@ markdown_extensions:
   - admonition
   - pymdownx.tasklist:
       custom_checkbox: true
-  - pymdownx.superfences
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
   - footnotes
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
 
 theme:
   name: material
@@ -48,19 +56,23 @@ nav:
       - Home: index.md
       - Getting Started: getting-started.md
       - Configuration: configuration.md
-      # - Setup:
-      #     - Docker: setup/docker.md
-      #     - Executable: setup/executable.md
+      - Setup:
+          - Docker: setup/docker.md
+          - Binary: setup/binary.md
+      # - Modes:/
+      # - Server: modes/server.md
       - IRC Notes: irc-notes.md
   - Developers:
       - Home: developers/index.md
       - Dev Container: developers/dev-container.md
       - Experimental: developers/experimental.md
+      - Architecture: developers/architecture.md
+      - To-Do: developers/todo.md
 
   - Changelog: changelog.md
 
 plugins:
   - search
-  - social:
-      cards: true
-      cards_dir: assets/images/social
+  # - social:
+  #     cards: true
+  #     cards_dir: assets/images/social
