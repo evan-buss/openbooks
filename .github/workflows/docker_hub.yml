@@ -22,6 +22,14 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
+        
+      - name: Set Docker Platforms For Branch
+        run: |
+          if [[ $GITHUB_REF == 'refs/heads/master' ]]; then
+              echo "DOCKER_PLATFORMS=linux/amd64,linux/arm64,linux/arm" >> "$GITHUB_ENV"
+          else
+              echo "DOCKER_PLATFORMS=linux/amd64" >> "$GITHUB_ENV"
+          fi
 
       - name: Set Docker Metadata
         id: meta
@@ -60,7 +68,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: .
-          platforms: linux/amd64,linux/arm64,linux/arm
+          platforms: ${{ env.DOCKER_PLATFORMS }}
           push: true
           labels: ${{ steps.meta.outputs.labels }}
           tags: ${{ steps.meta.outputs.tags }}
