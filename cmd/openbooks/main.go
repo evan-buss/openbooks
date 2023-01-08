@@ -13,7 +13,7 @@ import (
 )
 
 // version will always match the GitHub release versions.
-var version = "4.4.1"
+var version = "4.5.0"
 
 // We only increment ircVersion when irc admins require a fix to be made.
 // They can block / permit certain version numbers. ircVersion is the current permitted
@@ -26,6 +26,7 @@ type GlobalFlags struct {
 	Log       bool
 	SearchBot string
 	EnableTLS bool
+	UserAgent string
 }
 
 var debug bool
@@ -34,11 +35,13 @@ var desktopConfig server.Config
 
 func init() {
 	desktopCmd.PersistentFlags().BoolVar(&debug, "debug", false, "Enable debug mode.")
-	desktopCmd.PersistentFlags().StringVarP(&globalFlags.UserName, "name", "n", generateUserName(), "Use a name that isn't randomly generated. One word only.")
+	desktopCmd.PersistentFlags().StringVarP(&globalFlags.UserName, "name", "n", "", "Username used to connect to IRC server.")
+	desktopCmd.MarkPersistentFlagRequired("name")
 	desktopCmd.PersistentFlags().StringVarP(&globalFlags.Server, "server", "s", "irc.irchighway.net:6697", "IRC server to connect to.")
 	desktopCmd.PersistentFlags().BoolVar(&globalFlags.EnableTLS, "tls", true, "Connect to server using TLS.")
 	desktopCmd.PersistentFlags().BoolVarP(&globalFlags.Log, "log", "l", false, "Save raw IRC logs for each client connection.")
 	desktopCmd.PersistentFlags().StringVar(&globalFlags.SearchBot, "searchbot", "search", "The IRC bot that handles search queries. Try 'searchook' if 'search' is down.")
+	desktopCmd.PersistentFlags().StringVarP(&globalFlags.UserAgent, "useragent", "u", fmt.Sprintf("OpenBooks %s", ircVersion), "UserAgent / Version Reported to IRC Server.")
 
 	homeDir, err := os.UserHomeDir()
 	if err != nil {

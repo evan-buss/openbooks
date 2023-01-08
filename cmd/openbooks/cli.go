@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"os"
 	"strings"
@@ -31,7 +30,7 @@ var cliCmd = &cobra.Command{
 	Use:   "cli",
 	Short: "Run openbooks from the terminal in interactive CLI mode.",
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
-		cliConfig.Version = fmt.Sprintf("OpenBooks CLI %s", ircVersion)
+		cliConfig.Version = globalFlags.UserAgent
 		cliConfig.UserName = globalFlags.UserName
 		cliConfig.Server = globalFlags.Server
 		cliConfig.Log = globalFlags.Log

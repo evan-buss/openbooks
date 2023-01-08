@@ -18,7 +18,7 @@ func (server *server) NewIrcEventHandler(client *Client) core.EventHandler {
 	handler[core.MatchesFound] = client.matchesFoundHandler
 	handler[core.Ping] = client.pingHandler
 	handler[core.ServerList] = client.userListHandler(server.repository)
-	handler[core.Version] = client.versionHandler(server.config.Version)
+	handler[core.Version] = client.versionHandler(server.config.UserAgent)
 	return handler
 }
 

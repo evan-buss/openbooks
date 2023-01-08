@@ -1,0 +1,78 @@
+site_name: OpenBooks
+site_url: https://evan-buss.github.io/openbooks
+repo_name: OpenBooks
+repo_url: https://github.com/evan-buss/openbooks
+
+markdown_extensions:
+  - attr_list
+  - md_in_html
+  - def_list
+  - admonition
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - footnotes
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+
+theme:
+  name: material
+  features:
+    - navigation.instant
+    - navigation.tabs
+    # - navigation.tabs.sticky
+    - navigation.indexes
+  font:
+    text: Inter
+  icon:
+    logo: fontawesome/solid/book-open
+    repo: fontawesome/brands/github
+
+  palette:
+    # Palette toggle for light mode
+    - scheme: default
+      primary: blue
+      accent: cyan
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+
+    # Palette toggle for dark mode
+    - scheme: slate
+      primary: blue
+      accent: cyan
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+nav:
+  - Home:
+      - Home: index.md
+      - Getting Started: getting-started.md
+      - Configuration: configuration.md
+      - Setup:
+          - Docker: setup/docker.md
+          - Binary: setup/binary.md
+      # - Modes:/
+      # - Server: modes/server.md
+      - IRC Notes: irc-notes.md
+  - Changelog: changelog.md
+  - Developers:
+      - Home: developers/index.md
+      - Dev Container: developers/dev-container.md
+      - Experimental: developers/experimental.md
+      - Architecture: developers/architecture.md
+      - To-Do: developers/todo.md
+
+
+plugins:
+  - search
+  # - social:
+  #     cards: true
+  #     cards_dir: assets/images/social

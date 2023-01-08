@@ -1,0 +1,8 @@
+# https://taskfile.dev
+
+version: "3"
+
+includes:
+  dev: Taskfile.Development.yaml
+  docs: Taskfile.Documentation.yaml
+  release: Taskfile.Release.yaml

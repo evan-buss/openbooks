@@ -1,0 +1,3 @@
+- [ ] Show raw IRC logs in the browser.
+- [ ] Switch to a single IRC connection architecture.
+- [ ] Add client side search caching so search requests don't always go to the IRC server.

@@ -3,7 +3,6 @@ module github.com/evan-buss/openbooks
 go 1.19
 
 require (
-	github.com/brianvoe/gofakeit/v5 v5.11.2
 	github.com/dsnet/compress v0.0.2-0.20210315054119-f66993602bf5 // indirect
 	github.com/go-chi/chi/v5 v5.0.7
 	github.com/golang/snappy v0.0.4 // indirect

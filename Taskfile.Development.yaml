@@ -1,0 +1,58 @@
+# https://taskfile.dev
+
+version: "3"
+
+tasks:
+  go-update:
+    desc: Update Golang dependencies.
+    cmds:
+      - go get -u ./..
+      - go mod tidy
+
+  npm-update:
+    desc: Update Node.JS client side dependencies.
+    dir: server/app
+    cmds:
+      - npx npm-check-updates -i
+    interactive: true
+
+  npm-install:
+    desc: Install Node.JS client side dependencies.
+    dir: server/app
+    cmds:
+      - npm install
+    sources:
+      - package.json
+      - package-lock.json
+
+  mock:
+    desc: Start Mock Server for Development
+    dir: cmd/mock_server
+    cmds:
+      - go run .
+
+  cli:
+    desc: Run OpenBooks in CLI Mode.
+    dir: cmd/openbooks
+    cmds:
+      - go build
+      - ./openbooks cli --tls=false --server localhost:6667
+
+  server:
+    desc: Run OpenBooks in Server Mode.
+    dir: cmd/openbooks
+    cmds:
+      - go build
+      - ./openbooks server --tls=false --server localhost:6667
+
+  client:
+    desc: Run OpenBooks React Client Application in Development Mode.
+    dir: server/app
+    cmds:
+      - npm run dev
+
+  desktop:
+    desc: Run OpenBooks in the experimental desktop mode with a WebView GUI.
+    dir: cmd/openbooks
+    cmds:
+      - go run -tags webview
