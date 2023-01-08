@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/evan-buss/openbooks/irc"
 	"io/fs"
 	"log"
 	"net/http"
@@ -16,7 +17,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/evan-buss/openbooks/irc"
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 )
@@ -57,7 +57,15 @@ func (server *server) serveWs() http.HandlerFunc {
 			w.Header().Add("Set-Cookie", cookie.String())
 		}
 
-		userId := uuid.MustParse(cookie.Value)
+		userId, err := uuid.Parse(cookie.Value)
+		_, alreadyConnected := server.clients[userId]
+
+		// If invalid UUID or the same browser tries to connect again or multiple browser connections
+		// Don't connect to IRC or create new client
+		if err != nil || alreadyConnected || len(server.clients) > 0 {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
 
 		upgrader.CheckOrigin = func(req *http.Request) bool {
 			return true
@@ -69,14 +77,12 @@ func (server *server) serveWs() http.HandlerFunc {
 			return
 		}
 
-		// Each client gets its own connection, so use different usernames by appending count
-		name := fmt.Sprintf("%s_%d", server.config.UserName, len(server.clients)+1)
 		client := &Client{
 			conn: conn,
 			send: make(chan interface{}, 128),
 			uuid: userId,
-			irc:  irc.New(name, server.config.Version),
-			log:  log.New(os.Stdout, fmt.Sprintf("CLIENT (%s): ", name), log.LstdFlags|log.Lmsgprefix),
+			irc:  irc.New(server.config.UserName, server.config.UserAgent),
+			log:  log.New(os.Stdout, fmt.Sprintf("CLIENT (%s): ", server.config.UserName), log.LstdFlags|log.Lmsgprefix),
 			ctx:  context.Background(),
 		}
 
@@ -85,8 +91,6 @@ func (server *server) serveWs() http.HandlerFunc {
 
 		server.register <- client
 
-		// Allow collection of memory referenced by the caller by doing all work in
-		// new goroutines.
 		go server.writePump(client)
 		go server.readPump(client)
 	}

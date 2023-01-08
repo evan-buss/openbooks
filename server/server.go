@@ -55,7 +55,7 @@ type Config struct {
 	SearchTimeout           time.Duration
 	SearchBot               string
 	DisableBrowserDownloads bool
-	Version                 string
+	UserAgent               string
 }
 
 func New(config Config) *server {
