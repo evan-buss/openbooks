@@ -40,7 +40,7 @@ func (i *Conn) Connect(address string, enableTLS bool) error {
 
 	i.Conn = conn
 
-	user := "USER " + i.Username + " 0 * :" + i.realname + "\r\n"
+	user := "USER " + i.Username + " 0 * :" + i.Username + "\r\n"
 	nick := "NICK " + i.Username + "\r\n"
 
 	i.Write([]byte(user))
