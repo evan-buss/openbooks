@@ -7,20 +7,21 @@ For now, all config options are supplied via command line arguments / flags.
 
 These options apply to both Server and CLI mode.
 
-| Flag            | Default                   | Description                                                         |
-| --------------- | ------------------------- | ------------------------------------------------------------------- |
-| `--debug`       | `false`                   | Display additional debug information, including all config values.  |
-| `--help`/ `-h`  |                           | Display all commands and flags.                                     |
-| `--log`/`-l`    | `false`                   | Save raw IRC logs for each client connection.                       |
-| `--name`/`-n`   | `adjective_noun`          | Set a specific name to use when connecting to the IRC server.       |
-| `--searchbot`   | `search`                  | The IRC search operator to use. Try `searchook` if `search` is down |
-| `--server`/`-s` | `irc.irchighway.net:6697` | The IRC `server:port` to connect to.                                |
-| `--tls`         | `true`                    | Connect to IRC server over TLS.                                     |
+| Flag             | Default                   | Description                                                          |
+|------------------|---------------------------|----------------------------------------------------------------------|
+| `--debug`        | `false`                   | Display additional debug information, including all config values.   |
+| `--help`/ `-h`   |                           | Display all commands and flags.                                      |
+| `--log`/`-l`     | `false`                   | Save raw IRC logs for each client connection.                        |
+| `--name`/`-n`    | **REQUIRED**              | Username used to connect to IRC server.                              |
+| `--searchbot`    | `search`                  | The IRC search operator to use. Try `searchook` if `search` is down. |
+| `--server`/`-s`  | `irc.irchighway.net:6697` | The IRC `server:port` to connect to.                                 |
+| `--tls`          | `true`                    | Connect to IRC server over TLS.                                      |
+| `--useragent/-u` | `OpenBooks v4.5.0`        | UserAgent / Version Reported to IRC Server.                          |
 
 ## Server Mode Options
 
 | Flag                     | Default     | Description                                               |
-| ------------------------ | ----------- | --------------------------------------------------------- |
+|--------------------------|-------------|-----------------------------------------------------------|
 | `--basepath`             | `/`         | Web UI Path. Must have trailing `/`. (Ex. `/openbooks/`)  |
 | `--browser`/`-b`         | `false`     | Open the browser on startup.                              |
 | `--dir`/`-d`             | `/temp`[^1] | Directory where search results and eBooks are saved.      |
@@ -32,7 +33,7 @@ These options apply to both Server and CLI mode.
 ## CLI Mode Options
 
 | Flag         | Default           | Description                                          |
-| ------------ | ----------------- | ---------------------------------------------------- |
+|--------------|-------------------|------------------------------------------------------|
 | `--dir`/`-d` | Working Directory | Directory where search results and eBooks are saved. |
 
 [^1]: Docker sets a static directory of `/books` so that the volume is accessible outside the container.
