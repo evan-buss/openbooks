@@ -62,6 +62,7 @@ nav:
       # - Modes:/
       # - Server: modes/server.md
       - IRC Notes: irc-notes.md
+  - Changelog: changelog.md
   - Developers:
       - Home: developers/index.md
       - Dev Container: developers/dev-container.md
@@ -69,7 +70,6 @@ nav:
       - Architecture: developers/architecture.md
       - To-Do: developers/todo.md
 
-  - Changelog: changelog.md
 
 plugins:
   - search
