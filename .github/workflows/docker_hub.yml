@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: Publish Image to Docker Hub
+name: Publish Image to Docker Registries
 
 # Controls when the action will run. Triggers the workflow on push or pull request
 # events but only for the master branch
@@ -24,10 +24,10 @@ jobs:
         
       - name: Set Docker Platforms For Branch
         run: |
-          if [[ $GITHUB_REF == 'refs/heads/master' ]]; then
-              echo "DOCKER_PLATFORMS=linux/amd64,linux/arm64,linux/arm" >> "$GITHUB_ENV"
-          else
+          if [[ $GITHUB_REF == 'refs/heads/development' ]]; then
               echo "DOCKER_PLATFORMS=linux/amd64" >> "$GITHUB_ENV"
+          else
+              echo "DOCKER_PLATFORMS=linux/amd64,linux/arm64,linux/arm" >> "$GITHUB_ENV"
           fi
 
       - name: Set Docker Metadata
