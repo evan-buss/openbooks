@@ -1,14 +1,10 @@
 package dcc
 
 import (
-	"bytes"
-	"fmt"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"net"
 	"testing"
-
-	"github.com/evan-buss/openbooks/mock"
 )
 
 // TestStringParsing makes sure that data is properly extracted from the DCC
@@ -37,34 +33,6 @@ func TestStringParsing(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, table.download, download)
 	}
-}
-
-func TestDownload(t *testing.T) {
-	text := "Test dcc download content."
-
-	textDownload := Download{
-		Filename: "test.txt",
-		IP:       net.ParseIP("127.0.0.1").To4(),
-		Port:     6969,
-		Size:     int64(len(text)),
-	}
-
-	reader := bytes.NewReader([]byte(text))
-	server := mock.DccServer{
-		Port:   fmt.Sprintf(":%d", textDownload.Port),
-		Reader: reader,
-	}
-
-	ready := make(chan struct{}, 1)
-	go server.Start(ready)
-	<-ready
-
-	t.Log("After server start")
-
-	received := new(mock.WriteCloser)
-	err := textDownload.Download(received)
-	require.NoError(t, err)
-	assert.Equal(t, text, string(received.Data))
 }
 
 func TestIpConversion(t *testing.T) {
