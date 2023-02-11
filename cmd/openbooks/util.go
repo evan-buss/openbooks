@@ -8,7 +8,7 @@ import (
 )
 
 // Update a server config struct from globalFlags
-func bindGlobalServerFlags(config *server.Config) {
+func bindGlobalServerFlags(config *server.Config, globalFlags GlobalFlags) {
 	config.UserAgent = globalFlags.UserAgent
 	config.UserName = globalFlags.UserName
 	config.Log = globalFlags.Log

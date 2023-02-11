@@ -43,7 +43,7 @@ tasks:
     dir: cmd/openbooks
     cmds:
       - go build
-      - ./openbooks server --tls=false --server localhost:6667
+      - ./openbooks server --tls=false --server localhost:6667 --name dev_user
 
   client:
     desc: Run OpenBooks React Client Application in Development Mode.
