@@ -25,6 +25,7 @@ require (
 
 require (
 	github.com/davecgh/go-spew v1.1.1
+	github.com/elliotwutingfeng/asciiset v0.0.0-20230602005253-7f88bc28b13f
 	github.com/inkeliz/gowebview v1.0.1
 )
 
