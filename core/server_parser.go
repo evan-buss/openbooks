@@ -3,15 +3,11 @@ package core
 import (
 	"sort"
 	"strings"
+
+	"github.com/elliotwutingfeng/asciiset"
 )
 
-var prefixes = map[byte]struct{}{
-	'~': {},
-	'&': {},
-	'@': {},
-	'%': {},
-	'+': {},
-}
+var prefixes, _ = asciiset.MakeASCIISet("~&@%+")
 
 type IrcServers struct {
 	ElevatedUsers []string `json:"elevatedUsers"`
@@ -30,7 +26,7 @@ func ParseServers(rawString string) IrcServers {
 
 	for _, name := range allServers {
 		if len(name) > 1 {
-			if _, exists := prefixes[name[0]]; exists {
+			if exists := prefixes.Contains(name[0]); exists {
 				servers.ElevatedUsers = append(servers.ElevatedUsers, name[1:])
 			} else {
 				servers.RegularUsers = append(servers.RegularUsers, name)
