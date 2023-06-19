@@ -9,7 +9,7 @@ import {
   Tooltip
 } from "@mantine/core";
 import { AnimatePresence, motion } from "framer-motion";
-import { Book as BookIcon, Download, Trash } from "phosphor-react";
+import { Book as BookIcon, Download, Trash } from "@phosphor-icons/react";
 import { Book, useDeleteBookMutation, useGetBooksQuery } from "../../state/api";
 import { downloadFile } from "../../state/util";
 import { defaultAnimation } from "../../utils/animation";

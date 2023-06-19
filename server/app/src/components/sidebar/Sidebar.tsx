@@ -18,7 +18,7 @@ import {
   Plugs,
   Sidebar as SidebarIcon,
   Sun
-} from "phosphor-react";
+} from "@phosphor-icons/react";
 import { toggleDrawer } from "../../state/notificationSlice";
 import { toggleSidebar } from "../../state/stateSlice";
 import { useAppDispatch, useAppSelector } from "../../state/store";

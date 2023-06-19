@@ -8,30 +8,31 @@
     "prettier": "prettier --write 'src/**/*.{ts,tsx,js,vue}'"
   },
   "dependencies": {
-    "@emotion/react": "^11.10.4",
-    "@mantine/core": "^5.2.6",
-    "@mantine/hooks": "^5.2.6",
-    "@mantine/notifications": "^5.2.6",
-    "@reduxjs/toolkit": "^1.8.5",
-    "@tanstack/react-table": "^8.5.13",
+    "@emotion/react": "^11.11.1",
+    "@mantine/core": "^6.0.13",
+    "@mantine/hooks": "^6.0.13",
+    "@mantine/notifications": "^6.0.13",
+    "@phosphor-icons/react": "^2.0.10",
+    "@reduxjs/toolkit": "^1.9.5",
+    "@tanstack/match-sorter-utils": "^8.8.4",
+    "@tanstack/react-table": "^8.9.2",
     "@tanstack/react-virtual": "^3.0.0-alpha.0",
-    "framer-motion": "^7.2.1",
+    "framer-motion": "^10.12.16",
     "lodash": "^4.17.21",
-    "npm": "^8.19.1",
-    "phosphor-react": "^1.4.1",
+    "npm": "^9.7.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-redux": "^8.0.2",
-    "react-router-dom": "^6.3.0"
+    "react-redux": "^8.1.0",
+    "react-router-dom": "^6.13.0"
   },
   "devDependencies": {
-    "@types/lodash": "^4.14.184",
-    "@types/node": "^18.7.15",
-    "@types/react": "^18.0.18",
-    "@types/react-dom": "^18.0.6",
-    "@vitejs/plugin-react": "^2.1.0",
-    "prettier": "2.7.1",
-    "typescript": "^4.8.2",
-    "vite": "^3.1.0"
+    "@types/lodash": "^4.14.195",
+    "@types/node": "^20.3.1",
+    "@types/react": "^18.2.12",
+    "@types/react-dom": "^18.2.5",
+    "@vitejs/plugin-react": "^4.0.0",
+    "prettier": "2.8.8",
+    "typescript": "^5.1.3",
+    "vite": "^4.3.9"
   }
 }
