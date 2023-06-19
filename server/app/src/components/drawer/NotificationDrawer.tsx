@@ -10,7 +10,7 @@ import {
   useMantineColorScheme
 } from "@mantine/core";
 import { AnimatePresence, motion } from "framer-motion";
-import { BellSimpleSlash } from "phosphor-react";
+import { BellSimpleSlash } from "@phosphor-icons/react";
 import { useSelector } from "react-redux";
 import { NotificationType } from "../../state/messages";
 import {

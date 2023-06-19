@@ -27,7 +27,7 @@ tasks:
 
   mock:
     desc: Start Mock Server for Development
-    dir: cmd/mock_server
+    dir: cmd/mock
     cmds:
       - go run .
 
@@ -36,14 +36,14 @@ tasks:
     dir: cmd/openbooks
     cmds:
       - go build
-      - ./openbooks cli --tls=false --server localhost:6667
+      - ./openbooks cli --tls=false --server localhost:6667 --name "dev-user"
 
   server:
     desc: Run OpenBooks in Server Mode.
     dir: cmd/openbooks
     cmds:
       - go build
-      - ./openbooks server --tls=false --server localhost:6667
+      - ./openbooks server --tls=false --server localhost:6667 --name "dev-user"
 
   client:
     desc: Run OpenBooks React Client Application in Development Mode.

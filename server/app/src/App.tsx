@@ -7,7 +7,7 @@ import {
   MantineProvider
 } from "@mantine/core";
 import { useLocalStorage } from "@mantine/hooks";
-import { NotificationsProvider } from "@mantine/notifications";
+import { Notifications } from "@mantine/notifications";
 import NotificationDrawer from "./components/drawer/NotificationDrawer";
 import Sidebar from "./components/sidebar/Sidebar";
 import SearchPage from "./pages/SearchPage";
@@ -79,24 +79,23 @@ export default function App() {
             }
           }
         }}>
-        <NotificationsProvider position="top-center">
-          <AppShell
-            navbar={<Sidebar />}
-            padding={0}
-            styles={(theme) => ({
-              main: {
-                backgroundColor:
-                  theme.colorScheme === "dark"
-                    ? theme.colors.dark[8]
-                    : theme.colors.gray[0]
-              }
-            })}>
-            <div className={classes.wrapper}>
-              <SearchPage />
-              <NotificationDrawer />
-            </div>
-          </AppShell>
-        </NotificationsProvider>
+        <Notifications position="top-center" />
+        <AppShell
+          navbar={<Sidebar />}
+          padding={0}
+          styles={(theme) => ({
+            main: {
+              backgroundColor:
+                theme.colorScheme === "dark"
+                  ? theme.colors.dark[8]
+                  : theme.colors.gray[0]
+            }
+          })}>
+          <div className={classes.wrapper}>
+            <SearchPage />
+            <NotificationDrawer />
+          </div>
+        </AppShell>
       </MantineProvider>
     </ColorSchemeProvider>
   );

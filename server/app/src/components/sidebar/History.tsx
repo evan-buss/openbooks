@@ -10,7 +10,7 @@ import {
 } from "@mantine/core";
 import { Dispatch } from "@reduxjs/toolkit";
 import { AnimatePresence, motion } from "framer-motion";
-import { Eye, EyeSlash, MagnifyingGlass, Trash } from "phosphor-react";
+import { Eye, EyeSlash, MagnifyingGlass, Trash } from "@phosphor-icons/react";
 import { useSelector } from "react-redux";
 import {
   deleteHistoryItem,
