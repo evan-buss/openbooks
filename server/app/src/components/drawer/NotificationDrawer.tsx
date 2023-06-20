@@ -4,6 +4,7 @@ import {
   Drawer,
   Group,
   Notification,
+  ScrollArea,
   Stack,
   Text,
   Tooltip,
@@ -50,7 +51,8 @@ export default function NotificationDrawer() {
         title: {
           width: "100%",
           marginRight: 0
-        }
+        },
+        body: { width: "100%", height: "calc(100% - 52px)", padding: 0 }
       }}
       title={
         <Group position="apart">
@@ -81,39 +83,44 @@ export default function NotificationDrawer() {
       ) : (
         <Stack
           spacing="xs"
-          style={{ overflow: "scroll", height: "calc(100% - 44px)" }}>
-          <AnimatePresence mode="popLayout">
-            {notifications.map((notif) => (
-              <motion.div {...defaultAnimation} key={notif.timestamp}>
-                <Tooltip
-                  position="left"
-                  label={new Date(notif.timestamp).toLocaleTimeString("en-US", {
-                    timeStyle: "medium"
-                  })}>
-                  <Text
-                    color="dimmed"
-                    size="xs"
-                    weight={500}
-                    style={{ marginBottom: "0.25rem" }}>
-                    {new Date(notif.timestamp).toLocaleTimeString("en-US", {
-                      timeStyle: "short"
-                    })}
-                  </Text>
-                </Tooltip>
-                <Notification
-                  color={getIntent(notif.appearance)}
-                  styles={{
-                    root: {
-                      boxShadow: "none"
-                    }
-                  }}
-                  title={notif.title}
-                  onClose={() => dispatch(dismissNotification(notif))}>
-                  {notif.detail}
-                </Notification>
-              </motion.div>
-            ))}
-          </AnimatePresence>
+          style={{
+            overflow: "hidden",
+            height: "100%"
+          }}>
+          <ScrollArea h="100%" p={16}>
+            <AnimatePresence mode="popLayout">
+              {notifications.map((notif) => (
+                <motion.div {...defaultAnimation} key={notif.timestamp}>
+                  <Tooltip
+                    position="bottom-start"
+                    label={new Date(notif.timestamp).toLocaleDateString(
+                      "en-US",
+                      {
+                        dateStyle: "long"
+                      }
+                    )}>
+                    <Text color="dimmed" size="xs" weight={500} mb={4}>
+                      {new Date(notif.timestamp).toLocaleTimeString("en-US", {
+                        timeStyle: "short"
+                      })}
+                    </Text>
+                  </Tooltip>
+                  <Notification
+                    color={getIntent(notif.appearance)}
+                    mb={6}
+                    styles={{
+                      root: {
+                        boxShadow: "none"
+                      }
+                    }}
+                    title={notif.title}
+                    onClose={() => dispatch(dismissNotification(notif))}>
+                    {notif.detail}
+                  </Notification>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </ScrollArea>
         </Stack>
       )}
     </Drawer>
