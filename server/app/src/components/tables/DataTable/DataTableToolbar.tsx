@@ -2,6 +2,7 @@ import { Table } from "@tanstack/react-table";
 import { Button, Group, Space, TextInput } from "@mantine/core";
 import { X } from "@phosphor-icons/react";
 import React from "react";
+import { DataTableViewOptions } from "./DataTableViewOptions";
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>;
@@ -21,9 +22,10 @@ export default function DataTableToolbar<TData>({
     table.getFilteredRowModel().rows.length;
 
   return (
-    <Group mb={8} w="100%" position="apart">
-      <Group>
+    <Group mb={10} w="100%" position="apart">
+      <Group spacing={8}>
         <TextInput
+          w={{ xs: "150px", sm: "195px" }}
           variant={"filled"}
           size="xs"
           value={searchQuery}
@@ -34,21 +36,21 @@ export default function DataTableToolbar<TData>({
         />
         {facetFilters &&
           facetFilters(table)?.map((facetFilter, index) => facetFilter)}
-        <Space />
+        {isFiltered && (
+          <Button
+            variant="subtle"
+            size="xs"
+            onClick={() => {
+              table.resetColumnFilters();
+              table.resetGlobalFilter();
+            }}
+            rightIcon={<X />}>
+            Reset
+          </Button>
+        )}
       </Group>
-      {isFiltered && (
-        <Button
-          variant="default"
-          size="xs"
-          onClick={() => {
-            table.resetColumnFilters();
-            table.resetGlobalFilter();
-          }}
-          className="h-8 px-2 lg:px-3"
-          leftIcon={<X />}>
-          Reset
-        </Button>
-      )}
+
+      <DataTableViewOptions table={table} />
     </Group>
   );
 }

@@ -95,6 +95,7 @@ export default function BookTable({ books }: BookTableProps) {
       size: cols(1),
       enableGlobalFilter: false,
       enableSorting: false,
+      enableHiding: false,
       cell: (props) => <DownloadButton book={props.getValue()}></DownloadButton>
     })
   ];
