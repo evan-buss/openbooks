@@ -10,7 +10,7 @@ import {
   TextInput,
   Title
 } from "@mantine/core";
-import { MagnifyingGlass, Sidebar, Warning } from "phosphor-react";
+import { MagnifyingGlass, Sidebar, Warning } from "@phosphor-icons/react";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import image from "../assets/reading.svg";
 import BookTable from "../components/tables/BookTable";

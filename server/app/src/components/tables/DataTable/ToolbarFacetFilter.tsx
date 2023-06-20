@@ -1,20 +1,21 @@
 import {
+  Badge,
   Box,
   Button,
   Center,
   CloseButton,
   createStyles,
+  Divider,
   Group,
-  Indicator,
   Popover,
   Text,
   TextInput
 } from "@mantine/core";
-import { Column, Table } from "@tanstack/react-table";
+import { Column } from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { CaretDown, MagnifyingGlass } from "phosphor-react";
+import { MagnifyingGlass, PlusCircle } from "@phosphor-icons/react";
 import { CSSProperties, useRef, useState } from "react";
-import { useGetServersQuery } from "../../../state/api";
+import { useMediaQuery } from "@mantine/hooks";
 
 const stringContains = (first: string, second: string): boolean => {
   return first.toLowerCase().includes(second.toLowerCase());
@@ -44,6 +45,14 @@ const useStyles = createStyles((theme) => {
       textTransform: "none"
     },
     button: {
+      border: `1px dashed ${
+        theme.colorScheme === "dark"
+          ? theme.colors.dark[3]
+          : theme.colors.gray[3]
+      }`,
+      borderRadius: theme.radius.md,
+      backgroundColor:
+        theme.colorScheme === "dark" ? theme.colors.dark[6] : "white",
       ["&:hover"]: {
         backgroundColor:
           theme.colorScheme === "dark"
@@ -54,19 +63,24 @@ const useStyles = createStyles((theme) => {
   };
 });
 
-interface FacetFilterProps {
+interface FacetFilterProps<TData> {
   placeholder: string;
-  column: Column<any, string>;
-  table: Table<any>;
+  column: Column<TData, unknown>;
   Entry: React.FC<FacetEntryProps>;
 }
 
-export default function FacetFilter({
+export interface FacetEntryProps {
+  entry: string;
+  selected: boolean;
+  onClick: (entry: string) => void;
+  style: CSSProperties;
+}
+
+export default function ToolbarFacetFilter<TData>({
   placeholder,
   column,
-  table,
   Entry
-}: FacetFilterProps) {
+}: FacetFilterProps<TData>) {
   const [filter, setFilter] = useState("");
   const [opened, setOpened] = useState(false);
 
@@ -85,6 +99,8 @@ export default function FacetFilter({
 
   const filterValue = (column.getFilterValue() ?? []) as string[];
 
+  const useSmallLayout = useMediaQuery(`(max-width: ${theme.breakpoints.xs})`);
+
   const buttonColor =
     theme.colorScheme === "dark"
       ? filterValue.length > 0
@@ -98,7 +114,7 @@ export default function FacetFilter({
     <Popover
       width={200}
       trapFocus
-      position="bottom"
+      position="bottom-start"
       withArrow
       shadow="md"
       opened={opened}
@@ -106,15 +122,46 @@ export default function FacetFilter({
       styles={{ dropdown: { padding: 0 } }}>
       <Popover.Target>
         <Button
-          variant="subtle"
-          size="xs"
+          variant=""
           className={classes.button}
-          compact
-          uppercase
+          size="xs"
+          leftIcon={<PlusCircle size={16} />}
           color={buttonColor}
-          onClick={() => setOpened((o) => !o)}
-          rightIcon={<CaretDown weight="bold" />}>
+          onClick={() => setOpened((o) => !o)}>
           {placeholder}
+          {filterValue.length > 0 && (
+            <>
+              <Divider my={4} ml={8} mr={4} orientation="vertical" />
+              {useSmallLayout ? (
+                <Badge
+                  display={{ md: "hidden" }}
+                  color={buttonColor}
+                  radius="sm"
+                  size="xs">
+                  {filterValue.length}
+                </Badge>
+              ) : (
+                <Box>
+                  {filterValue.length > 2 ? (
+                    <Badge color={buttonColor} radius="sm" size="xs">
+                      {filterValue.length} selected
+                    </Badge>
+                  ) : (
+                    filterValue.map((value, index) => (
+                      <Badge
+                        key={index}
+                        radius="sm"
+                        color={buttonColor}
+                        size="xs"
+                        ml={4}>
+                        {value}
+                      </Badge>
+                    ))
+                  )}
+                </Box>
+              )}
+            </>
+          )}
         </Button>
       </Popover.Target>
       <Popover.Dropdown>
@@ -205,109 +252,5 @@ export default function FacetFilter({
         </div>
       </Popover.Dropdown>
     </Popover>
-  );
-}
-
-const useFacetStyles = createStyles((theme) => {
-  const border = `1px solid ${
-    theme.colorScheme === "dark" ? theme.colors.dark[4] : theme.colors.gray[3]
-  }`;
-
-  return {
-    entry: {
-      ...theme.fn.focusStyles(),
-      height: 30,
-      position: "relative",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "start",
-      padding: "0 8px",
-      cursor: "pointer",
-      borderBottom: border,
-      userSelect: "none",
-      ["&:hover, &:focus"]: {
-        backgroundColor:
-          theme.colorScheme === "dark"
-            ? theme.colors.dark[7]
-            : theme.colors.gray[0]
-      }
-    },
-    entrySelected: {
-      backgroundColor:
-        theme.colorScheme === "dark"
-          ? theme.colors.dark[7]
-          : theme.colors.gray[0]
-    },
-    indicator: {
-      width: 2,
-      height: "80%",
-      position: "absolute",
-      left: 0,
-      backgroundColor:
-        theme.colorScheme === "dark"
-          ? theme.colors.brand[3]
-          : theme.colors.brand[4],
-      borderRadius: theme.radius.xl
-    }
-  };
-});
-
-export interface FacetEntryProps {
-  entry: string;
-  selected: boolean;
-  onClick: (entry: string) => void;
-  style: CSSProperties;
-}
-
-export function ServerFacetEntry({
-  entry,
-  onClick,
-  selected,
-  style
-}: FacetEntryProps) {
-  const { classes, cx } = useFacetStyles();
-  const { data: servers } = useGetServersQuery(null);
-  const serverOnline = servers?.includes(entry) ?? false;
-
-  return (
-    <Box
-      tabIndex={0}
-      className={cx(classes.entry, { [classes.entrySelected]: selected })}
-      style={style}
-      onClick={() => onClick(entry)}>
-      <div className={cx({ [classes.indicator]: selected })}></div>
-
-      <Text size={12} weight="normal" color="dark" style={{ marginLeft: 20 }}>
-        <Indicator
-          position="middle-start"
-          offset={-16}
-          size={6}
-          color={serverOnline ? "green.6" : "gray"}>
-          {entry}
-        </Indicator>
-      </Text>
-    </Box>
-  );
-}
-
-export function StandardFacetEntry({
-  entry,
-  onClick,
-  selected,
-  style
-}: FacetEntryProps): JSX.Element {
-  const { classes, cx } = useFacetStyles();
-  return (
-    <Box
-      tabIndex={0}
-      className={cx(classes.entry, { [classes.entrySelected]: selected })}
-      style={style}
-      onClick={() => onClick(entry)}>
-      <div className={cx({ [classes.indicator]: selected })}></div>
-
-      <Text size={12} weight="normal" color="dark">
-        {entry}
-      </Text>
-    </Box>
   );
 }
