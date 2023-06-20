@@ -1,6 +1,5 @@
 import {
   ActionIcon,
-  Burger,
   createStyles,
   Group,
   MediaQuery,
@@ -17,7 +16,8 @@ import {
   MoonStars,
   Plugs,
   Sidebar as SidebarIcon,
-  Sun
+  Sun,
+  X
 } from "@phosphor-icons/react";
 import { toggleDrawer } from "../../state/notificationSlice";
 import { toggleSidebar } from "../../state/stateSlice";
@@ -62,7 +62,7 @@ export default function Sidebar() {
 
   return (
     <Navbar
-      width={{ sm: 300 }}
+      width={{ md: 300 }}
       hiddenBreakpoint="sm"
       hidden={!opened}
       className={classes.navbar}>
@@ -82,12 +82,13 @@ export default function Sidebar() {
                 <BellSimple weight="bold" size={18} />
               </ActionIcon>
             </Tooltip>
-            <MediaQuery largerThan="sm" styles={{ display: "none" }}>
-              <Burger
-                opened={opened}
-                onClick={() => dispatch(toggleSidebar())}
-                size="sm"
-              />
+            <MediaQuery largerThan="md" styles={{ display: "none" }}>
+              <ActionIcon
+                variant="subtle"
+                color="dark"
+                onClick={() => dispatch(toggleSidebar())}>
+                <X weight="bold" size={18} />
+              </ActionIcon>
             </MediaQuery>
           </Group>
         </Group>

@@ -81,7 +81,7 @@ export default function App() {
         }}>
         <Notifications position="top-center" />
         <AppShell
-          navbar={<Sidebar />}
+          aside={<Sidebar />}
           padding={0}
           styles={(theme) => ({
             main: {
