@@ -23,7 +23,7 @@ import {
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { ReactNode, useMemo, useRef, useState } from "react";
 import { BookDetail } from "../../../state/messages";
-import DataTableToolbar from "./DataTableToolbar";
+import Toolbar from "./Toolbar";
 import {
   compareItems,
   RankingInfo,
@@ -194,7 +194,7 @@ export default function DataTable<TData, TValue>({
       : 0;
   return (
     <>
-      <DataTableToolbar
+      <Toolbar
         table={table}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
