@@ -3,13 +3,13 @@ import { Button, Menu, useMantineTheme } from "@mantine/core";
 import React from "react";
 import { Check, Sliders } from "@phosphor-icons/react";
 
-interface DataTableViewOptionsProps<TData> {
+interface ToolbarViewOptionsProps<TData> {
   table: Table<TData>;
 }
 
-export function DataTableViewOptions<TData>({
+export function ToolbarViewOptions<TData>({
   table
-}: DataTableViewOptionsProps<TData>) {
+}: ToolbarViewOptionsProps<TData>) {
   const theme = useMantineTheme();
   const buttonColor = theme.colorScheme === "dark" ? "brand.2" : "dark.0";
   const hideableColumns = table
@@ -33,7 +33,7 @@ export function DataTableViewOptions<TData>({
         <Button
           color={buttonColor}
           size="xs"
-          variant="outline"
+          variant="default"
           leftIcon={<Sliders />}>
           View
         </Button>
