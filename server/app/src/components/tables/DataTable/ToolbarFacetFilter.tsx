@@ -15,6 +15,7 @@ import { Column } from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { MagnifyingGlass, PlusCircle } from "@phosphor-icons/react";
 import { CSSProperties, useRef, useState } from "react";
+import { useMediaQuery } from "@mantine/hooks";
 
 const stringContains = (first: string, second: string): boolean => {
   return first.toLowerCase().includes(second.toLowerCase());
@@ -98,6 +99,8 @@ export default function ToolbarFacetFilter<TData>({
 
   const filterValue = (column.getFilterValue() ?? []) as string[];
 
+  const useSmallLayout = useMediaQuery(`(max-width: ${theme.breakpoints.xs})`);
+
   const buttonColor =
     theme.colorScheme === "dark"
       ? filterValue.length > 0
@@ -129,19 +132,34 @@ export default function ToolbarFacetFilter<TData>({
           {filterValue.length > 0 && (
             <>
               <Divider my={4} ml={8} mr={4} orientation="vertical" />
-              <Box>
-                {filterValue.length > 2 ? (
-                  <Badge color={buttonColor} size="xs">
-                    {filterValue.length} selected
-                  </Badge>
-                ) : (
-                  filterValue.map((value, index) => (
-                    <Badge key={index} color={buttonColor} size="xs" ml={4}>
-                      {value}
+              {useSmallLayout ? (
+                <Badge
+                  display={{ md: "hidden" }}
+                  color={buttonColor}
+                  radius="sm"
+                  size="xs">
+                  {filterValue.length}
+                </Badge>
+              ) : (
+                <Box>
+                  {filterValue.length > 2 ? (
+                    <Badge color={buttonColor} radius="sm" size="xs">
+                      {filterValue.length} selected
                     </Badge>
-                  ))
-                )}
-              </Box>
+                  ) : (
+                    filterValue.map((value, index) => (
+                      <Badge
+                        key={index}
+                        radius="sm"
+                        color={buttonColor}
+                        size="xs"
+                        ml={4}>
+                        {value}
+                      </Badge>
+                    ))
+                  )}
+                </Box>
+              )}
             </>
           )}
         </Button>

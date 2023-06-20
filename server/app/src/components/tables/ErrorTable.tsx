@@ -37,14 +37,16 @@ export default function ErrorTable({
         <DataTableColumnHeader column={props.column} title="Line" />
       ),
       cell: (props) => <code style={{ margin: 0 }}>{props.getValue()}</code>,
-      size: cols(9)
+      size: cols(9),
+      enableHiding: false
     }),
     columnHelper.accessor("error", {
       header: (props) => (
         <DataTableColumnHeader column={props.column} title="Error" />
       ),
       size: cols(3),
-      filterFn: "arrIncludesSome"
+      filterFn: "arrIncludesSome",
+      enableHiding: false
     })
   ];
 
