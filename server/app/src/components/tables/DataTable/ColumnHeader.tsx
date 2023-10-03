@@ -1,19 +1,12 @@
 import { Column } from "@tanstack/react-table";
-import { Button, createStyles, Menu, Text } from "@mantine/core";
+import { Button, Menu, Text, useMantineColorScheme } from "@mantine/core";
 import {
+  CaretUpDown,
   SortAscending,
   SortDescending,
-  CaretUpDown,
   XCircle
 } from "@phosphor-icons/react";
 import React from "react";
-
-const useStyles = createStyles((theme) => ({
-  button: {
-    color:
-      theme.colorScheme === "dark" ? theme.colors.dark[0] : theme.colors.gray[7]
-  }
-}));
 
 interface DataTableColumnHeaderProps<TData, TValue>
   extends React.HTMLAttributes<HTMLDivElement> {
@@ -27,11 +20,17 @@ export function DataTableColumnHeader<TData, TValue>({
   title,
   icon
 }: DataTableColumnHeaderProps<TData, TValue>) {
-  const { classes } = useStyles();
+  const { colorScheme } = useMantineColorScheme();
+  const isDark = colorScheme === "dark";
 
   if (!column.getCanSort()) {
     return (
-      <Text mx={20} transform="uppercase">
+      <Text
+        style={{ color: "var(--mantine-color-dark-light-color)" }}
+        fw={500}
+        mx={20}
+        size="xs"
+        tt="uppercase">
         {title}
       </Text>
     );
@@ -42,12 +41,11 @@ export function DataTableColumnHeader<TData, TValue>({
       <Menu.Target>
         <Button
           color="dark"
-          leftIcon={icon}
-          uppercase
-          className={classes.button}
+          leftSection={icon}
+          tt="uppercase"
           size="xs"
           variant="subtle"
-          rightIcon={
+          rightSection={
             column.getIsSorted() === "desc" ? (
               <SortDescending className="ml-2 h-4 w-4" />
             ) : column.getIsSorted() === "asc" ? (
@@ -62,18 +60,18 @@ export function DataTableColumnHeader<TData, TValue>({
 
       <Menu.Dropdown>
         <Menu.Item
-          icon={<SortAscending size={14} />}
+          leftSection={<SortAscending size={14} />}
           onClick={() => column.toggleSorting(false)}>
           Ascending
         </Menu.Item>
         <Menu.Item
-          icon={<SortDescending size={14} />}
+          leftSection={<SortDescending size={14} />}
           onClick={() => column.toggleSorting(true)}>
           Descending
         </Menu.Item>
         {column.getIsSorted() !== false && (
           <Menu.Item
-            icon={<XCircle size={14} />}
+            leftSection={<XCircle size={14} />}
             onClick={() => column.clearSorting()}>
             Clear Sort
           </Menu.Item>

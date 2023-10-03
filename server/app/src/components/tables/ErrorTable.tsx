@@ -66,15 +66,11 @@ export default function ErrorTable({
       shadow="md"
       opened={opened}>
       <Popover.Target>
-        <ActionIcon
-          color="brand"
-          variant="light"
-          onMouseEnter={open}
-          onMouseLeave={close}>
+        <ActionIcon variant="light" onMouseEnter={open} onMouseLeave={close}>
           <Info size={18} />
         </ActionIcon>
       </Popover.Target>
-      <Popover.Dropdown sx={{ pointerEvents: "none" }} w={400}>
+      <Popover.Dropdown style={{ pointerEvents: "none" }} w={400}>
         <Text size="sm">
           {errors?.length === 1 ? "This result" : "These results"} could not be
           parsed to due to {errors?.length === 1 ? "its" : "their"} non-standard

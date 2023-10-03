@@ -1,0 +1,24 @@
+.stack {
+    min-width: 100%;
+    margin: var(--mantine-spacing-xl);
+    background-color: var(--mantine-color-blue-0);
+}
+
+.errorToggle {
+    //align-self: start;
+    margin-bottom: var(--mantine-spacing-sm);
+
+    color: light-dark(var(--mantine-color-dark-3), var(--mantine-color-dark-2));
+    @mixin hover {
+        background-color: light-dark(var(--mantine-color-gray-1), var(--mantine-color-dark-7));
+    }
+
+    &[data-error-mode] {
+        color: light-dark(var(--mantine-color-white), var(--mantine-color-dark-8));
+        @mixin hover {
+            background-color: light-dark(var(--mantine-color-blue-5), var(--mantine-color-blue-3));
+        }
+    }
+}
+
+

@@ -1,0 +1,28 @@
+.listEntry {
+    height: 30px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: start;
+    padding: 0 8px;
+    cursor: pointer;
+    border-bottom: 1px solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-3));
+    user-select: none;
+
+    @mixin hover {
+        background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-7));
+    }
+
+    &[data-selected], &:focus {
+        background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-7));
+    }
+}
+
+.indicator {
+    width: 2px;
+    height: 80%;
+    position: absolute;
+    left: 0;
+    background-color: light-dark(var(--mantine-color-blue-4), var(--mantine-color-blue-3));
+    border-radius: var(--mantine-radius-xl);
+}

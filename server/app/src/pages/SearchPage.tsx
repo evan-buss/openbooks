@@ -2,13 +2,12 @@ import {
   ActionIcon,
   Button,
   Center,
-  createStyles,
   Group,
   Image,
-  MediaQuery,
   Stack,
   TextInput,
-  Title
+  Title,
+  useMantineColorScheme
 } from "@mantine/core";
 import { MagnifyingGlass, Sidebar, Warning } from "@phosphor-icons/react";
 import { FormEvent, useEffect, useMemo, useState } from "react";
@@ -18,59 +17,24 @@ import ErrorTable from "../components/tables/ErrorTable";
 import { MessageType } from "../state/messages";
 import { sendMessage, sendSearch, toggleSidebar } from "../state/stateSlice";
 import { useAppDispatch, useAppSelector } from "../state/store";
-
-const useStyles = createStyles(
-  (theme, { errorMode }: { errorMode: boolean }) => ({
-    stack: {
-      minWidth: "100%",
-      margin: theme.spacing.xl,
-      backgroundColor: theme.colors.blue[0]
-    },
-    wFull: {
-      width: "100%"
-    },
-    errorToggle: {
-      "alignSelf": "start",
-      "height": "24px",
-      "marginBottom": theme.spacing.xs,
-      "fontWeight": 500,
-      "color":
-        theme.colorScheme === "dark"
-          ? errorMode
-            ? theme.colors.dark[8]
-            : theme.colors.dark[2]
-          : errorMode
-          ? theme.colors.white
-          : theme.colors.dark[3],
-      "&:hover": {
-        backgroundColor:
-          theme.colorScheme === "dark"
-            ? errorMode
-              ? theme.colors.brand[3]
-              : theme.colors.dark[7]
-            : errorMode
-            ? theme.colors.brand[5]
-            : theme.colors.gray[1]
-      }
-    }
-  })
-);
+import classes from "./SearchPage.module.css";
+import { conditionalAttribute } from "../utils/attribute-helper";
 
 export default function SearchPage() {
   const dispatch = useAppDispatch();
   const activeItem = useAppSelector((store) => store.state.activeItem);
   const opened = useAppSelector((store) => store.state.isSidebarOpen);
 
+  const { colorScheme } = useMantineColorScheme();
+
   const [searchQuery, setSearchQuery] = useState("");
   const [showErrors, setShowErrors] = useState(false);
 
   const hasErrors = (activeItem?.errors ?? []).length > 0;
-  const errorMode = showErrors && activeItem;
+  const errorMode = showErrors && !!activeItem;
   const validInput = errorMode
     ? searchQuery.startsWith("!")
     : searchQuery !== "";
-
-  const { classes, theme } = useStyles({ errorMode: !!errorMode });
 
   useEffect(() => {
     setShowErrors(false);
@@ -109,22 +73,16 @@ export default function SearchPage() {
   );
 
   return (
-    <Stack
-      spacing={0}
-      align="center"
-      sx={(theme) => ({ width: "100%", margin: theme.spacing.xl })}>
-      <form className={classes.wFull} onSubmit={(e) => searchHandler(e)}>
-        <Group
-          noWrap
-          spacing="md"
-          sx={(theme) => ({ marginBottom: theme.spacing.md })}>
+    <Stack gap={0} align="flex-start" style={{ flexGrow: 1 }}>
+      <form style={{ width: "100%" }} onSubmit={(e) => searchHandler(e)}>
+        <Group wrap="nowrap" gap="md" mb="md">
           {!opened && (
             <ActionIcon size="lg" onClick={() => dispatch(toggleSidebar())}>
               <Sidebar weight="bold" size={20}></Sidebar>
             </ActionIcon>
           )}
           <TextInput
-            className={classes.wFull}
+            w="100%"
             variant="filled"
             disabled={activeItem !== null && !activeItem.results}
             value={searchQuery}
@@ -134,17 +92,17 @@ export default function SearchPage() {
             }
             radius="md"
             type="search"
-            icon={<MagnifyingGlass weight="bold" size={22} />}
+            leftSection={<MagnifyingGlass weight="bold" size={22} />}
             required
           />
 
           <Button
             type="submit"
-            color={theme.colorScheme === "dark" ? "brand.2" : "brand"}
             disabled={!validInput}
+            color={colorScheme === "dark" ? "blue.2" : "blue"}
             radius="md"
             variant={validInput ? "gradient" : "default"}
-            gradient={{ from: "brand.4", to: "brand.3" }}>
+            gradient={{ from: "blue.4", to: "blue.3" }}>
             {errorMode ? "Download" : "Search"}
           </Button>
         </Group>
@@ -152,11 +110,12 @@ export default function SearchPage() {
 
       {hasErrors && (
         <Button
+          {...conditionalAttribute("error-mode", errorMode)}
           className={classes.errorToggle}
           variant={errorMode ? "filled" : "subtle"}
           onClick={() => setShowErrors((show) => !show)}
-          leftIcon={<Warning size={18} />}
-          size="xs">
+          leftSection={<Warning size={18} />}
+          size="compact-xs">
           {activeItem?.errors?.length} Parsing{" "}
           {activeItem?.errors?.length === 1 ? "Error" : "Errors"}
         </Button>
@@ -164,25 +123,23 @@ export default function SearchPage() {
       {!activeItem ? (
         <Center style={{ height: "100%", width: "100%" }}>
           <Stack align="center">
-            <Title weight="normal" align="center">
+            <Title fw="normal" ta="center">
               Search a book to get started.
             </Title>
-            <MediaQuery smallerThan="md" styles={{ display: "none" }}>
-              <Image
-                width={600}
-                fit="contain"
-                src={image}
-                alt="person reading"
-              />
-            </MediaQuery>
-            <MediaQuery largerThan="md" styles={{ display: "none" }}>
-              <Image
-                width={300}
-                fit="contain"
-                src={image}
-                alt="person reading"
-              />
-            </MediaQuery>
+            <Image
+              hiddenFrom="lg"
+              w={300}
+              fit="contain"
+              src={image}
+              alt="person reading"
+            />
+            <Image
+              visibleFrom="lg"
+              w={600}
+              fit="contain"
+              src={image}
+              alt="person reading"
+            />
           </Stack>
         </Center>
       ) : errorMode ? (

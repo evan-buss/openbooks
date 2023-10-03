@@ -4,64 +4,22 @@ import {
   Button,
   Center,
   CloseButton,
-  createStyles,
   Divider,
   Group,
   Popover,
   Text,
-  TextInput
+  TextInput,
+  useMantineColorScheme
 } from "@mantine/core";
 import { Column } from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { MagnifyingGlass, PlusCircle } from "@phosphor-icons/react";
 import { CSSProperties, useRef, useState } from "react";
-import { useMediaQuery } from "@mantine/hooks";
+import classes from "./ToolbarFacetFilter.module.css";
 
 const stringContains = (first: string, second: string): boolean => {
   return first.toLowerCase().includes(second.toLowerCase());
 };
-
-const useStyles = createStyles((theme) => {
-  const border = `1px solid ${
-    theme.colorScheme === "dark" ? theme.colors.dark[4] : theme.colors.gray[3]
-  }`;
-
-  return {
-    header: {
-      padding: 6,
-      textTransform: "none"
-    },
-    search: {
-      borderTop: border,
-      borderBottom: border,
-      background:
-        theme.colorScheme === "dark"
-          ? theme.colors.dark[5]
-          : theme.colors.gray[0]
-    },
-    container: {
-      maxHeight: 200,
-      overflow: "auto",
-      textTransform: "none"
-    },
-    button: {
-      border: `1px dashed ${
-        theme.colorScheme === "dark"
-          ? theme.colors.dark[3]
-          : theme.colors.gray[3]
-      }`,
-      borderRadius: theme.radius.md,
-      backgroundColor:
-        theme.colorScheme === "dark" ? theme.colors.dark[6] : "white",
-      ["&:hover"]: {
-        backgroundColor:
-          theme.colorScheme === "dark"
-            ? theme.colors.dark[4]
-            : theme.colors.gray[0]
-      }
-    }
-  };
-});
 
 interface FacetFilterProps<TData> {
   placeholder: string;
@@ -87,7 +45,6 @@ export default function ToolbarFacetFilter<TData>({
   const options = Array.from(column.getFacetedUniqueValues().keys());
   const filteredOptions = options.filter((x) => stringContains(x, filter));
 
-  const { classes, theme } = useStyles();
   const listRef = useRef<HTMLDivElement>(null);
 
   const rowVirtualizer = useVirtualizer({
@@ -99,15 +56,15 @@ export default function ToolbarFacetFilter<TData>({
 
   const filterValue = (column.getFilterValue() ?? []) as string[];
 
-  const useSmallLayout = useMediaQuery(`(max-width: ${theme.breakpoints.xs})`);
+  const { colorScheme } = useMantineColorScheme();
 
   const buttonColor =
-    theme.colorScheme === "dark"
+    colorScheme === "dark"
       ? filterValue.length > 0
-        ? "brand.2"
+        ? "blue.2"
         : "dark.0"
       : filterValue.length > 0
-      ? "brand.4"
+      ? "blue.4"
       : "gray.7";
 
   return (
@@ -122,51 +79,44 @@ export default function ToolbarFacetFilter<TData>({
       styles={{ dropdown: { padding: 0 } }}>
       <Popover.Target>
         <Button
-          variant=""
+          variant="default"
           className={classes.button}
           size="xs"
-          leftIcon={<PlusCircle size={16} />}
+          leftSection={<PlusCircle size={16} />}
           color={buttonColor}
           onClick={() => setOpened((o) => !o)}>
           {placeholder}
           {filterValue.length > 0 && (
             <>
               <Divider my={4} ml={8} mr={4} orientation="vertical" />
-              {useSmallLayout ? (
-                <Badge
-                  display={{ md: "hidden" }}
-                  color={buttonColor}
-                  radius="sm"
-                  size="xs">
-                  {filterValue.length}
-                </Badge>
-              ) : (
-                <Box>
-                  {filterValue.length > 2 ? (
-                    <Badge color={buttonColor} radius="sm" size="xs">
-                      {filterValue.length} selected
+              <Badge hiddenFrom="md" color={buttonColor} radius="sm" size="xs">
+                {filterValue.length}
+              </Badge>
+              <Box visibleFrom="md">
+                {filterValue.length > 2 ? (
+                  <Badge color={buttonColor} radius="sm" size="xs">
+                    {filterValue.length} selected
+                  </Badge>
+                ) : (
+                  filterValue.map((value, index) => (
+                    <Badge
+                      key={index}
+                      radius="sm"
+                      color={buttonColor}
+                      size="xs"
+                      ml={4}>
+                      {value}
                     </Badge>
-                  ) : (
-                    filterValue.map((value, index) => (
-                      <Badge
-                        key={index}
-                        radius="sm"
-                        color={buttonColor}
-                        size="xs"
-                        ml={4}>
-                        {value}
-                      </Badge>
-                    ))
-                  )}
-                </Box>
-              )}
+                  ))
+                )}
+              </Box>
             </>
           )}
         </Button>
       </Popover.Target>
       <Popover.Dropdown>
-        <Group position="apart" className={classes.header}>
-          <Text weight="normal" size="xs" color="dark">
+        <Group justify="space-between" className={classes.header}>
+          <Text fw="normal" size="xs" c="dark">
             Filter {placeholder}
           </Text>
           <CloseButton
@@ -178,7 +128,7 @@ export default function ToolbarFacetFilter<TData>({
         </Group>
         <TextInput
           data-autofocus
-          icon={<MagnifyingGlass weight="bold" />}
+          leftSection={<MagnifyingGlass weight="bold" />}
           className={classes.search}
           variant="unstyled"
           value={filter}
@@ -189,10 +139,9 @@ export default function ToolbarFacetFilter<TData>({
             column.getIsFiltered() && (
               <Button
                 style={{ marginRight: 25, fontWeight: "normal" }}
-                size="xs"
-                compact
+                size="compact-xs"
                 variant="default"
-                color="brand"
+                color="blue"
                 disabled={filterValue.length === 0}
                 onClick={() => {
                   column.setFilterValue([]);
@@ -204,7 +153,7 @@ export default function ToolbarFacetFilter<TData>({
           }
         />
 
-        <div ref={listRef} className={classes.container} data-autofocus>
+        <div ref={listRef} className={classes.container}>
           <div
             style={{
               height: `${rowVirtualizer.getTotalSize()}px`,

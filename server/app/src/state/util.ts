@@ -33,7 +33,7 @@ export const displayNotification = ({
   switch (appearance) {
     case NotificationType.NOTIFY:
       showNotification({
-        color: "brand",
+        color: "blue",
         title: title,
         message: detail
       });
