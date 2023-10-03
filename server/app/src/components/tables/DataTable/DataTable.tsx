@@ -1,9 +1,5 @@
 import { ScrollArea, Table, Text } from "@mantine/core";
-import {
-  useDebouncedValue,
-  useElementSize,
-  useMergedRef
-} from "@mantine/hooks";
+import { useDebouncedValue } from "@mantine/hooks";
 import {
   ColumnDef,
   FilterFn,
@@ -14,21 +10,15 @@ import {
   getFilteredRowModel,
   getSortedRowModel,
   Row,
-  SortingFn,
-  sortingFns,
   Table as TableType,
   useReactTable
 } from "@tanstack/react-table";
 
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { ReactNode, useMemo, useRef, useState } from "react";
+import { ReactNode, useRef, useState } from "react";
 import { BookDetail } from "../../../state/messages";
 import Toolbar from "./Toolbar";
-import {
-  compareItems,
-  RankingInfo,
-  rankItem
-} from "@tanstack/match-sorter-utils";
+import { RankingInfo, rankItem } from "@tanstack/match-sorter-utils";
 import classes from "./DataTable.module.css";
 import { conditionalAttribute } from "../../../utils/attribute-helper";
 
@@ -54,79 +44,10 @@ const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
   return itemRank.passed;
 };
 
-const fuzzySort: SortingFn<any> = (rowA, rowB, columnId) => {
-  let dir = 0;
-
-  // Only sort by rank if the column has ranking information
-  if (rowA.columnFiltersMeta[columnId]) {
-    dir = compareItems(
-      rowA.columnFiltersMeta[columnId]?.itemRank!,
-      rowB.columnFiltersMeta[columnId]?.itemRank!
-    );
-  }
-
-  // Provide an alphanumeric fallback for when the item ranks are equal
-  return dir === 0 ? sortingFns.alphanumeric(rowA, rowB, columnId) : dir;
-};
-
-// export const useTableStyles = createStyles((theme) => ({
-//   container: {
-//     border: `1px solid ${
-//       theme.colorScheme === "dark" ? theme.colors.dark[3] : theme.colors.gray[3]
-//     }`,
-//     borderRadius: theme.radius.md,
-//     backgroundColor:
-//       theme.colorScheme === "dark" ? theme.colors.dark[6] : "white",
-//     height: "100%",
-//     overflow: "auto",
-//     width: "100%",
-//     boxShadow: theme.shadows.xs
-//   },
-//   head: {
-//     position: "sticky",
-//     top: 0,
-//     backgroundColor:
-//       theme.colorScheme === "dark"
-//         ? theme.colors.dark[5]
-//         : theme.colors.gray[1],
-//     zIndex: 1
-//   },
-//   headerCell: {
-//     position: "relative"
-//   },
-//   resizer: {
-//     position: "absolute",
-//     right: 0,
-//     top: 0,
-//     height: "100%",
-//     width: "2px",
-//     background:
-//       theme.colorScheme === "dark"
-//         ? theme.colors.dark[3]
-//         : theme.colors.gray[6],
-//     cursor: "col-resize",
-//     userSelect: "none",
-//     touchAction: "none",
-//     opacity: 0,
-//
-//     ["&.isResizing"]: {
-//       background:
-//         theme.colorScheme === "dark"
-//           ? theme.colors.brand[3]
-//           : theme.colors.brand[4],
-//       opacity: 1
-//     },
-//
-//     ["&:hover"]: {
-//       opacity: 1
-//     }
-//   }
-// }));
-
 export type ColumnWidthFunc = (cols: number) => number;
 
 interface DataTableProps<TData, TValue> {
-  columns: (columnFunc: ColumnWidthFunc) => ColumnDef<TData, TValue>[];
+  columns: ColumnDef<TData, TValue>[];
   data: TData[];
   facetFilters?: (table: TableType<TData>) => ReactNode[];
 }
@@ -137,26 +58,14 @@ export default function DataTable<TData, TValue>({
   facetFilters
 }: DataTableProps<TData, TValue>) {
   // Table virtualization stuff
-  const { ref: elementSizeRef, height, width } = useElementSize();
-  const virtualizedRef = useRef();
-  const mergedRef = useMergedRef(elementSizeRef, virtualizedRef);
-
-  // const columnDefs = useMemo(() => {
-  //   // Use a function to calculate column widths based on the current width of the table
-  //   const cols = (cols: number) => (width / 12) * cols;
-  //   return columns(cols);
-  // }, [columns, width]);
-  const columnDefs = useMemo(
-    () => columns((cols: number) => (width / 12) * cols),
-    []
-  );
+  const virtualizedRef = useRef(null);
 
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [debouncedSearchQuery] = useDebouncedValue<string>(searchQuery, 250);
 
   const table = useReactTable({
     data: data,
-    columns: columnDefs,
+    columns: columns,
     enableMultiSort: true,
     filterFns: {
       fuzzy: fuzzyFilter
@@ -208,7 +117,7 @@ export default function DataTable<TData, TValue>({
         facetFilters={facetFilters}
       />
       <ScrollArea
-        viewportRef={mergedRef}
+        viewportRef={virtualizedRef}
         className={classes.container}
         type="hover"
         scrollbarSize={6}

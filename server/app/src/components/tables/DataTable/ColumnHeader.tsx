@@ -1,5 +1,5 @@
 import { Column } from "@tanstack/react-table";
-import { Button, Menu, Text, useMantineColorScheme } from "@mantine/core";
+import { Button, Menu, Text } from "@mantine/core";
 import {
   CaretUpDown,
   SortAscending,
@@ -20,9 +20,6 @@ export function DataTableColumnHeader<TData, TValue>({
   title,
   icon
 }: DataTableColumnHeaderProps<TData, TValue>) {
-  const { colorScheme } = useMantineColorScheme();
-  const isDark = colorScheme === "dark";
-
   if (!column.getCanSort()) {
     return (
       <Text

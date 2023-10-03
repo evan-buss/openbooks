@@ -193,7 +193,7 @@ export default function ToolbarFacetFilter<TData>({
 
           {filteredOptions.length === 0 && (
             <Center py="xs">
-              <Text color="dimmed" size="xs">
+              <Text c="dimmed" size="xs">
                 No Results
               </Text>
             </Center>

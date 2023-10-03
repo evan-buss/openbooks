@@ -1,13 +1,13 @@
 import { Button, Indicator, Loader, Text, Tooltip } from "@mantine/core";
 import { createColumnHelper, Table } from "@tanstack/react-table";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useGetServersQuery } from "../../state/api";
 import { BookDetail } from "../../state/messages";
 import { sendDownload } from "../../state/stateSlice";
 import { RootState, useAppDispatch } from "../../state/store";
 import { DataTableColumnHeader } from "./DataTable/ColumnHeader";
-import DataTable, { ColumnWidthFunc } from "./DataTable/DataTable";
+import DataTable from "./DataTable/DataTable";
 import ToolbarFacetFilter from "./DataTable/ToolbarFacetFilter";
 import { ServerFacetEntry, StandardFacetEntry } from "./Facets";
 
@@ -20,8 +20,8 @@ interface BookTableProps {
 export default function BookTable({ books }: BookTableProps) {
   const { data: servers } = useGetServersQuery(null);
 
-  const columns = useCallback(
-    (cols: ColumnWidthFunc) => [
+  const columns = useMemo(
+    () => [
       columnHelper.accessor("server", {
         header: (props) => (
           <DataTableColumnHeader column={props.column} title="Server" />

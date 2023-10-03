@@ -7,7 +7,7 @@ import { ActionIcon, Popover, Text } from "@mantine/core";
 import { createColumnHelper, Table } from "@tanstack/react-table";
 import React, { useEffect } from "react";
 import { ParseError } from "../../state/messages";
-import DataTable, { ColumnWidthFunc } from "./DataTable/DataTable";
+import DataTable from "./DataTable/DataTable";
 import { DataTableColumnHeader } from "./DataTable/ColumnHeader";
 import ToolbarFacetFilter from "./DataTable/ToolbarFacetFilter";
 import { StandardFacetEntry } from "./Facets";
@@ -15,11 +15,28 @@ import { Info } from "@phosphor-icons/react";
 
 const columnHelper = createColumnHelper<ParseError>();
 
+const columns = [
+  columnHelper.accessor("line", {
+    header: (props) => (
+      <DataTableColumnHeader column={props.column} title="Line" />
+    ),
+    cell: (props) => <code style={{ margin: 0 }}>{props.getValue()}</code>,
+    enableHiding: false
+  }),
+  columnHelper.accessor("error", {
+    header: (props) => (
+      <DataTableColumnHeader column={props.column} title="Error" />
+    ),
+    size: 300,
+    filterFn: "arrIncludesSome",
+    enableHiding: false
+  })
+];
+
 interface ErrorTableProps {
   errors: ParseError[];
   setSearchQuery: (query: string) => void;
 }
-
 export default function ErrorTable({
   errors,
   setSearchQuery
@@ -30,25 +47,6 @@ export default function ErrorTable({
   useEffect(() => {
     setSearchQuery(selectionText);
   }, [selectionText]);
-
-  const columns = (cols: ColumnWidthFunc) => [
-    columnHelper.accessor("line", {
-      header: (props) => (
-        <DataTableColumnHeader column={props.column} title="Line" />
-      ),
-      cell: (props) => <code style={{ margin: 0 }}>{props.getValue()}</code>,
-      size: cols(9),
-      enableHiding: false
-    }),
-    columnHelper.accessor("error", {
-      header: (props) => (
-        <DataTableColumnHeader column={props.column} title="Error" />
-      ),
-      size: cols(3),
-      filterFn: "arrIncludesSome",
-      enableHiding: false
-    })
-  ];
 
   const [opened, { close, open }] = useDisclosure(false);
 
