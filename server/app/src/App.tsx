@@ -1,102 +1,111 @@
 import {
   AppShell,
-  ColorScheme,
-  ColorSchemeProvider,
-  createEmotionCache,
-  createStyles,
-  MantineProvider
+  ColorSchemeScript,
+  createTheme,
+  MantineProvider,
+  px
 } from "@mantine/core";
-import { useLocalStorage } from "@mantine/hooks";
 import { Notifications } from "@mantine/notifications";
-import NotificationDrawer from "./components/drawer/NotificationDrawer";
+import { RootState, useAppSelector } from "./state/store";
+// import "@mantine/core/styles.css";
+import "@mantine/core/styles/global.css";
+
+import "@mantine/core/styles/UnstyledButton.css";
+import "@mantine/core/styles/Button.css";
+
+import "@mantine/core/styles/ActionIcon.css";
+import "@mantine/core/styles/AppShell.css";
+import "@mantine/core/styles/Badge.css";
+import "@mantine/core/styles/Center.css";
+import "@mantine/core/styles/Indicator.css";
+import "@mantine/core/styles/Tooltip.css";
+import "@mantine/core/styles/Stack.css";
+import "@mantine/core/styles/Input.css";
+import "@mantine/core/styles/Image.css";
+import "@mantine/core/styles/Popover.css";
+import "@mantine/core/styles/Menu.css";
+import "@mantine/core/styles/Group.css";
+import "@mantine/core/styles/Notification.css";
+import "@mantine/core/styles/ScrollArea.css";
+import "@mantine/core/styles/TypographyStylesProvider.css";
+import "@mantine/core/styles/Table.css";
+import "@mantine/core/styles/Loader.css";
+import "@mantine/core/styles/SegmentedControl.css";
+import "@mantine/core/styles/VisuallyHidden.css";
+import "@mantine/core/styles/Text.css";
+import "@mantine/core/styles/Divider.css";
+
+import "@mantine/notifications/styles.css";
 import Sidebar from "./components/sidebar/Sidebar";
 import SearchPage from "./pages/SearchPage";
-import { useAppDispatch, useAppSelector } from "./state/store";
+import { NotificationDrawer } from "./components/drawer/NotificationDrawer";
+import classes from "./App.module.css";
+import { useSelector } from "react-redux";
 
-const emotionCache = createEmotionCache({ key: "openbooks" });
-
-const useStyles = createStyles(() => ({
-  burger: {
-    position: "absolute",
-    bottom: 0,
-    left: 0
+const theme = createTheme({
+  activeClassName: "",
+  primaryColor: "blue",
+  primaryShade: { light: 4, dark: 2 },
+  colors: {
+    blue: [
+      "#e0ecff",
+      "#b0c6ff",
+      "#7e9fff",
+      "#4c79ff",
+      "#3366ff",
+      "#0039e6",
+      "#002db4",
+      "#002082",
+      "#001351",
+      "#000621"
+    ]
   },
-  wrapper: {
-    boxSizing: "border-box",
-    display: "flex",
-    flexWrap: "nowrap",
-    maxHeight: "100vh",
-    minHeight: "100vh"
+  components: {
+    ActionIcon: {
+      defaultProps: {
+        radius: "md",
+        color: "blue",
+        variant: "subtle"
+      }
+    }
   }
-}));
+});
 
 export default function App() {
-  const { classes } = useStyles();
-  const [colorScheme, setColorScheme] = useLocalStorage({
-    key: "color-scheme",
-    defaultValue: "light" as ColorScheme,
-    getInitialValueInEffect: true
-  });
-
-  const dispatch = useAppDispatch();
-  const open = useAppSelector((state) => state.state.isSidebarOpen);
+  const opened = useAppSelector((state) => state.state.isSidebarOpen);
+  const notificationsOpen = useSelector(
+    (state: RootState) => state.notifications.isOpen
+  );
 
   return (
-    <ColorSchemeProvider
-      colorScheme={colorScheme}
-      toggleColorScheme={() =>
-        setColorScheme((color) => (color === "dark" ? "light" : "dark"))
-      }>
-      <MantineProvider
-        emotionCache={emotionCache}
-        withGlobalStyles
-        withNormalizeCSS
-        theme={{
-          colorScheme,
-          activeStyles: { transform: "none" },
-          primaryColor: "brand",
-          primaryShade: { light: 4, dark: 2 },
-          colors: {
-            brand: [
-              "#e0ecff",
-              "#b0c6ff",
-              "#7e9fff",
-              "#4c79ff",
-              "#3366ff",
-              "#0039e6",
-              "#002db4",
-              "#002082",
-              "#001351",
-              "#000621"
-            ]
-          },
-          components: {
-            ActionIcon: {
-              defaultProps: {
-                radius: "md",
-                color: "brand"
-              }
-            }
-          }
-        }}>
+    <>
+      <ColorSchemeScript defaultColorScheme="auto" />
+      <MantineProvider defaultColorScheme="auto" theme={theme}>
         <Notifications position="top-center" />
         <AppShell
-          aside={<Sidebar />}
-          padding={0}
-          styles={(theme) => ({
-            main: {
-              backgroundColor:
-                theme.colorScheme === "dark"
-                  ? theme.colors.dark[8]
-                  : theme.colors.gray[0]
+          navbar={{
+            width: 300,
+            breakpoint: "sm",
+            collapsed: { mobile: !opened, desktop: !opened }
+          }}
+          padding={px("1.5rem")}
+          aside={{
+            width: 300,
+            breakpoint: "",
+            collapsed: {
+              mobile: !notificationsOpen,
+              desktop: !notificationsOpen
             }
-          })}>
-          <div className={classes.wrapper}>
+          }}>
+          <Sidebar />
+          <AppShell.Main className={classes.main}>
             <SearchPage />
+          </AppShell.Main>
+          <AppShell.Aside>
             <NotificationDrawer />
-          </div>
+          </AppShell.Aside>
         </AppShell>
       </MantineProvider>
-    </ColorSchemeProvider>
+    </>
   );
 }

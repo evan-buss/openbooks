@@ -1,0 +1,26 @@
+.root {
+    background-color: light-dark(var(--mantine-color-white), var(--mantine-color-dark-6));
+    border-color: light-dark(var(--mantine-color-gray-3), var(--mantine-color-gray-8));
+
+    &[data-active] {
+        border-color: var(--mantine-primary-color-filled);
+        box-shadow: var(--mantine-shadow-sm);
+    }
+
+    @mixin hover {
+        background-color: light-dark(var(--mantine-color-gray-1), var(--mantine-color-dark-5));
+    }
+}
+
+.inner {
+    color: light-dark(black, white);
+    font-weight: normal;
+    justify-content: space-between;
+}
+
+.label {
+    padding-left: var(--mantine-spacing-sm);
+    width: 100%;
+    text-align: start;
+    font-size: var(--mantine-font-size-sm);
+}

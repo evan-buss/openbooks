@@ -1,10 +1,4 @@
-import {
-  AnyAction,
-  Dispatch,
-  Middleware,
-  MiddlewareAPI,
-  PayloadAction
-} from "@reduxjs/toolkit";
+import { Middleware, MiddlewareAPI, PayloadAction } from "@reduxjs/toolkit";
 import { openbooksApi } from "./api";
 import { deleteHistoryItem } from "./historySlice";
 import {
@@ -32,20 +26,20 @@ import { displayNotification, downloadFile } from "./util";
 // Handles send_message actions by sending to socket.
 export const websocketConn =
   (wsUrl: string): Middleware =>
-  ({ dispatch, getState }: MiddlewareAPI<AppDispatch, RootState>) => {
+  ({ dispatch }: MiddlewareAPI<AppDispatch, RootState>) => {
     const socket = new WebSocket(wsUrl);
 
     socket.onopen = () => onOpen(dispatch);
     socket.onclose = () => onClose(dispatch);
     socket.onmessage = (message) => route(dispatch, message);
-    socket.onerror = (event) =>
+    socket.onerror = () =>
       displayNotification({
         appearance: NotificationType.DANGER,
         title: "Unable to connect to server.",
         timestamp: new Date().getTime()
       });
 
-    return (next: Dispatch<AnyAction>) => (action: PayloadAction<any>) => {
+    return (next: AppDispatch) => (action: PayloadAction<unknown>) => {
       // Send Message action? Send data to the socket.
       if (sendMessage.match(action)) {
         if (socket.readyState === socket.OPEN) {
@@ -74,9 +68,9 @@ const onClose = (dispatch: AppDispatch): void => {
   dispatch(setConnectionState(false));
 };
 
-const route = (dispatch: AppDispatch, msg: MessageEvent<any>): void => {
+const route = (dispatch: AppDispatch, msg: MessageEvent<string>): void => {
   const getNotif = (): Notification => {
-    let response = JSON.parse(msg.data) as Response;
+    const response = JSON.parse(msg.data) as Response;
     const timestamp = new Date().getTime();
     const notification: Notification = {
       ...response,

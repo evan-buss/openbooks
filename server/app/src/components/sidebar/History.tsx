@@ -8,8 +8,6 @@ import {
   Text,
   Tooltip
 } from "@mantine/core";
-import { Dispatch } from "@reduxjs/toolkit";
-import { AnimatePresence, motion } from "framer-motion";
 import { Eye, EyeSlash, MagnifyingGlass, Trash } from "@phosphor-icons/react";
 import { useSelector } from "react-redux";
 import {
@@ -18,38 +16,36 @@ import {
   selectHistory
 } from "../../state/historySlice";
 import { setActiveItem } from "../../state/stateSlice";
-import { useAppDispatch, useAppSelector } from "../../state/store";
-import { defaultAnimation } from "../../utils/animation";
-import { useSidebarButtonStyle } from "./styles";
+import { AppDispatch, useAppDispatch, useAppSelector } from "../../state/store";
+import classes from "./SidebarButton.module.css";
+import { conditionalAttribute } from "../../utils/attribute-helper";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 
 export default function History() {
   const history = useSelector(selectHistory);
   const activeTS =
     useAppSelector((store) => store.state.activeItem?.timestamp) ?? -1;
   const dispatch = useAppDispatch();
+  const [parent] = useAutoAnimate(/* optional config */);
 
   return (
-    <Stack spacing="xs">
-      <AnimatePresence mode="popLayout">
-        {history.length > 0 ? (
-          history.map((item: HistoryItem) => (
-            <motion.div {...defaultAnimation} key={item.timestamp.toString()}>
-              <HistoryCard
-                activeTS={activeTS}
-                key={item.timestamp.toString()}
-                item={item}
-                dispatch={dispatch}
-              />
-            </motion.div>
-          ))
-        ) : (
-          <Center>
-            <Text color="dimmed" size="sm">
-              History is a mystery.
-            </Text>
-          </Center>
-        )}
-      </AnimatePresence>
+    <Stack gap="xs" ref={parent}>
+      {history.length > 0 ? (
+        history.map((item: HistoryItem) => (
+          <HistoryCard
+            activeTS={activeTS}
+            key={item.timestamp.toString()}
+            item={item}
+            dispatch={dispatch}
+          />
+        ))
+      ) : (
+        <Center>
+          <Text c="dimmed" size="sm">
+            History is a mystery.
+          </Text>
+        </Center>
+      )}
     </Stack>
   );
 }
@@ -57,13 +53,11 @@ export default function History() {
 type Props = {
   activeTS: number;
   item: HistoryItem;
-  dispatch: Dispatch<any>;
+  dispatch: AppDispatch;
 };
 
 function HistoryCard({ activeTS, item, dispatch }: Props) {
   const isActive = activeTS === item.timestamp;
-  const { classes } = useSidebarButtonStyle({ isActive });
-
   const loading = !item.results?.length && !item.errors?.length;
 
   return (
@@ -71,16 +65,21 @@ function HistoryCard({ activeTS, item, dispatch }: Props) {
       <Menu.Target>
         <Tooltip label={item.query} openDelay={1_000}>
           <Button
-            classNames={classes}
+            classNames={{
+              root: classes.root,
+              inner: classes.inner,
+              label: classes.label
+            }}
+            {...conditionalAttribute("active", isActive)}
             radius="sm"
             variant="outline"
             fullWidth
-            leftIcon={<MagnifyingGlass size={18} weight="bold" />}
-            rightIcon={
+            leftSection={<MagnifyingGlass size={18} weight="bold" />}
+            rightSection={
               loading ? (
-                <Loader color="brand" size="xs" />
+                <Loader color="blue" size="xs" />
               ) : (
-                <Badge color="brand" radius="sm" size="sm" variant="light">
+                <Badge color="blue" radius="sm" size="sm" variant="light">
                   {`${item.results?.length} RESULTS`}
                 </Badge>
               )
@@ -93,13 +92,13 @@ function HistoryCard({ activeTS, item, dispatch }: Props) {
       <Menu.Dropdown>
         {!isActive ? (
           <Menu.Item
-            icon={<Eye size={18} weight="bold" />}
+            leftSection={<Eye size={18} weight="bold" />}
             onClick={() => dispatch(setActiveItem(item))}>
             Show Results
           </Menu.Item>
         ) : (
           <Menu.Item
-            icon={<EyeSlash size={18} weight="bold" />}
+            leftSection={<EyeSlash size={18} weight="bold" />}
             onClick={() => dispatch(setActiveItem(null))}>
             Hide Results
           </Menu.Item>
@@ -107,7 +106,7 @@ function HistoryCard({ activeTS, item, dispatch }: Props) {
 
         <Menu.Item
           color="red"
-          icon={<Trash size={18} weight="bold" />}
+          leftSection={<Trash size={18} weight="bold" />}
           onClick={() => dispatch(deleteHistoryItem(item.timestamp))}>
           Delete item
         </Menu.Item>

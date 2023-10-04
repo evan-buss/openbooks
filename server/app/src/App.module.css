@@ -1,0 +1,13 @@
+:root {
+    background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-8));
+}
+
+.main {
+    min-height: 100vh;
+    max-height: 100vh;
+    box-sizing: border-box;
+    display: flex;
+    flex-wrap: nowrap;
+    background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-8));
+    overflow: hidden;
+}
