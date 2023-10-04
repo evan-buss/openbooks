@@ -16,7 +16,7 @@ mkdocs==1.4.1
 mkdocs-material==8.5.7
 mkdocs-material-extensions==1.1
 packaging==21.3
-Pillow==9.3.0
+Pillow==10.0.1
 pycparser==2.21
 Pygments==2.13.0
 pymdown-extensions==9.7
