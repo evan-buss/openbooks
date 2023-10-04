@@ -1,9 +1,7 @@
 import {
   ActionIcon,
-  createStyles,
+  AppShell,
   Group,
-  MediaQuery,
-  Navbar,
   SegmentedControl,
   Text,
   Tooltip,
@@ -24,51 +22,26 @@ import { toggleSidebar } from "../../state/stateSlice";
 import { useAppDispatch, useAppSelector } from "../../state/store";
 import History from "./History";
 import Library from "./Library";
-
-const useStyles = createStyles((theme, _params, getRef) => {
-  return {
-    navbar: {
-      backgroundColor:
-        theme.colorScheme === "dark" ? theme.colors.dark[7] : theme.white
-    },
-    footer: {
-      borderTop: `1px solid ${
-        theme.colorScheme === "dark"
-          ? theme.colors.dark[4]
-          : theme.colors.gray[3]
-      }`,
-      paddingTop: theme.spacing.sm
-    }
-  };
-});
+import classes from "./Sidebar.module.css";
 
 export default function Sidebar() {
-  const { classes } = useStyles();
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
 
   const dispatch = useAppDispatch();
   const connected = useAppSelector((store) => store.state.isConnected);
   const username = useAppSelector((store) => store.state.username);
-  const opened = useAppSelector((store) => store.state.isSidebarOpen);
 
   const [index, setIndex] = useLocalStorage<"books" | "history">({
     key: "sidebar-state",
     defaultValue: "history"
   });
 
-  if (!opened) {
-    return <></>;
-  }
-
   return (
-    <Navbar
-      width={{ md: 300 }}
-      hiddenBreakpoint="sm"
-      hidden={!opened}
-      className={classes.navbar}>
-      <Navbar.Section p="sm">
-        <Group position="apart">
-          <Text weight="bold" size="lg">
+    <AppShell.Navbar className={classes.navbar}>
+      {/*<AppShell.Navbar>*/}
+      <AppShell.Section p="sm">
+        <Group justify="space-between">
+          <Text fw="bold" size="lg">
             OpenBooks
           </Text>
           <Group>
@@ -82,18 +55,17 @@ export default function Sidebar() {
                 <BellSimple weight="bold" size={18} />
               </ActionIcon>
             </Tooltip>
-            <MediaQuery largerThan="md" styles={{ display: "none" }}>
-              <ActionIcon
-                variant="subtle"
-                color="dark"
-                onClick={() => dispatch(toggleSidebar())}>
-                <X weight="bold" size={18} />
-              </ActionIcon>
-            </MediaQuery>
+            <ActionIcon
+              hiddenFrom="sm"
+              variant="subtle"
+              color="dark"
+              onClick={() => dispatch(toggleSidebar())}>
+              <X weight="bold" size={18} />
+            </ActionIcon>
           </Group>
         </Group>
 
-        <Text size="sm" color="dimmed">
+        <Text size="sm" c="dimmed">
           Download eBooks from IRC Highway
         </Text>
 
@@ -115,14 +87,14 @@ export default function Sidebar() {
           ]}
           fullWidth
         />
-      </Navbar.Section>
+      </AppShell.Section>
 
-      <Navbar.Section grow p="xs" style={{ overflow: "auto" }}>
+      <AppShell.Section grow p="xs" style={{ overflow: "auto" }}>
         {index === "history" ? <History /> : <Library />}
-      </Navbar.Section>
+      </AppShell.Section>
 
-      <Navbar.Section className={classes.footer} p="sm">
-        <Group position="apart" noWrap>
+      <AppShell.Section p="sm" className={classes.footer}>
+        <Group justify="space-between" wrap="nowrap">
           <Group>
             {username ? (
               <>
@@ -147,7 +119,7 @@ export default function Sidebar() {
             )}
           </Group>
 
-          <Group align="end" spacing="xs">
+          <Group align="end" gap="xs">
             <ActionIcon onClick={() => toggleColorScheme()}>
               {colorScheme === "dark" ? (
                 <Sun size={18} weight="bold" />
@@ -160,7 +132,7 @@ export default function Sidebar() {
             </ActionIcon>
           </Group>
         </Group>
-      </Navbar.Section>
-    </Navbar>
+      </AppShell.Section>
+    </AppShell.Navbar>
   );
 }

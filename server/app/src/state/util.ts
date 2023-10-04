@@ -33,7 +33,7 @@ export const displayNotification = ({
   switch (appearance) {
     case NotificationType.NOTIFY:
       showNotification({
-        color: "brand",
+        color: "blue",
         title: title,
         message: detail
       });
@@ -66,13 +66,17 @@ export const displayNotification = ({
 export function downloadFile(relativeURL?: string) {
   if (relativeURL === "" || relativeURL === undefined) return;
 
-  let url = getApiURL();
+  const url = getApiURL();
   url.pathname += relativeURL;
 
-  let link = document.createElement("a");
+  const link = document.createElement("a");
   link.download = "";
   link.target = "_blank";
   link.href = url.href;
+
+  // Ensure the link isn't visible to the user or cause layout shifts.
+  link.setAttribute("visibility", "hidden");
+  document.body.appendChild(link);
   link.click();
-  link.remove();
+  document.body.removeChild(link);
 }

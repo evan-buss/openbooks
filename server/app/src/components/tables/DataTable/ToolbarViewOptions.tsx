@@ -1,5 +1,5 @@
 import { Table } from "@tanstack/react-table";
-import { Button, Menu, useMantineTheme } from "@mantine/core";
+import { Button, Menu, useMantineColorScheme } from "@mantine/core";
 import React from "react";
 import { Check, Sliders } from "@phosphor-icons/react";
 
@@ -10,8 +10,8 @@ interface ToolbarViewOptionsProps<TData> {
 export function ToolbarViewOptions<TData>({
   table
 }: ToolbarViewOptionsProps<TData>) {
-  const theme = useMantineTheme();
-  const buttonColor = theme.colorScheme === "dark" ? "brand.2" : "dark.0";
+  const { colorScheme } = useMantineColorScheme();
+  const buttonColor = colorScheme === "dark" ? "blue.2" : "dark.0";
   const hideableColumns = table
     .getAllColumns()
     .filter(
@@ -34,7 +34,7 @@ export function ToolbarViewOptions<TData>({
           color={buttonColor}
           size="xs"
           variant="default"
-          leftIcon={<Sliders />}>
+          leftSection={<Sliders />}>
           View
         </Button>
       </Menu.Target>
@@ -46,7 +46,7 @@ export function ToolbarViewOptions<TData>({
             <Menu.Item
               style={{ textTransform: "capitalize" }}
               key={column.id}
-              icon={
+              leftSection={
                 column.getIsVisible() ? (
                   <Check size={14} />
                 ) : (

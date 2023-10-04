@@ -8,17 +8,17 @@ import {
   Text,
   Tooltip
 } from "@mantine/core";
-import { AnimatePresence, motion } from "framer-motion";
 import { Book as BookIcon, Download, Trash } from "@phosphor-icons/react";
 import { Book, useDeleteBookMutation, useGetBooksQuery } from "../../state/api";
 import { downloadFile } from "../../state/util";
-import { defaultAnimation } from "../../utils/animation";
-import { useSidebarButtonStyle } from "./styles";
+import classes from "./SidebarButton.module.css";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 
 export default function Library() {
   const { data, isLoading, isSuccess, isError } = useGetBooksQuery(null);
+  const [parent] = useAutoAnimate(/* optional config */);
 
-  if (isLoading) {
+  if (isLoading && !data) {
     return (
       <Center>
         <Loader />
@@ -29,7 +29,7 @@ export default function Library() {
   if (isError) {
     return (
       <Center>
-        <Text color="dimmed" size="sm">
+        <Text c="dimmed" size="sm">
           Book persistence disabled.
         </Text>
       </Center>
@@ -39,7 +39,7 @@ export default function Library() {
   if (isSuccess && data?.length === 0) {
     return (
       <Center>
-        <Text color="dimmed" size="sm">
+        <Text c="dimmed" size="sm">
           No previous downloads.
         </Text>
       </Center>
@@ -47,14 +47,8 @@ export default function Library() {
   }
 
   return (
-    <Stack spacing="xs">
-      <AnimatePresence mode="popLayout">
-        {data?.map((book) => (
-          <motion.div {...defaultAnimation} key={book.name}>
-            <LibraryCard key={book.name} book={book} />
-          </motion.div>
-        ))}
-      </AnimatePresence>
+    <Stack gap="xs" ref={parent}>
+      {data?.map((book) => <LibraryCard key={book.name} book={book} />)}
     </Stack>
   );
 }
@@ -64,7 +58,6 @@ interface LibraryCardProps {
 }
 
 function LibraryCard({ book }: LibraryCardProps) {
-  const { classes } = useSidebarButtonStyle({});
   const [deleteBook] = useDeleteBookMutation();
 
   return (
@@ -72,13 +65,17 @@ function LibraryCard({ book }: LibraryCardProps) {
       <Menu.Target>
         <Tooltip label={book.name} openDelay={1_000}>
           <Button
+            classNames={{
+              root: classes.root,
+              section: classes.section,
+              label: classes.label
+            }}
             key={book.name}
-            classNames={classes}
             radius="sm"
             variant="outline"
             fullWidth
-            leftIcon={<BookIcon weight="bold" size={18} />}
-            rightIcon={
+            leftSection={<BookIcon weight="bold" size={18} />}
+            rightSection={
               <Badge color="brand" radius="sm" size="sm" variant="light">
                 {new Date(book.time).toLocaleDateString("en-US")}
               </Badge>
@@ -90,14 +87,14 @@ function LibraryCard({ book }: LibraryCardProps) {
 
       <Menu.Dropdown>
         <Menu.Item
-          icon={<Download weight="bold" />}
+          leftSection={<Download weight="bold" />}
           onClick={() => downloadFile(book.downloadLink)}>
           Download
         </Menu.Item>
 
         <Menu.Item
           color="red"
-          icon={<Trash size={18} weight="bold" />}
+          leftSection={<Trash size={18} weight="bold" />}
           onClick={() => deleteBook(book.name)}>
           Delete
         </Menu.Item>

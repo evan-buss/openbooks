@@ -38,7 +38,7 @@ export const historySlice = createSlice({
       state.items = state.items.filter((x) => x.timestamp !== action.payload);
     },
     updateHistoryItem: (state, action: PayloadAction<HistoryItem>) => {
-      var pendingItemIndex = state.items.findIndex(
+      const pendingItemIndex = state.items.findIndex(
         (x) => x.timestamp === action.payload.timestamp
       );
       state.items = [
