@@ -139,11 +139,7 @@ function DownloadButton({ book }: { book: string }) {
 
   return (
     <Button size="compact-xs" radius="sm" onClick={onClick} fw="normal" w={80}>
-      {isInFlight ? (
-        <Loader variant="dots" color="gray" />
-      ) : (
-        <span>Download</span>
-      )}
+      {isInFlight ? <Loader type="dots" color="gray" /> : <span>Download</span>}
     </Button>
   );
 }

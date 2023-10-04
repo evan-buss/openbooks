@@ -37,8 +37,9 @@ export default function Sidebar() {
   });
 
   return (
-    <AppShell.Navbar>
-      <AppShell.Section p="sm" className={classes.navbar}>
+    <AppShell.Navbar className={classes.navbar}>
+      {/*<AppShell.Navbar>*/}
+      <AppShell.Section p="sm">
         <Group justify="space-between">
           <Text fw="bold" size="lg">
             OpenBooks

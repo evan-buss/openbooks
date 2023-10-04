@@ -32,7 +32,7 @@ export default function Toolbar<TData>({
           size="xs"
           disabled={noData}
           value={searchQuery}
-          onChange={(e: any) => setSearchQuery(e.currentTarget.value)}
+          onChange={(e) => setSearchQuery(e.currentTarget.value)}
           placeholder="Filter results..."
           radius="sm"
           type="search"

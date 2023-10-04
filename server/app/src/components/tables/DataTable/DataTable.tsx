@@ -31,7 +31,7 @@ declare module "@tanstack/table-core" {
   }
 }
 
-const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
+const fuzzyFilter: FilterFn<unknown> = (row, columnId, value, addMeta) => {
   // Rank the item
   const itemRank = rankItem(row.getValue(columnId), value);
 
@@ -43,8 +43,6 @@ const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
   // Return if the item should be filtered in/out
   return itemRank.passed;
 };
-
-export type ColumnWidthFunc = (cols: number) => number;
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -146,14 +144,14 @@ export default function DataTable<TData, TValue>({
                       header.getContext()
                     )}
                     <div
+                      role="presentation"
                       onMouseDown={header.getResizeHandler()}
                       onTouchStart={header.getResizeHandler()}
                       {...conditionalAttribute(
                         "resizing",
                         header.column.getIsResizing()
                       )}
-                      className={classes.resizer}
-                    />
+                      className={classes.resizer}></div>
                   </Table.Th>
                 ))}
               </Table.Tr>

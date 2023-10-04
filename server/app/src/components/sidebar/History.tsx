@@ -8,8 +8,6 @@ import {
   Text,
   Tooltip
 } from "@mantine/core";
-import { Dispatch } from "@reduxjs/toolkit";
-import { AnimatePresence, motion } from "framer-motion";
 import { Eye, EyeSlash, MagnifyingGlass, Trash } from "@phosphor-icons/react";
 import { useSelector } from "react-redux";
 import {
@@ -18,39 +16,36 @@ import {
   selectHistory
 } from "../../state/historySlice";
 import { setActiveItem } from "../../state/stateSlice";
-import { useAppDispatch, useAppSelector } from "../../state/store";
-import { defaultAnimation } from "../../utils/animation";
+import { AppDispatch, useAppDispatch, useAppSelector } from "../../state/store";
 import classes from "./SidebarButton.module.css";
 import { conditionalAttribute } from "../../utils/attribute-helper";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 
 export default function History() {
   const history = useSelector(selectHistory);
   const activeTS =
     useAppSelector((store) => store.state.activeItem?.timestamp) ?? -1;
   const dispatch = useAppDispatch();
+  const [parent] = useAutoAnimate(/* optional config */);
 
   return (
-    <Stack gap="xs">
-      <AnimatePresence mode="popLayout">
-        {history.length > 0 ? (
-          history.map((item: HistoryItem) => (
-            <motion.div {...defaultAnimation} key={item.timestamp.toString()}>
-              <HistoryCard
-                activeTS={activeTS}
-                key={item.timestamp.toString()}
-                item={item}
-                dispatch={dispatch}
-              />
-            </motion.div>
-          ))
-        ) : (
-          <Center>
-            <Text c="dimmed" size="sm">
-              History is a mystery.
-            </Text>
-          </Center>
-        )}
-      </AnimatePresence>
+    <Stack gap="xs" ref={parent}>
+      {history.length > 0 ? (
+        history.map((item: HistoryItem) => (
+          <HistoryCard
+            activeTS={activeTS}
+            key={item.timestamp.toString()}
+            item={item}
+            dispatch={dispatch}
+          />
+        ))
+      ) : (
+        <Center>
+          <Text c="dimmed" size="sm">
+            History is a mystery.
+          </Text>
+        </Center>
+      )}
     </Stack>
   );
 }
@@ -58,7 +53,7 @@ export default function History() {
 type Props = {
   activeTS: number;
   item: HistoryItem;
-  dispatch: Dispatch<any>;
+  dispatch: AppDispatch;
 };
 
 function HistoryCard({ activeTS, item, dispatch }: Props) {

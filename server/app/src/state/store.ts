@@ -23,16 +23,18 @@ export const store = configureStore({
     getDefaultMiddleware().concat(
       websocketConn(getWebsocketURL().href),
       openbooksApi.middleware
-    ),
+    )
 });
 
 setupListeners(store.dispatch);
 
-const saveState = (key: string, state: any): void => {
+const saveState = (key: string, state: unknown): void => {
   try {
     const serialized = JSON.stringify(state);
     localStorage.setItem(key, serialized);
-  } catch (err) {}
+  } catch (err) {
+    console.error("Error saving state:", err);
+  }
 };
 
 store.subscribe(

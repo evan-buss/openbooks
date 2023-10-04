@@ -5,12 +5,10 @@ import {
   Group,
   Notification,
   ScrollArea,
-  Stack,
   Text,
   Tooltip,
   useMantineColorScheme
 } from "@mantine/core";
-import { AnimatePresence, motion } from "framer-motion";
 import { BellSimpleSlash, X } from "@phosphor-icons/react";
 import { useSelector } from "react-redux";
 import { NotificationType } from "../../state/messages";
@@ -20,13 +18,15 @@ import {
   toggleDrawer
 } from "../../state/notificationSlice";
 import { RootState, useAppDispatch } from "../../state/store";
-import { defaultAnimation } from "../../utils/animation";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 
 export function NotificationDrawer() {
   const notifications = useSelector(
     (store: RootState) => store.notifications.notifications
   );
   const dispatch = useAppDispatch();
+
+  const [parent] = useAutoAnimate();
 
   const { colorScheme } = useMantineColorScheme();
 
@@ -67,56 +67,41 @@ export function NotificationDrawer() {
           </Group>
         </Group>
       </AppShell.Section>
-      <AppShell.Section grow style={{ overflow: "auto" }}>
-        {notifications.length === 0 ? (
+      <AppShell.Section grow component={ScrollArea} viewportRef={parent} p="sm">
+        {notifications.length === 0 && (
           <Center>
             <Text size="sm" c="dimmed">
               No notifications.
             </Text>
           </Center>
-        ) : (
-          <Stack
-            gap="xs"
-            style={{
-              overflow: "hidden",
-              height: "100%"
-            }}>
-            <ScrollArea h="100%" p={16}>
-              <AnimatePresence mode="popLayout">
-                {notifications.map((notif) => (
-                  <motion.div {...defaultAnimation} key={notif.timestamp}>
-                    <Tooltip
-                      position="bottom-start"
-                      label={new Date(notif.timestamp).toLocaleDateString(
-                        "en-US",
-                        {
-                          dateStyle: "long"
-                        }
-                      )}>
-                      <Text c="dimmed" size="xs" fw={500} mb={4}>
-                        {new Date(notif.timestamp).toLocaleTimeString("en-US", {
-                          timeStyle: "short"
-                        })}
-                      </Text>
-                    </Tooltip>
-                    <Notification
-                      color={getIntent(notif.appearance)}
-                      mb={6}
-                      styles={{
-                        root: {
-                          boxShadow: "none"
-                        }
-                      }}
-                      title={notif.title}
-                      onClose={() => dispatch(dismissNotification(notif))}>
-                      {notif.detail}
-                    </Notification>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-            </ScrollArea>
-          </Stack>
         )}
+        {notifications.map((notif) => (
+          <div key={notif.timestamp}>
+            <Tooltip
+              position="bottom-start"
+              label={new Date(notif.timestamp).toLocaleDateString("en-US", {
+                dateStyle: "long"
+              })}>
+              <Text c="dimmed" size="xs" fw={500} mb={4}>
+                {new Date(notif.timestamp).toLocaleTimeString("en-US", {
+                  timeStyle: "short"
+                })}
+              </Text>
+            </Tooltip>
+            <Notification
+              color={getIntent(notif.appearance)}
+              mb={6}
+              styles={{
+                root: {
+                  boxShadow: "none"
+                }
+              }}
+              title={notif.title}
+              onClose={() => dispatch(dismissNotification(notif))}>
+              {notif.detail}
+            </Notification>
+          </div>
+        ))}
       </AppShell.Section>
     </>
   );

@@ -7,7 +7,34 @@ import {
 } from "@mantine/core";
 import { Notifications } from "@mantine/notifications";
 import { RootState, useAppSelector } from "./state/store";
-import "@mantine/core/styles.css";
+// import "@mantine/core/styles.css";
+import "@mantine/core/styles/global.css";
+
+import "@mantine/core/styles/UnstyledButton.css";
+import "@mantine/core/styles/Button.css";
+
+import "@mantine/core/styles/ActionIcon.css";
+import "@mantine/core/styles/AppShell.css";
+import "@mantine/core/styles/Badge.css";
+import "@mantine/core/styles/Center.css";
+import "@mantine/core/styles/Indicator.css";
+import "@mantine/core/styles/Tooltip.css";
+import "@mantine/core/styles/Stack.css";
+import "@mantine/core/styles/Input.css";
+import "@mantine/core/styles/Image.css";
+import "@mantine/core/styles/Popover.css";
+import "@mantine/core/styles/Menu.css";
+import "@mantine/core/styles/Group.css";
+import "@mantine/core/styles/Notification.css";
+import "@mantine/core/styles/ScrollArea.css";
+import "@mantine/core/styles/TypographyStylesProvider.css";
+import "@mantine/core/styles/Table.css";
+import "@mantine/core/styles/Loader.css";
+import "@mantine/core/styles/SegmentedControl.css";
+import "@mantine/core/styles/VisuallyHidden.css";
+import "@mantine/core/styles/Text.css";
+import "@mantine/core/styles/Divider.css";
+
 import "@mantine/notifications/styles.css";
 import Sidebar from "./components/sidebar/Sidebar";
 import SearchPage from "./pages/SearchPage";

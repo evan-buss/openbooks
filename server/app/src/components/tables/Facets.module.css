@@ -23,6 +23,6 @@
     height: 80%;
     position: absolute;
     left: 0;
-    background-color: light-dark(var(--mantine-color-blue-4), var(--mantine-color-blue-3));
+    background-color: light-dark(var(--mantine-color-blue-4), var(--mantine-color-blue-2));
     border-radius: var(--mantine-radius-xl);
 }

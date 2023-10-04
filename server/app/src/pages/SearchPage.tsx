@@ -1,3 +1,4 @@
+import React, { FormEvent, useEffect, useMemo, useState } from "react";
 import {
   ActionIcon,
   Button,
@@ -10,7 +11,6 @@ import {
   useMantineColorScheme
 } from "@mantine/core";
 import { MagnifyingGlass, Sidebar, Warning } from "@phosphor-icons/react";
-import { FormEvent, useEffect, useMemo, useState } from "react";
 import image from "../assets/reading.svg";
 import BookTable from "../components/tables/BookTable";
 import ErrorTable from "../components/tables/ErrorTable";
@@ -86,7 +86,7 @@ export default function SearchPage() {
             variant="filled"
             disabled={activeItem !== null && !activeItem.results}
             value={searchQuery}
-            onChange={(e: any) => setSearchQuery(e.target.value)}
+            onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={
               errorMode ? "Download a book manually." : "Search for a book."
             }

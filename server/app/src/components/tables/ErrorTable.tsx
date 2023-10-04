@@ -46,7 +46,7 @@ export default function ErrorTable({
 
   useEffect(() => {
     setSearchQuery(selectionText);
-  }, [selectionText]);
+  }, [setSearchQuery, selectionText]);
 
   const [opened, { close, open }] = useDisclosure(false);
 

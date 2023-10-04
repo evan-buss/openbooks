@@ -8,15 +8,15 @@ import {
   Text,
   Tooltip
 } from "@mantine/core";
-import { AnimatePresence, motion } from "framer-motion";
 import { Book as BookIcon, Download, Trash } from "@phosphor-icons/react";
 import { Book, useDeleteBookMutation, useGetBooksQuery } from "../../state/api";
 import { downloadFile } from "../../state/util";
-import { defaultAnimation } from "../../utils/animation";
 import classes from "./SidebarButton.module.css";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 
 export default function Library() {
   const { data, isLoading, isSuccess, isError } = useGetBooksQuery(null);
+  const [parent] = useAutoAnimate(/* optional config */);
 
   if (isLoading && !data) {
     return (
@@ -47,14 +47,8 @@ export default function Library() {
   }
 
   return (
-    <Stack gap="xs">
-      <AnimatePresence mode="popLayout">
-        {data?.map((book) => (
-          <motion.div {...defaultAnimation} key={book.name}>
-            <LibraryCard key={book.name} book={book} />
-          </motion.div>
-        ))}
-      </AnimatePresence>
+    <Stack gap="xs" ref={parent}>
+      {data?.map((book) => <LibraryCard key={book.name} book={book} />)}
     </Stack>
   );
 }
@@ -74,7 +68,7 @@ function LibraryCard({ book }: LibraryCardProps) {
             classNames={{
               root: classes.root,
               section: classes.section,
-              label: classes.label,
+              label: classes.label
             }}
             key={book.name}
             radius="sm"

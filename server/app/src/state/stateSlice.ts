@@ -58,7 +58,7 @@ const stateSlice = createSlice({
 });
 
 // Action that sends a websocket message to the server
-const sendMessage = createAction("socket/send_message", (message: any) => ({
+const sendMessage = createAction("socket/send_message", (message: unknown) => ({
   payload: { message: JSON.stringify(message) }
 }));
 
