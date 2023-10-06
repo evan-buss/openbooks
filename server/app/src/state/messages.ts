@@ -5,6 +5,25 @@ export enum NotificationType {
   DANGER
 }
 
+export type RequestMessage =
+  | { type: MessageType.CONNECT; payload: ConnectPayload }
+  | { type: MessageType.DOWNLOAD; payload: DownloadPayload }
+  | { type: MessageType.SEARCH; payload: SearchPayload };
+
+export type ResponseMessage = { type: MessageType.STATUS; payload: string };
+
+interface ConnectPayload {
+  address: string;
+  enableTLS: boolean;
+  channel: string;
+}
+
+interface DownloadPayload {
+  book: string;
+}
+
+interface SearchPayload {}
+
 export enum MessageType {
   STATUS,
   CONNECT,
@@ -13,7 +32,7 @@ export enum MessageType {
   RATELIMIT
 }
 
-// Notification is used to show a UI toast notification the the user.
+// Notification is used to show a UI toast notification the user.
 export interface Notification {
   appearance: NotificationType;
   title: string;

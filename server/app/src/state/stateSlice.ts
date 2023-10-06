@@ -1,14 +1,11 @@
-import {
-  createAction,
-  createAsyncThunk,
-  createSlice,
-  PayloadAction
-} from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { addHistoryItem, HistoryItem, updateHistoryItem } from "./historySlice";
 import { MessageType, SearchResponse } from "./messages";
 import { AppDispatch, RootState } from "./store";
+import { sendMessage } from "./socketMiddleware";
 
 interface AppState {
+  // TODO: Need to differentiate websocket connection status from IRC connection status
   isConnected: boolean;
   isSidebarOpen: boolean;
   activeItem: HistoryItem | null;
@@ -56,11 +53,6 @@ const stateSlice = createSlice({
     }
   }
 });
-
-// Action that sends a websocket message to the server
-const sendMessage = createAction("socket/send_message", (message: unknown) => ({
-  payload: { message: JSON.stringify(message) }
-}));
 
 const sendDownload = createAsyncThunk(
   "state/send_download",

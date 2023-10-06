@@ -9,9 +9,10 @@ import (
 )
 
 // Specific irc.irchighway.net commands
+// Also works with Unanet as they use the same operator software
 
 // Join connects to the irc.irchighway.net server and joins the #ebooks channel
-func Join(irc *irc.Conn, address string, enableTLS bool) error {
+func Join(irc *irc.Conn, address string, channel string, enableTLS bool) error {
 	err := irc.Connect(address, enableTLS)
 	if err != nil {
 		return err
@@ -19,7 +20,7 @@ func Join(irc *irc.Conn, address string, enableTLS bool) error {
 	// Wait before joining the ebooks room
 	// Often you recieve a private message from the server
 	time.Sleep(time.Second * 2)
-	irc.JoinChannel("ebooks")
+	irc.JoinChannel(channel)
 	return nil
 }
 
@@ -34,7 +35,7 @@ func DownloadBook(irc *irc.Conn, book string) {
 	irc.SendMessage(book)
 }
 
-// Send a CTCP Version response
+// SendVersionInfo sends a CTCP Version response
 func SendVersionInfo(irc *irc.Conn, line string, version string) {
 	// Line format is like ":messager PRIVMSG #channel: message"
 	// we just want the messager without the colon

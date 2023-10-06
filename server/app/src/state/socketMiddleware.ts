@@ -1,4 +1,9 @@
-import { Middleware, MiddlewareAPI, PayloadAction } from "@reduxjs/toolkit";
+import {
+  createAction,
+  Middleware,
+  MiddlewareAPI,
+  PayloadAction
+} from "@reduxjs/toolkit";
 import { openbooksApi } from "./api";
 import { deleteHistoryItem } from "./historySlice";
 import {
@@ -7,19 +12,23 @@ import {
   MessageType,
   Notification,
   NotificationType,
+  RequestMessage,
   Response,
   SearchResponse
 } from "./messages";
 import { addNotification } from "./notificationSlice";
 import {
   removeInFlightDownload,
-  sendMessage,
   setConnectionState,
   setSearchResults,
   setUsername
 } from "./stateSlice";
 import { AppDispatch, RootState } from "./store";
 import { displayNotification, downloadFile } from "./util";
+import { connectToServer } from "./connectionSlice";
+
+// Action to send a websocket message to the server
+export const sendMessage = createAction<RequestMessage>("socket/send_message");
 
 // Web socket redux middleware.
 // Listens to socket and dispatches handlers.
@@ -39,11 +48,11 @@ export const websocketConn =
         timestamp: new Date().getTime()
       });
 
-    return (next: AppDispatch) => (action: PayloadAction<unknown>) => {
+    return (next: AppDispatch) => (action: PayloadAction<RequestMessage>) => {
       // Send Message action? Send data to the socket.
       if (sendMessage.match(action)) {
         if (socket.readyState === socket.OPEN) {
-          socket.send(action.payload.message);
+          socket.send(JSON.stringify(action.payload));
         } else {
           displayNotification({
             appearance: NotificationType.WARNING,
@@ -60,7 +69,7 @@ export const websocketConn =
 const onOpen = (dispatch: AppDispatch): void => {
   console.log("WebSocket connected.");
   dispatch(setConnectionState(true));
-  dispatch(sendMessage({ type: MessageType.CONNECT, payload: {} }));
+  dispatch(connectToServer());
 };
 
 const onClose = (dispatch: AppDispatch): void => {
@@ -69,42 +78,39 @@ const onClose = (dispatch: AppDispatch): void => {
 };
 
 const route = (dispatch: AppDispatch, msg: MessageEvent<string>): void => {
-  const getNotif = (): Notification => {
-    const response = JSON.parse(msg.data) as Response;
-    const timestamp = new Date().getTime();
-    const notification: Notification = {
-      ...response,
-      timestamp
-    };
-
-    switch (response.type) {
-      case MessageType.STATUS:
-        return notification;
-      case MessageType.CONNECT:
-        dispatch(setUsername((response as ConnectionResponse).name));
-        return notification;
-      case MessageType.SEARCH:
-        dispatch(setSearchResults(response as SearchResponse));
-        return notification;
-      case MessageType.DOWNLOAD:
-        downloadFile((response as DownloadResponse)?.downloadPath);
-        dispatch(openbooksApi.util.invalidateTags(["books"]));
-        dispatch(removeInFlightDownload());
-        return notification;
-      case MessageType.RATELIMIT:
-        dispatch(deleteHistoryItem());
-        return notification;
-      default:
-        console.error(response);
-        return {
-          appearance: NotificationType.DANGER,
-          title: "Unknown message type. See console.",
-          timestamp
-        };
-    }
+  const response = JSON.parse(msg.data) as Response;
+  const timestamp = new Date().getTime();
+  let notification: Notification = {
+    ...response,
+    timestamp
   };
 
-  const notif = getNotif();
-  dispatch(addNotification(notif));
-  displayNotification(notif);
+  switch (response.type) {
+    case MessageType.STATUS:
+      break;
+    case MessageType.CONNECT:
+      dispatch(setUsername((response as ConnectionResponse).name));
+      break;
+    case MessageType.SEARCH:
+      dispatch(setSearchResults(response as SearchResponse));
+      break;
+    case MessageType.DOWNLOAD:
+      downloadFile((response as DownloadResponse)?.downloadPath);
+      dispatch(openbooksApi.util.invalidateTags(["books"]));
+      dispatch(removeInFlightDownload());
+      break;
+    case MessageType.RATELIMIT:
+      dispatch(deleteHistoryItem());
+      break;
+    default:
+      console.error(response);
+      notification = {
+        appearance: NotificationType.DANGER,
+        title: "Unknown message type. See console.",
+        timestamp
+      };
+  }
+
+  dispatch(addNotification(notification));
+  displayNotification(notification);
 };
