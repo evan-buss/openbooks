@@ -38,7 +38,7 @@ func instantiate(config *Config) {
 	fmt.Printf("Connecting to %s.", config.Server)
 	conn := irc.New(config.UserName, config.Version)
 	config.irc = conn
-	err := core.Join(conn, config.Server, config.EnableTLS)
+	err := core.Join(conn, config.Server, "ebooks", config.EnableTLS)
 	if err != nil {
 		log.Fatal(err)
 	}

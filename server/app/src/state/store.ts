@@ -6,6 +6,7 @@ import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import { openbooksApi } from "./api";
 import historyReducer from "./historySlice";
 import notificationReducer from "./notificationSlice";
+import connectionReducer from "./connectionSlice";
 import { websocketConn } from "./socketMiddleware";
 import stateReducer from "./stateSlice";
 import { getWebsocketURL } from "./util";
@@ -17,6 +18,7 @@ export const store = configureStore({
     state: stateReducer,
     history: historyReducer,
     notifications: notificationReducer,
+    connection: connectionReducer,
     [openbooksApi.reducerPath]: openbooksApi.reducer
   },
   middleware: (getDefaultMiddleware) =>
@@ -41,6 +43,7 @@ store.subscribe(
   throttle(() => {
     saveState("history", store.getState().history.items);
     saveState("active", store.getState().state.activeItem);
+    saveState("connection", store.getState().connection.selectedServer);
   }, 1000)
 );
 

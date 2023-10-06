@@ -2,6 +2,7 @@ package irc
 
 import (
 	"crypto/tls"
+	"log/slog"
 	"net"
 )
 
@@ -24,8 +25,14 @@ func New(username, realname string) *Conn {
 	return irc
 }
 
-// Connect connects to the given server at port 6667
 func (i *Conn) Connect(address string, enableTLS bool) error {
+	// If switching servers, we will already have an active connection.
+	// A single IRC{} instance is used per client.
+	if i.IsConnected() {
+		i.Disconnect()
+		slog.Info("Disconnected from IRC server.")
+	}
+
 	var conn net.Conn
 	var err error
 	if enableTLS {

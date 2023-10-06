@@ -19,6 +19,8 @@ func (server *server) routeMessage(message Request, c *Client) {
 	var obj interface{}
 
 	switch message.MessageType {
+	case CONNECT:
+		obj = new(ConnectionRequest)
 	case SEARCH:
 		obj = new(SearchRequest)
 	case DOWNLOAD:
@@ -37,7 +39,7 @@ func (server *server) routeMessage(message Request, c *Client) {
 
 	switch message.MessageType {
 	case CONNECT:
-		c.startIrcConnection(server)
+		c.startIrcConnection(obj.(*ConnectionRequest), server)
 	case SEARCH:
 		c.sendSearchRequest(obj.(*SearchRequest), server)
 	case DOWNLOAD:
@@ -48,8 +50,8 @@ func (server *server) routeMessage(message Request, c *Client) {
 }
 
 // handle ConnectionRequests and either connect to the server or do nothing
-func (c *Client) startIrcConnection(server *server) {
-	err := core.Join(c.irc, server.config.Server, server.config.EnableTLS)
+func (c *Client) startIrcConnection(request *ConnectionRequest, server *server) {
+	err := core.Join(c.irc, request.Address, request.Channel, request.EnableTLS)
 	if err != nil {
 		c.log.Println(err)
 		c.send <- newErrorResponse("Unable to connect to IRC server.")

@@ -44,7 +44,11 @@ type Request struct {
 }
 
 // ConnectionRequest is a request to start the IRC server
-type ConnectionRequest struct{}
+type ConnectionRequest struct {
+	Address   string
+	EnableTLS bool
+	Channel   string
+}
 
 // SearchRequest is a request that sends a search request to the IRC server for a specific query
 type SearchRequest struct {

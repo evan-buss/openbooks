@@ -57,6 +57,11 @@ func NewOperator(config *Config) *Operator {
 }
 
 func (o *Operator) Handler(client *irc.Client, message *irc.Message) {
+	// Skip 353 messages
+	if message.Command == "353" {
+		return
+	}
+
 	if strings.HasPrefix(message.Trailing(), "@search") {
 		query := strings.SplitN(message.Trailing(), " ", 2)[1]
 		o.log.Printf("Search for '%s'\n", query)
