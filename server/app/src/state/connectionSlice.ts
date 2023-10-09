@@ -1,7 +1,5 @@
-import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSelector, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "./store";
-import { sendMessage } from "./stateSlice";
-import { MessageType } from "./messages";
 
 export interface IrcServer {
   name: string;
@@ -32,7 +30,11 @@ const loadConnection = (): SelectedServer => {
 
 const initialState = (): ConnectionState => {
   const useMockServers = import.meta.env.VITE_MOCK_IRC_SERVERS;
-  console.log("Using mock servers? ", useMockServers);
+  if (useMockServers) {
+    console.info("Using MOCK IRC servers");
+  } else {
+    console.warn("Using LIVE IRC servers");
+  }
   return {
     selectedServer: loadConnection(),
     servers: [
@@ -56,38 +58,24 @@ const initialState = (): ConnectionState => {
 
 const connectionSlice = createSlice({
   name: "connection",
-  initialState,
+  initialState: initialState(),
   reducers: {
-    selectServer(state, action: PayloadAction<SelectedServer>) {
+    setIrcServer(state, action: PayloadAction<SelectedServer>) {
       state.selectedServer = action.payload;
     }
   }
 });
 
-const activeIrcServer = ({
-  connection: { servers, selectedServer }
-}: RootState): IrcServer & { enableTLS: boolean } => {
-  const server = servers.find((x) => x.name === selectedServer.name)!;
-  return { ...server, enableTLS: selectedServer.enableTLS };
-};
+const selectConnection = (state: RootState) => state.connection;
 
-const connectToServer = createAsyncThunk(
-  "connection/connect_to_server",
-  async (_, { dispatch, getState }) => {
-    const { address, port, channel, enableTLS } = activeIrcServer(
-      getState() as RootState
-    );
-    dispatch(
-      sendMessage({
-        type: MessageType.CONNECT,
-        payload: { address: `${address}:${port}`, channel, enableTLS }
-      })
-    );
+const selectActiveIrcServer = createSelector(
+  selectConnection,
+  ({ servers, selectedServer }) => {
+    const server = servers.find((x) => x.name === selectedServer.name)!;
+    return { ...server, enableTLS: selectedServer.enableTLS };
   }
 );
 
-const { selectServer } = connectionSlice.actions;
-
-export { connectionSlice, selectServer, connectToServer, activeIrcServer };
-
+export const { setIrcServer } = connectionSlice.actions;
+export { connectionSlice, selectActiveIrcServer };
 export default connectionSlice.reducer;

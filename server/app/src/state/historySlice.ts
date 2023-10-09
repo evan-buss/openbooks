@@ -1,15 +1,22 @@
-import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import {
+  createAsyncThunk,
+  createSelector,
+  createSlice,
+  PayloadAction
+} from "@reduxjs/toolkit";
 import { BookDetail, ParseError } from "./messages";
 import { setActiveItem } from "./stateSlice";
 import { AppDispatch, RootState } from "./store";
+import { selectActiveIrcServer } from "./connectionSlice";
 
 // HistoryItem represents a single search history item
-type HistoryItem = {
+export interface HistoryItem {
+  serverName: string;
   query: string;
   timestamp: number;
   results?: BookDetail[];
   errors?: ParseError[];
-};
+}
 
 interface HistoryState {
   items: HistoryItem[];
@@ -46,6 +53,9 @@ export const historySlice = createSlice({
         action.payload,
         ...state.items.slice(pendingItemIndex + 1)
       ];
+    },
+    setHistory: (state, action: PayloadAction<HistoryItem[]>) => {
+      state.items = action.payload;
     }
   }
 });
@@ -73,11 +83,13 @@ const deleteHistoryItem = createAsyncThunk<
   dispatch(historySlice.actions.deleteByTimetamp(timeStamp));
 });
 
-const { addHistoryItem, updateHistoryItem } = historySlice.actions;
+const selectAll = (state: RootState) => state.history.items;
+const selectHistory = createSelector(
+  [selectAll, selectActiveIrcServer],
+  (history, server) => history.filter((x) => x.serverName === server.name)
+);
 
-const selectHistory = (state: RootState) => state.history.items;
-
-export type { HistoryItem };
-export { deleteHistoryItem, addHistoryItem, updateHistoryItem, selectHistory };
-
+export const { addHistoryItem, updateHistoryItem, setHistory } =
+  historySlice.actions;
+export { deleteHistoryItem, selectHistory };
 export default historySlice.reducer;

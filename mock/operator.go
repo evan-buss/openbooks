@@ -2,6 +2,7 @@ package mock
 
 import (
 	"context"
+	"fmt"
 	"gopkg.in/irc.v4"
 	"log"
 	"math/rand"
@@ -13,8 +14,10 @@ import (
 
 type Config struct {
 	Server           string
+	Channel          string
 	SearchResultPath string
 	BookResultPath   string
+	Name             string
 }
 
 // Operator listens to an IRC channel and responds to search / download requests
@@ -34,14 +37,14 @@ func NewOperator(config *Config) *Operator {
 	operator := &Operator{
 		config:     config,
 		dccManager: NewDccManager(),
-		log:        log.New(os.Stdout, "OPERATOR: ", 0),
+		log:        log.New(os.Stdout, fmt.Sprintf("OPERATOR %s: ", config.Channel), 0),
 	}
 
 	client := irc.NewClient(conn, irc.ClientConfig{
-		Nick:           "search",
+		Nick:           config.Name,
 		Pass:           "",
-		User:           "search",
-		Name:           "search",
+		User:           config.Name,
+		Name:           config.Name,
 		EnableISupport: true,
 		EnableTracker:  true,
 		PingFrequency:  time.Second * 30,
@@ -90,10 +93,11 @@ func (o *Operator) Handler(client *irc.Client, message *irc.Message) {
 }
 
 func (o *Operator) StartListening(ctx context.Context) error {
+	fmt.Println("Starting operator")
 	go func() {
 		time.Sleep(time.Second * 2)
-		o.client.Write("JOIN #ebooks")
-		o.log.Println("Joined #ebooks channel")
+		o.client.Write("JOIN " + o.config.Channel)
+		o.log.Printf("Joined %s channel\n", o.config.Channel)
 	}()
 
 	o.log.Printf("Connected to %s\n", o.config.Server)

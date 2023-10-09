@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"github.com/evan-buss/openbooks/mock"
-	"log"
 	"os"
 	"os/signal"
 )
@@ -17,8 +16,16 @@ func main() {
 	//}
 
 	//Start mock book operator
-	operator := mock.NewOperator(&mock.Config{
-		Server: "localhost:6667",
+	highwayOp := mock.NewOperator(&mock.Config{
+		Server:  "localhost:6667",
+		Name:    "search",
+		Channel: "#ebooks",
+	})
+
+	undernetOp := mock.NewOperator(&mock.Config{
+		Server:  "localhost:6667",
+		Name:    "search2",
+		Channel: "#bookz",
 	})
 
 	go func() {
@@ -28,5 +35,8 @@ func main() {
 		cancel()
 	}()
 
-	log.Fatal(operator.StartListening(ctx))
+	go highwayOp.StartListening(ctx)
+	go undernetOp.StartListening(ctx)
+
+	<-ctx.Done()
 }

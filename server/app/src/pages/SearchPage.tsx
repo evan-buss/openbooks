@@ -14,11 +14,11 @@ import { MagnifyingGlass, Sidebar, Warning } from "@phosphor-icons/react";
 import image from "../assets/reading.svg";
 import BookTable from "../components/tables/BookTable";
 import ErrorTable from "../components/tables/ErrorTable";
-import { MessageType } from "../state/messages";
-import { sendMessage, sendSearch, toggleSidebar } from "../state/stateSlice";
+import { toggleSidebar } from "../state/stateSlice";
 import { useAppDispatch, useAppSelector } from "../state/store";
 import classes from "./SearchPage.module.css";
 import { conditionalAttribute } from "../utils/attribute-helper";
+import { sendDownload, sendSearch } from "../state/socketMiddleware";
 
 export default function SearchPage() {
   const dispatch = useAppDispatch();
@@ -44,12 +44,7 @@ export default function SearchPage() {
     event.preventDefault();
 
     if (errorMode) {
-      dispatch(
-        sendMessage({
-          type: MessageType.DOWNLOAD,
-          payload: { book: searchQuery }
-        })
-      );
+      dispatch(sendDownload(searchQuery));
     } else {
       dispatch(sendSearch(searchQuery));
     }

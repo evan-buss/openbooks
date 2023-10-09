@@ -29,6 +29,7 @@ import "@mantine/core/styles/ActionIcon.css";
 import "@mantine/core/styles/AppShell.css";
 import "@mantine/core/styles/Badge.css";
 import "@mantine/core/styles/Center.css";
+import "@mantine/core/styles/Code.css";
 import "@mantine/core/styles/Divider.css";
 import "@mantine/core/styles/Image.css";
 import "@mantine/core/styles/Indicator.css";
