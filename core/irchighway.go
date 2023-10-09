@@ -9,7 +9,7 @@ import (
 )
 
 // Specific irc.irchighway.net commands
-// Also works with Unanet as they use the same operator software
+// Also works with Undernet as they use the same operator software
 
 // Join connects to the irc.irchighway.net server and joins the #ebooks channel
 func Join(irc *irc.Conn, address string, channel string, enableTLS bool) error {

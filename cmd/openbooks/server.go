@@ -19,7 +19,7 @@ func init() {
 
 	serverCmd.Flags().StringVarP(&serverConfig.Port, "port", "p", "5228", "Set the local network port for browser mode.")
 	serverCmd.Flags().IntP("rate-limit", "r", 10, "The number of seconds to wait between searches to reduce strain on IRC search servers. Minimum is 10 seconds.")
-	serverCmd.Flags().BoolVar(&serverConfig.DisableBrowserDownloads, "no-browser-downloads", false, "The browser won't recieve and download eBook files, but they are still saved to the defined 'dir' path.")
+	serverCmd.Flags().BoolVar(&serverConfig.DisableBrowserDownloads, "no-browser-downloads", false, "The browser won't receive and download eBook files, but they are still saved to the defined 'dir' path.")
 	serverCmd.Flags().StringVar(&serverConfig.Basepath, "basepath", "/", `Base path where the application is accessible. For example "/openbooks/".`)
 	serverCmd.Flags().BoolVarP(&openBrowser, "browser", "b", false, "Open the browser on server start.")
 	serverCmd.Flags().BoolVar(&serverConfig.Persist, "persist", false, "Persist eBooks in 'dir'. Default is to delete after sending.")
@@ -30,6 +30,9 @@ var serverCmd = &cobra.Command{
 	Use:   "server",
 	Short: "Run OpenBooks in server mode.",
 	Long:  "Run OpenBooks in server mode. This allows you to use a web interface to search and download eBooks.",
+	FParseErrWhitelist: cobra.FParseErrWhitelist{
+		UnknownFlags: true, // Don't error on unknown flags. Users updating to new version may have old flags.
+	},
 	PreRun: func(cmd *cobra.Command, args []string) {
 		bindGlobalServerFlags(&serverConfig)
 		rateLimit, _ := cmd.Flags().GetInt("rate-limit")

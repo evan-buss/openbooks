@@ -1,6 +1,7 @@
 import {
   ActionIcon,
   Button,
+  Code,
   Group,
   Modal,
   px,
@@ -9,18 +10,24 @@ import {
   Text,
   Tooltip
 } from "@mantine/core";
-import { CheckCircle, Plugs, PlugsConnected } from "@phosphor-icons/react";
+import {
+  CheckCircle,
+  Plugs,
+  PlugsConnected,
+  ShieldCheck,
+  ShieldSlash
+} from "@phosphor-icons/react";
 import { useId, useState } from "react";
 import classes from "./ServerMenu.module.css";
 import { useDisclosure } from "@mantine/hooks";
 import { useAppDispatch, useAppSelector } from "../../state/store";
 import {
-  connectToServer,
   IrcServer,
   SelectedServer,
-  selectServer
+  setIrcServer
 } from "../../state/connectionSlice";
-import isEqual from "lodash/isEqual";
+import { setActiveItem } from "../../state/stateSlice";
+import { connectToServer } from "../../state/socketMiddleware";
 
 export function ServerMenu({ connected }: { connected: boolean }) {
   const [opened, { open, close }] = useDisclosure(false);
@@ -37,7 +44,8 @@ export function ServerMenu({ connected }: { connected: boolean }) {
   };
 
   const handleConnect = () => {
-    dispatch(selectServer(selected));
+    dispatch(setActiveItem(null));
+    dispatch(setIrcServer(selected));
     dispatch(connectToServer());
     close();
   };
@@ -57,14 +65,12 @@ export function ServerMenu({ connected }: { connected: boolean }) {
               key={server.name}
               server={server}
               isSelected={selected.name === server.name}
+              isTLSEnabled={selectedServer.enableTLS}
               onSelect={(ssl) => handleSelect(server, ssl)}
             />
           ))}
-          <Button
-            style={{ alignSelf: "end" }}
-            disabled={isEqual(selectedServer, selected)}
-            onClick={handleConnect}>
-            Connect
+          <Button style={{ alignSelf: "end" }} onClick={handleConnect}>
+            {selectedServer.name === selected.name ? "Reconnect" : "Connect"}
           </Button>
         </Stack>
       </Modal>
@@ -75,12 +81,18 @@ export function ServerMenu({ connected }: { connected: boolean }) {
 interface ServerOptionProps {
   server: IrcServer;
   isSelected: boolean;
+  isTLSEnabled: boolean;
   onSelect: (ssl: boolean) => void;
 }
 
-function ServerOption({ server, isSelected, onSelect }: ServerOptionProps) {
+function ServerOption({
+  server,
+  isSelected,
+  isTLSEnabled,
+  onSelect
+}: ServerOptionProps) {
   const id = useId();
-  const [enableTLS, setEnableTLS] = useState(true);
+  const [enableTLS, setEnableTLS] = useState(isTLSEnabled);
   const serverString = `${server.address}:${
     enableTLS ? server.sslPort : server.port
   }`;
@@ -110,24 +122,37 @@ function ServerOption({ server, isSelected, onSelect }: ServerOptionProps) {
         <Group gap={12} align="center">
           <CheckCircle size={20} weight="bold" className={classes.icon} />
           <Stack gap={0}>
-            <Text>{server.name}</Text>
+            <Text size="md" fw={500}>
+              {server.name} <Code>#{server.channel}</Code>
+            </Text>
             <Tooltip position="right" label={serverString}>
               <Text c="gray.5">{server.address}</Text>
             </Tooltip>
           </Stack>
         </Group>
 
-        <div>
+        <Tooltip
+          label={enableTLS ? "TLS Enabled" : "TLS Disabled"}
+          refProp="rootRef">
           <Switch
+            aria-label="Enable TLS?"
             className={classes.switch}
             defaultChecked
-            size="xs"
-            w={100}
+            labelPosition="right"
+            size="lg"
+            onLabel="ON"
+            offLabel="OFF"
+            thumbIcon={
+              enableTLS ? (
+                <ShieldCheck weight="bold" color="black" size={14} />
+              ) : (
+                <ShieldSlash weight="bold" color="black" size={14} />
+              )
+            }
             checked={enableTLS}
             onChange={(e) => handleTLSChange(e.currentTarget.checked)}
-            label="TLS?"
           />
-        </div>
+        </Tooltip>
       </label>
     </div>
   );

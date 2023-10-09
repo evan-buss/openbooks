@@ -2,8 +2,12 @@ package server
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"strings"
 	"time"
+
+	"github.com/evan-buss/openbooks/irc"
 
 	"github.com/evan-buss/openbooks/core"
 	"github.com/evan-buss/openbooks/util"
@@ -56,9 +60,17 @@ func (c *Client) startIrcConnection(request *ConnectionRequest, server *server) 
 		err := core.Join(c.irc, request.Address, request.Channel, request.EnableTLS)
 		if err != nil {
 			c.log.Println(err)
-			c.send <- newErrorResponse("Unable to connect to IRC server.")
+			if errors.Is(err, irc.ErrTLSHandshake) {
+				c.send <- newErrorResponse(err.Error())
+			} else {
+				c.send <- newErrorResponse("Unable to connect to IRC server.")
+			}
 			return
 		}
+
+		address := strings.Split(request.Address, ":")[0]
+
+		c.log.Printf("Connected to %s #%s as %s.\n", address, request.Channel, c.irc.Username)
 
 		handler := server.NewIrcEventHandler(c)
 
@@ -76,7 +88,7 @@ func (c *Client) startIrcConnection(request *ConnectionRequest, server *server) 
 			StatusResponse: StatusResponse{
 				MessageType:      CONNECT,
 				NotificationType: SUCCESS,
-				Title:            "Welcome, connection established.",
+				Title:            fmt.Sprintf("Connection established to %s #%s", address, request.Channel),
 				Detail:           fmt.Sprintf("IRC username %s", c.irc.Username),
 			},
 			Name: c.irc.Username,

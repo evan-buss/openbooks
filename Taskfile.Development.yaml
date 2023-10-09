@@ -48,6 +48,8 @@ tasks:
   client:
     desc: Run OpenBooks React Client Application in Development Mode.
     dir: server/app
+    env:
+      MOCK_SERVERS: true
     cmds:
       - npm run dev
 

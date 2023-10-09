@@ -22,6 +22,7 @@ import History from "./History";
 import Library from "./Library";
 import classes from "./Sidebar.module.css";
 import { ServerMenu } from "./ServerMenu";
+import { selectActiveIrcServer } from "../../state/connectionSlice";
 
 export default function Sidebar() {
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
@@ -29,9 +30,7 @@ export default function Sidebar() {
   const dispatch = useAppDispatch();
   const connected = useAppSelector((store) => store.state.isConnected);
   const username = useAppSelector((store) => store.state.username);
-  const serverName = useAppSelector(
-    (store) => store.connection.selectedServer.name
-  );
+  const activeServer = useAppSelector(selectActiveIrcServer);
 
   const [index, setIndex] = useLocalStorage<"books" | "history">({
     key: "sidebar-state",
@@ -68,7 +67,10 @@ export default function Sidebar() {
         </Group>
 
         <Text size="sm" c="dimmed">
-          Download eBooks from {serverName}
+          Download eBooks from
+          <Tooltip label={`#${activeServer.channel}`}>
+            <span> {activeServer.name}</span>
+          </Tooltip>
         </Text>
 
         <SegmentedControl

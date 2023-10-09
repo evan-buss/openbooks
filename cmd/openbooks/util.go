@@ -12,9 +12,7 @@ func bindGlobalServerFlags(config *server.Config) {
 	config.UserAgent = globalFlags.UserAgent
 	config.UserName = globalFlags.UserName
 	config.Log = globalFlags.Log
-	config.Server = globalFlags.Server
 	config.SearchBot = globalFlags.SearchBot
-	config.EnableTLS = globalFlags.EnableTLS
 }
 
 // Make sure the server config has a valid rate limit.
