@@ -1,7 +1,7 @@
 [![Docker Pulls](https://img.shields.io/docker/pulls/evanbuss/openbooks.svg)](https://hub.docker.com/r/
 evanbuss/openbooks/)
 
-The OpenBooks docker image allows you to run [Server Mode](../modes/server.md). A multi-platform Docker container is published to Docker Hub for each release.
+The OpenBooks docker image allows you to run server mode. A multi-platform Docker container is published to Docker Hub for each release.
 
 ## Docker Compose
 
