@@ -60,7 +60,6 @@ type Client struct {
 // reads from this goroutine.
 func (server *server) readPump(c *Client) {
 	defer func() {
-		c.irc.Disconnect()
 		c.conn.Close()
 		server.unregister <- c
 	}()

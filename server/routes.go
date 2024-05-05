@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/evan-buss/openbooks/irc"
 	"io/fs"
 	"log"
 	"net/http"
@@ -16,6 +15,8 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/evan-buss/openbooks/irc"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
@@ -90,9 +91,6 @@ func (server *server) serveWs() http.HandlerFunc {
 		client.log.Println("New client created.")
 
 		server.register <- client
-
-		go server.writePump(client)
-		go server.readPump(client)
 	}
 }
 
