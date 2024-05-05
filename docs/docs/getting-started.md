@@ -29,4 +29,4 @@ If you'd prefer to use OpenBooks from your terminal, check out [CLI Mode](./conf
 
    - Linux users may have to run `chmod +x [binary name]` to make it executable
 
-> For more information see the [executable guide](./setup/executable.md).
+> For more information see the [binary guide](./setup/binary.md).
