@@ -12,11 +12,19 @@
   "remoteUser": "root",
   "features": {
     "ghcr.io/devcontainers/features/go:1": {},
-    "ghcr.io/devcontainers/features/node:1": {}
+    "ghcr.io/devcontainers/features/node:1": {},
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
   },
   "customizations": {
     "vscode": {
-      "extensions": ["golang.go", "heybourn.headwind", "esbenp.prettier-vscode", "bradlc.vscode-tailwindcss", "ms-vscode.makefile-tools", "redhat.vscode-yaml"]
+      "extensions": [
+        "golang.go",
+        "heybourn.headwind",
+        "esbenp.prettier-vscode",
+        "bradlc.vscode-tailwindcss",
+        "ms-vscode.makefile-tools",
+        "redhat.vscode-yaml"
+      ]
     }
   }
 }
