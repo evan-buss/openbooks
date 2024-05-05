@@ -49,34 +49,50 @@ func (server *server) routeMessage(message Request, c *Client) {
 
 // handle ConnectionRequests and either connect to the server or do nothing
 func (c *Client) startIrcConnection(server *server) {
-	err := core.Join(c.irc, server.config.Server, server.config.EnableTLS)
-	if err != nil {
-		c.log.Println(err)
-		c.send <- newErrorResponse("Unable to connect to IRC server.")
+	// The IRC connection could be re-used if it is already connected
+	if !c.irc.IsConnected() {
+		err := core.Join(c.irc, server.config.Server, server.config.EnableTLS)
+		if err != nil {
+			c.log.Println(err)
+			c.send <- newErrorResponse("Unable to connect to IRC server.")
+			return
+		}
+
+		handler := server.NewIrcEventHandler(c)
+
+		if server.config.Log {
+			logger, _, err := util.CreateLogFile(c.irc.Username, server.config.DownloadDir)
+			if err != nil {
+				server.log.Println(err)
+			}
+			handler[core.Message] = func(text string) { logger.Println(text) }
+		}
+
+		go core.StartReader(c.ctx, c.irc, handler)
+
+		c.send <- ConnectionResponse{
+			StatusResponse: StatusResponse{
+				MessageType:      CONNECT,
+				NotificationType: SUCCESS,
+				Title:            "Welcome, connection established.",
+				Detail:           fmt.Sprintf("IRC username %s", c.irc.Username),
+			},
+			Name: c.irc.Username,
+		}
+
 		return
 	}
-
-	handler := server.NewIrcEventHandler(c)
-
-	if server.config.Log {
-		logger, _, err := util.CreateLogFile(c.irc.Username, server.config.DownloadDir)
-		if err != nil {
-			server.log.Println(err)
-		}
-		handler[core.Message] = func(text string) { logger.Println(text) }
-	}
-
-	go core.StartReader(c.ctx, c.irc, handler)
 
 	c.send <- ConnectionResponse{
 		StatusResponse: StatusResponse{
 			MessageType:      CONNECT,
-			NotificationType: SUCCESS,
-			Title:            "Welcome, connection established.",
+			NotificationType: NOTIFY,
+			Title:            "Welcome back, re-using open IRC connection.",
 			Detail:           fmt.Sprintf("IRC username %s", c.irc.Username),
 		},
 		Name: c.irc.Username,
 	}
+
 }
 
 // handle SearchRequests and send the query to the book server

@@ -103,17 +103,47 @@ func Start(config Config) {
 // The client hub is to be run in a goroutine and handles management of
 // websocket client registrations.
 func (server *server) startClientHub(ctx context.Context) {
+	type selfDestructor struct {
+		timer  *time.Timer
+		client *Client
+	}
+
+	selfDestructors := make(map[uuid.UUID]selfDestructor)
+
 	for {
 		select {
 		case client := <-server.register:
-			server.clients[client.uuid] = client
-		case client := <-server.unregister:
-			if _, ok := server.clients[client.uuid]; ok {
-				_, cancel := context.WithCancel(client.ctx)
-				close(client.send)
-				cancel()
-				delete(server.clients, client.uuid)
+			if destructor, ok := selfDestructors[client.uuid]; ok {
+				destructor.timer.Stop()
+				server.log.Printf("Client %s reconnected\n", client.uuid.String())
+
+				// Update the existing client's websocket connection to the new one
+				destructor.client.conn = client.conn
+				client = destructor.client
+
+				delete(selfDestructors, client.uuid)
 			}
+
+			server.clients[client.uuid] = client
+			go server.writePump(client)
+			go server.readPump(client)
+
+		case client := <-server.unregister:
+			// Keep the client and IRC connection alive for 3 minutes in case the client reconnects
+			timer := time.AfterFunc(time.Minute*3, func() {
+				if _, ok := selfDestructors[client.uuid]; ok {
+					client.irc.Disconnect()
+					_, cancel := context.WithCancel(client.ctx)
+					close(client.send)
+					cancel()
+					delete(selfDestructors, client.uuid)
+					server.log.Printf("Client %s self-destructed\n", client.uuid.String())
+				}
+			})
+
+			selfDestructors[client.uuid] = selfDestructor{timer, client}
+			delete(server.clients, client.uuid)
+			server.log.Printf("Client %s disconnected\n", client.uuid.String())
 		case <-ctx.Done():
 			for _, client := range server.clients {
 				_, cancel := context.WithCancel(client.ctx)
