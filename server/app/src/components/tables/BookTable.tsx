@@ -4,7 +4,7 @@ import React, { useCallback, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useGetServersQuery } from "../../state/api";
 import { BookDetail } from "../../state/messages";
-import { sendDownload } from "../../state/stateSlice";
+import { sendDownload } from "../../state/socketMiddleware";
 import { RootState, useAppDispatch } from "../../state/store";
 import { DataTableColumnHeader } from "./DataTable/ColumnHeader";
 import DataTable from "./DataTable/DataTable";

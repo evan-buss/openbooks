@@ -10,9 +10,7 @@ import {
 import { useLocalStorage } from "@mantine/hooks";
 import {
   BellSimple,
-  IdentificationBadge,
   MoonStars,
-  Plugs,
   Sidebar as SidebarIcon,
   Sun,
   X
@@ -23,6 +21,8 @@ import { useAppDispatch, useAppSelector } from "../../state/store";
 import History from "./History";
 import Library from "./Library";
 import classes from "./Sidebar.module.css";
+import { ServerMenu } from "./ServerMenu";
+import { selectActiveIrcServer } from "../../state/connectionSlice";
 
 export default function Sidebar() {
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
@@ -30,6 +30,7 @@ export default function Sidebar() {
   const dispatch = useAppDispatch();
   const connected = useAppSelector((store) => store.state.isConnected);
   const username = useAppSelector((store) => store.state.username);
+  const activeServer = useAppSelector(selectActiveIrcServer);
 
   const [index, setIndex] = useLocalStorage<"books" | "history">({
     key: "sidebar-state",
@@ -66,7 +67,10 @@ export default function Sidebar() {
         </Group>
 
         <Text size="sm" c="dimmed">
-          Download eBooks from IRC Highway
+          Download eBooks from
+          <Tooltip label={`#${activeServer.channel}`}>
+            <span> {activeServer.name}</span>
+          </Tooltip>
         </Text>
 
         <SegmentedControl
@@ -96,26 +100,21 @@ export default function Sidebar() {
       <AppShell.Section p="sm" className={classes.footer}>
         <Group justify="space-between" wrap="nowrap">
           <Group>
+            <ServerMenu connected={!!username} />
             {username ? (
-              <>
-                <IdentificationBadge size={24} />
-                <Text
-                  size="sm"
-                  lineClamp={1}
-                  style={{
-                    maxWidth: 150,
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap"
-                  }}>
-                  {username}
-                </Text>
-              </>
+              <Text
+                size="sm"
+                lineClamp={1}
+                style={{
+                  maxWidth: 150,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap"
+                }}>
+                {username}
+              </Text>
             ) : (
-              <>
-                <Plugs size={24} />
-                <Text size="sm">Not connected.</Text>
-              </>
+              <Text size="sm">Not connected.</Text>
             )}
           </Group>
 

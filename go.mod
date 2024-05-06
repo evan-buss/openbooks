@@ -1,6 +1,6 @@
 module github.com/evan-buss/openbooks
 
-go 1.19
+go 1.21
 
 require (
 	github.com/dsnet/compress v0.0.2-0.20210315054119-f66993602bf5 // indirect

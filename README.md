@@ -103,5 +103,7 @@ go build -tags webview
   - React.js
   - TypeScript
   - Redux / Redux Toolkit
-  - Mantine UI / @emotion/react
+  - Mantine UI
+  - Tanstack Table
+  - Tanstack Virtual
   - Framer Motion

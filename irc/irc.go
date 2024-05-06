@@ -2,8 +2,12 @@ package irc
 
 import (
 	"crypto/tls"
+	"errors"
+	"log/slog"
 	"net"
 )
+
+var ErrTLSHandshake = errors.New("TLS handshake failed. The server may not support TLS")
 
 // Conn represents an IRC connection to a server
 type Conn struct {
@@ -24,8 +28,14 @@ func New(username, realname string) *Conn {
 	return irc
 }
 
-// Connect connects to the given server at port 6667
 func (i *Conn) Connect(address string, enableTLS bool) error {
+	// If switching servers, we will already have an active connection.
+	// A single IRC{} instance is used per client.
+	if i.IsConnected() {
+		i.Disconnect()
+		slog.Info("Disconnected from IRC server.")
+	}
+
 	var conn net.Conn
 	var err error
 	if enableTLS {
@@ -35,6 +45,9 @@ func (i *Conn) Connect(address string, enableTLS bool) error {
 	}
 
 	if err != nil {
+		if err.Error() == "tls: first record does not look like a TLS handshake" {
+			return ErrTLSHandshake
+		}
 		return err
 	}
 
