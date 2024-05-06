@@ -2,6 +2,7 @@ site_name: OpenBooks
 site_url: https://evan-buss.github.io/openbooks
 repo_name: OpenBooks
 repo_url: https://github.com/evan-buss/openbooks
+edit_uri: tree/master/docs/docs
 
 markdown_extensions:
   - attr_list
