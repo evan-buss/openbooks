@@ -7,7 +7,6 @@ require (
 	github.com/go-chi/chi/v5 v5.0.7
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/uuid v1.3.0
-	github.com/gorilla/websocket v1.5.0
 	github.com/mholt/archiver/v3 v3.5.1
 	github.com/nwaples/rardecode v1.1.3 // indirect
 	github.com/rs/cors v1.8.2
@@ -28,6 +27,7 @@ require (
 require (
 	github.com/davecgh/go-spew v1.1.1
 	github.com/inkeliz/gowebview v1.0.1
+	github.com/r3labs/sse/v2 v2.10.0
 	github.com/testcontainers/testcontainers-go v0.17.0
 	gopkg.in/irc.v4 v4.0.0
 )
@@ -73,5 +73,6 @@ require (
 	google.golang.org/genproto v0.0.0-20220617124728-180714bec0ad // indirect
 	google.golang.org/grpc v1.47.0 // indirect
 	google.golang.org/protobuf v1.28.0 // indirect
+	gopkg.in/cenkalti/backoff.v1 v1.1.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

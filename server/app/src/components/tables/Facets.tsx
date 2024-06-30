@@ -12,8 +12,8 @@ export function ServerFacetEntry({
   selected,
   style
 }: FacetEntryProps) {
-  const { data: servers } = useGetServersQuery(null);
-  const serverOnline = servers?.includes(entry) ?? false;
+  const { data: servers } = useGetServersQuery();
+  const serverOnline = servers && servers.has(entry);
 
   return (
     <Button

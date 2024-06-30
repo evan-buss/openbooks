@@ -12,7 +12,7 @@ export interface Book {
   time: string;
 }
 
-export const openbooksApi = createApi({
+export const api = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: getApiURL().href,
     credentials: "include",
@@ -20,25 +20,44 @@ export const openbooksApi = createApi({
   }),
   tagTypes: ["books", "servers"],
   endpoints: (builder) => ({
-    getServers: builder.query<string[], null>({
+    getServers: builder.query<Set<string>, void>({
       query: () => `servers`,
       transformResponse: (ircServers: IrcServer) => {
-        return ircServers.elevatedUsers ?? [];
+        return new Set(ircServers.elevatedUsers ?? []);
       }
     }),
-    getBooks: builder.query<Book[], null>({
+    getBooks: builder.query<Book[], void>({
       query: () => `library`,
       providesTags: ["books"]
     }),
-    deleteBook: builder.mutation<null, string>({
+    deleteBook: builder.mutation<void, string>({
       query: (book) => ({
         url: `library/${book}`,
         method: "DELETE"
       }),
       invalidatesTags: ["books"]
+    }),
+    search: builder.mutation<void, string>({
+      query: (query) => ({
+        url: `search`,
+        method: "POST",
+        params: { query }
+      })
+    }),
+    download: builder.mutation<void, string>({
+      query: (book) => ({
+        url: `download`,
+        params: { book },
+        method: "POST"
+      })
     })
   })
 });
 
-export const { useGetServersQuery, useGetBooksQuery, useDeleteBookMutation } =
-  openbooksApi;
+export const {
+  useGetServersQuery,
+  useGetBooksQuery,
+  useDeleteBookMutation,
+  useSearchMutation,
+  useDownloadMutation
+} = api;
