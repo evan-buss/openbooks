@@ -17,7 +17,10 @@ interface BookTableProps {
 }
 
 export default function BookTable({ books }: BookTableProps) {
-  const { data: servers } = useGetServersQuery(null);
+  const { data: servers } = useGetServersQuery(undefined, {
+    pollingInterval: 5000,
+    skipPollingIfUnfocused: true
+  });
 
   const columns = useMemo(
     () => [
@@ -26,7 +29,7 @@ export default function BookTable({ books }: BookTableProps) {
           <DataTableColumnHeader column={props.column} title="Server" />
         ),
         cell: (props) => {
-          const online = servers?.includes(props.getValue());
+          const online = servers && servers.has(props.getValue());
           return (
             <Tooltip position="top-start" label={online ? "Online" : "Offline"}>
               <Indicator

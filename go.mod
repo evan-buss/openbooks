@@ -7,7 +7,6 @@ require (
 	github.com/go-chi/chi/v5 v5.0.7
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/uuid v1.3.0
-	github.com/gorilla/websocket v1.5.0
 	github.com/mholt/archiver/v3 v3.5.1
 	github.com/nwaples/rardecode v1.1.3 // indirect
 	github.com/rs/cors v1.8.2

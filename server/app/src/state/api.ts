@@ -20,10 +20,10 @@ export const api = createApi({
   }),
   tagTypes: ["books", "servers"],
   endpoints: (builder) => ({
-    getServers: builder.query<string[], null>({
+    getServers: builder.query<Set<string>, void>({
       query: () => `servers`,
       transformResponse: (ircServers: IrcServer) => {
-        return ircServers.elevatedUsers ?? [];
+        return new Set(ircServers.elevatedUsers ?? []);
       }
     }),
     getBooks: builder.query<Book[], void>({
@@ -38,10 +38,10 @@ export const api = createApi({
       invalidatesTags: ["books"]
     }),
     search: builder.mutation<void, string>({
-      query: (searchQuery) => ({
+      query: (query) => ({
         url: `search`,
         method: "POST",
-        params: { query: searchQuery }
+        params: { query }
       })
     }),
     download: builder.mutation<void, string>({
