@@ -3,12 +3,12 @@ import { setupListeners } from "@reduxjs/toolkit/query/react";
 import { enableMapSet } from "immer";
 import throttle from "lodash/throttle";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
-import { openbooksApi } from "./api";
+import { api } from "./api";
 import historyReducer from "./historySlice";
 import notificationReducer from "./notificationSlice";
-import { websocketConn } from "./socketMiddleware";
+import { sseMiddleware } from "./sseMiddleware";
 import stateReducer from "./stateSlice";
-import { getWebsocketURL } from "./util";
+import { getApiURL } from "./util";
 
 enableMapSet();
 
@@ -17,12 +17,12 @@ export const store = configureStore({
     state: stateReducer,
     history: historyReducer,
     notifications: notificationReducer,
-    [openbooksApi.reducerPath]: openbooksApi.reducer
+    [api.reducerPath]: api.reducer
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
-      websocketConn(getWebsocketURL().href),
-      openbooksApi.middleware
+      sseMiddleware(getApiURL().href + "events"),
+      api.middleware
     )
 });
 
@@ -40,7 +40,7 @@ const saveState = (key: string, state: unknown): void => {
 store.subscribe(
   throttle(() => {
     saveState("history", store.getState().history.items);
-    saveState("active", store.getState().state.activeItem);
+    saveState("active", store.getState().history.active);
   }, 1000)
 );
 

@@ -14,6 +14,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/google/uuid"
+	"github.com/r3labs/sse/v2"
 	"github.com/rs/cors"
 )
 
@@ -26,6 +27,8 @@ type server struct {
 
 	// Registered clients.
 	clients map[uuid.UUID]*Client
+
+	sse *sse.Server
 
 	// Register requests from the clients.
 	register chan *Client
@@ -59,7 +62,12 @@ type Config struct {
 }
 
 func New(config Config) *server {
+	sseServer := sse.New()
+	sseServer.AutoReplay = false
+	sseServer.AutoStream = true
+
 	return &server{
+		sse:        sseServer,
 		repository: NewRepository(),
 		config:     &config,
 		register:   make(chan *Client),
@@ -79,9 +87,9 @@ func Start(config Config) {
 
 	corsConfig := cors.Options{
 		AllowCredentials: true,
-		AllowedOrigins:   []string{"http://127.0.0.1:5173"},
+		AllowedOrigins:   []string{"http://localhost:5173"},
 		AllowedHeaders:   []string{"*"},
-		AllowedMethods:   []string{"GET", "DELETE"},
+		AllowedMethods:   []string{"GET", "POST", "DELETE"},
 	}
 	router.Use(cors.New(corsConfig).Handler)
 
@@ -117,16 +125,14 @@ func (server *server) startClientHub(ctx context.Context) {
 				destructor.timer.Stop()
 				server.log.Printf("Client %s reconnected\n", client.uuid.String())
 
-				// Update the existing client's websocket connection to the new one
-				destructor.client.conn = client.conn
-				client = destructor.client
+				client.irc = destructor.client.irc
 
 				delete(selfDestructors, client.uuid)
 			}
 
 			server.clients[client.uuid] = client
+			server.connectIRC(client)
 			go server.writePump(client)
-			go server.readPump(client)
 
 		case client := <-server.unregister:
 			// Keep the client and IRC connection alive for 3 minutes in case the client reconnects

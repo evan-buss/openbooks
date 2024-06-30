@@ -1,17 +1,18 @@
-import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { BookDetail, ParseError } from "./messages";
-import { setActiveItem } from "./stateSlice";
-import { AppDispatch, RootState } from "./store";
+import { createSelector, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { api } from "./api";
+import { BookDetail, ParseError, SearchResponse } from "./messages";
+import { RootState } from "./store";
 
 // HistoryItem represents a single search history item
-type HistoryItem = {
+export type HistoryItem = {
   query: string;
   timestamp: number;
   results?: BookDetail[];
   errors?: ParseError[];
 };
 
-interface HistoryState {
+export interface HistoryState {
+  active: number | undefined;
   items: HistoryItem[];
 }
 
@@ -24,6 +25,7 @@ const loadState = (): HistoryItem[] => {
 };
 
 const initialState: HistoryState = {
+  active: undefined,
   items: loadState()
 };
 
@@ -31,53 +33,41 @@ export const historySlice = createSlice({
   name: "history",
   initialState,
   reducers: {
-    addHistoryItem: (state, action: PayloadAction<HistoryItem>) => {
-      state.items = [action.payload, ...state.items].slice(0, 16);
+    setActiveItem(state, action: PayloadAction<HistoryItem | null>) {
+      state.active = action.payload?.timestamp;
     },
-    deleteByTimetamp: (state, action: PayloadAction<number>) => {
-      state.items = state.items.filter((x) => x.timestamp !== action.payload);
+    removeResults: (state, action: PayloadAction<number>) => {
+      const timestamp = action.payload;
+
+      if (state.active === timestamp) {
+        state.active = undefined;
+      }
+
+      state.items = state.items.filter((x) => x.timestamp !== timestamp);
     },
-    updateHistoryItem: (state, action: PayloadAction<HistoryItem>) => {
-      const pendingItemIndex = state.items.findIndex(
-        (x) => x.timestamp === action.payload.timestamp
-      );
-      state.items = [
-        ...state.items.slice(0, pendingItemIndex),
-        action.payload,
-        ...state.items.slice(pendingItemIndex + 1)
-      ];
+    resultsReceived: (state, action: PayloadAction<SearchResponse>) => {
+      state.items[0].results = action.payload.books;
+      state.items[0].errors = action.payload.errors;
     }
+  },
+  extraReducers: (builder) => {
+    builder.addMatcher(api.endpoints.search.matchFulfilled, (state, action) => {
+      const timestamp = new Date().getTime();
+      const query = action.meta.arg.originalArgs;
+
+      state.active = timestamp;
+      state.items = [{ query, timestamp }, ...state.items].slice(0, 16);
+    });
   }
 });
 
-// Delete an item from history. Clear current item and loading state if deleting active search
-const deleteHistoryItem = createAsyncThunk<
-  Promise<void>,
-  number | undefined,
-  { dispatch: AppDispatch; state: RootState }
->("history/delete_item", async (timeStamp, { dispatch, getState }) => {
-  if (timeStamp === undefined) {
-    dispatch(setActiveItem(null));
-    const toRemove = getState().history.items.at(0)?.timestamp;
-    if (toRemove) {
-      dispatch(historySlice.actions.deleteByTimetamp(toRemove));
-    }
-    return;
-  }
+export const selectActiveItem = createSelector(
+  (state: RootState) => state.history.items,
+  (state: RootState) => state.history.active,
+  (items, active) => items.find((x) => x.timestamp === active)
+);
 
-  const activeItem = getState().state.activeItem;
-  if (activeItem?.timestamp === timeStamp) {
-    dispatch(setActiveItem(null));
-  }
-
-  dispatch(historySlice.actions.deleteByTimetamp(timeStamp));
-});
-
-const { addHistoryItem, updateHistoryItem } = historySlice.actions;
-
-const selectHistory = (state: RootState) => state.history.items;
-
-export type { HistoryItem };
-export { deleteHistoryItem, addHistoryItem, updateHistoryItem, selectHistory };
+export const { setActiveItem, removeResults, resultsReceived } =
+  historySlice.actions;
 
 export default historySlice.reducer;

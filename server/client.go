@@ -2,41 +2,23 @@ package server
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"log"
-	"time"
 
+	"github.com/evan-buss/openbooks/core"
 	"github.com/evan-buss/openbooks/irc"
+	"github.com/evan-buss/openbooks/util"
 	"github.com/google/uuid"
-
-	"github.com/gorilla/websocket"
+	"github.com/r3labs/sse/v2"
 )
-
-const (
-	// Time allowed to write a message to the peer.
-	writeWait = 10 * time.Second
-
-	// Time allowed to read the next pong message from the peer.
-	pongWait = 60 * time.Second
-
-	// Send pings to peer with this period. Must be less than pongWait.
-	pingPeriod = (pongWait * 9) / 10
-
-	// Maximum message size allowed from peer.
-	maxMessageSize = 512
-)
-
-var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
-}
 
 // Client is a middleman between the websocket connection and the hub.
 type Client struct {
 	// Unique ID for the client
 	uuid uuid.UUID
 
-	// The websocket connection.
-	conn *websocket.Conn
+	sse *sse.Server
 
 	// Signal to indicate the connection should be terminated.
 	// disconnect chan struct{}
@@ -53,72 +35,77 @@ type Client struct {
 	ctx context.Context
 }
 
-// readPump pumps messages from the websocket connection to the hub.
-//
-// The application runs readPump in a per-connection goroutine. The application
-// ensures that there is at most one reader on a connection by executing all
-// reads from this goroutine.
-func (server *server) readPump(c *Client) {
-	defer func() {
-		c.conn.Close()
-		server.unregister <- c
-	}()
-	c.conn.SetReadLimit(maxMessageSize)
-	c.conn.SetReadDeadline(time.Now().Add(pongWait))
-	c.conn.SetPongHandler(func(string) error { c.conn.SetReadDeadline(time.Now().Add(pongWait)); return nil })
-	for {
-		select {
-		case <-c.ctx.Done():
-			return
-		default:
-			var request Request
-			err := c.conn.ReadJSON(&request)
-
-			if err != nil {
-				c.log.Printf("Connection Closed: %v", err)
-				return
-			}
-
-			c.log.Printf("%s Message Received\n", request.MessageType)
-
-			server.routeMessage(request, c)
-		}
-	}
-}
-
+// TODO: we don't really need clients anymore as SSE handles it for us and we aren't allowing
+// multiple IRC connections simulatenously.
 // writePump pumps messages from the hub to the websocket connection.
 //
 // A goroutine running writePump is started for each connection. The
 // application ensures that there is at most one writer to a connection by
 // executing all writes from this goroutine.
 func (server *server) writePump(c *Client) {
-	ticker := time.NewTicker(pingPeriod)
-	defer func() {
-		ticker.Stop()
-	}()
-
 	for {
 		select {
 		case message, ok := <-c.send:
-			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if !ok {
-				// The hub closed the channel.
-				c.conn.WriteMessage(websocket.CloseMessage, []byte{})
-				return
+				continue
 			}
 
-			err := c.conn.WriteJSON(message)
+			byteMessage, err := json.Marshal(message)
 			if err != nil {
-				c.log.Printf("Error writing JSON to websocket: %s\n", err)
+				c.log.Printf("Error marshalling message to JSON: %s\n", err)
 				return
 			}
+			c.sse.Publish(c.uuid.String(), &sse.Event{
+				Data: byteMessage,
+			})
 		case <-c.ctx.Done():
 			return
-		case <-ticker.C:
-			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
-			if err := c.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
-				return
-			}
 		}
+	}
+}
+
+func (server *server) connectIRC(client *Client) {
+	// The IRC connection could be re-used if it is already connected
+	if !client.irc.IsConnected() {
+		err := core.Join(client.irc, server.config.Server, server.config.EnableTLS)
+		if err != nil {
+			client.log.Println(err)
+			client.send <- newErrorResponse("Unable to connect to IRC server.")
+			return
+		}
+
+		handler := server.NewIrcEventHandler(client)
+
+		if server.config.Log {
+			logger, _, err := util.CreateLogFile(client.irc.Username, server.config.DownloadDir)
+			if err != nil {
+				server.log.Println(err)
+			}
+			handler[core.Message] = func(text string) { logger.Println(text) }
+		}
+
+		go core.StartReader(client.ctx, client.irc, handler)
+
+		client.send <- ConnectionResponse{
+			StatusResponse: StatusResponse{
+				MessageType:      CONNECT,
+				NotificationType: SUCCESS,
+				Title:            "Welcome, connection established.",
+				Detail:           fmt.Sprintf("IRC username %s", client.irc.Username),
+			},
+			Name: client.irc.Username,
+		}
+
+		return
+	}
+
+	client.send <- ConnectionResponse{
+		StatusResponse: StatusResponse{
+			MessageType:      CONNECT,
+			NotificationType: NOTIFY,
+			Title:            "Welcome back, re-using open IRC connection.",
+			Detail:           fmt.Sprintf("IRC username %s", client.irc.Username),
+		},
+		Name: client.irc.Username,
 	}
 }
