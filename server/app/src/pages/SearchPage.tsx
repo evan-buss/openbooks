@@ -1,4 +1,3 @@
-import React, { FormEvent, useEffect, useMemo, useState } from "react";
 import {
   ActionIcon,
   Button,
@@ -11,19 +10,23 @@ import {
   useMantineColorScheme
 } from "@mantine/core";
 import { MagnifyingGlass, Sidebar, Warning } from "@phosphor-icons/react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import image from "../assets/reading.svg";
 import BookTable from "../components/tables/BookTable";
 import ErrorTable from "../components/tables/ErrorTable";
-import { MessageType } from "../state/messages";
-import { sendMessage, sendSearch, toggleSidebar } from "../state/stateSlice";
+import { useDownloadMutation, useSearchMutation } from "../state/api";
+import { toggleSidebar } from "../state/stateSlice";
 import { useAppDispatch, useAppSelector } from "../state/store";
-import classes from "./SearchPage.module.css";
 import { conditionalAttribute } from "../utils/attribute-helper";
+import classes from "./SearchPage.module.css";
+import { selectActiveItem } from "../state/historySlice";
 
 export default function SearchPage() {
   const dispatch = useAppDispatch();
-  const activeItem = useAppSelector((store) => store.state.activeItem);
+  const activeItem = useAppSelector(selectActiveItem);
   const opened = useAppSelector((store) => store.state.isSidebarOpen);
+  const [searchMutation] = useSearchMutation();
+  const [downloadMutation] = useDownloadMutation();
 
   const { colorScheme } = useMantineColorScheme();
 
@@ -44,14 +47,9 @@ export default function SearchPage() {
     event.preventDefault();
 
     if (errorMode) {
-      dispatch(
-        sendMessage({
-          type: MessageType.DOWNLOAD,
-          payload: { book: searchQuery }
-        })
-      );
+      downloadMutation(searchQuery);
     } else {
-      dispatch(sendSearch(searchQuery));
+      searchMutation(searchQuery);
     }
 
     setSearchQuery("");
@@ -84,7 +82,7 @@ export default function SearchPage() {
           <TextInput
             w="100%"
             variant="filled"
-            disabled={activeItem !== null && !activeItem.results}
+            disabled={activeItem && !activeItem.results}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={

@@ -1,3 +1,4 @@
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 import {
   Badge,
   Button,
@@ -9,22 +10,18 @@ import {
   Tooltip
 } from "@mantine/core";
 import { Eye, EyeSlash, MagnifyingGlass, Trash } from "@phosphor-icons/react";
-import { useSelector } from "react-redux";
 import {
-  deleteHistoryItem,
   HistoryItem,
-  selectHistory
+  removeResults,
+  setActiveItem
 } from "../../state/historySlice";
-import { setActiveItem } from "../../state/stateSlice";
 import { AppDispatch, useAppDispatch, useAppSelector } from "../../state/store";
-import classes from "./SidebarButton.module.css";
 import { conditionalAttribute } from "../../utils/attribute-helper";
-import { useAutoAnimate } from "@formkit/auto-animate/react";
+import classes from "./SidebarButton.module.css";
 
 export default function History() {
-  const history = useSelector(selectHistory);
-  const activeTS =
-    useAppSelector((store) => store.state.activeItem?.timestamp) ?? -1;
+  const history = useAppSelector((store) => store.history.items);
+  const activeTS = useAppSelector((store) => store.history.active);
   const dispatch = useAppDispatch();
   const [parent] = useAutoAnimate(/* optional config */);
 
@@ -51,7 +48,7 @@ export default function History() {
 }
 
 type Props = {
-  activeTS: number;
+  activeTS: number | undefined;
   item: HistoryItem;
   dispatch: AppDispatch;
 };
@@ -107,7 +104,7 @@ function HistoryCard({ activeTS, item, dispatch }: Props) {
         <Menu.Item
           color="red"
           leftSection={<Trash size={18} weight="bold" />}
-          onClick={() => dispatch(deleteHistoryItem(item.timestamp))}>
+          onClick={() => dispatch(removeResults(item.timestamp))}>
           Delete item
         </Menu.Item>
       </Menu.Dropdown>

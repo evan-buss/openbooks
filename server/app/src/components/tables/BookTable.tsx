@@ -1,11 +1,10 @@
 import { Button, Indicator, Loader, Text, Tooltip } from "@mantine/core";
-import { createColumnHelper, Table } from "@tanstack/react-table";
-import React, { useCallback, useMemo, useState } from "react";
+import { Table, createColumnHelper } from "@tanstack/react-table";
+import { useCallback, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
-import { useGetServersQuery } from "../../state/api";
+import { useDownloadMutation, useGetServersQuery } from "../../state/api";
 import { BookDetail } from "../../state/messages";
-import { sendDownload } from "../../state/stateSlice";
-import { RootState, useAppDispatch } from "../../state/store";
+import { RootState } from "../../state/store";
 import { DataTableColumnHeader } from "./DataTable/ColumnHeader";
 import DataTable from "./DataTable/DataTable";
 import ToolbarFacetFilter from "./DataTable/ToolbarFacetFilter";
@@ -123,7 +122,7 @@ export default function BookTable({ books }: BookTableProps) {
 }
 
 function DownloadButton({ book }: { book: string }) {
-  const dispatch = useAppDispatch();
+  const [downloadMutation] = useDownloadMutation();
 
   const [clicked, setClicked] = useState(false);
   const isInFlight = useSelector((state: RootState) =>
@@ -133,7 +132,7 @@ function DownloadButton({ book }: { book: string }) {
   // Prevent hitting the same button multiple times
   const onClick = () => {
     if (clicked) return;
-    dispatch(sendDownload(book));
+    downloadMutation(book);
     setClicked(true);
   };
 

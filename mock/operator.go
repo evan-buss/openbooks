@@ -2,13 +2,14 @@ package mock
 
 import (
 	"context"
-	"gopkg.in/irc.v4"
 	"log"
 	"math/rand"
 	"net"
 	"os"
 	"strings"
 	"time"
+
+	"gopkg.in/irc.v4"
 )
 
 type Config struct {
@@ -58,8 +59,11 @@ func NewOperator(config *Config) *Operator {
 
 func (o *Operator) Handler(client *irc.Client, message *irc.Message) {
 	if strings.HasPrefix(message.Trailing(), "@search") {
-		query := strings.SplitN(message.Trailing(), " ", 2)[1]
-		o.log.Printf("Search for '%s'\n", query)
+		queryParts := strings.SplitN(message.Trailing(), " ", 2)
+		if len(queryParts) == 1 {
+			return
+		}
+		o.log.Printf("Search for '%s'\n", queryParts[1])
 
 		dccString := o.dccManager.ServeFile("SearchBot_results_for_ the great gatsby.txt.zip")
 

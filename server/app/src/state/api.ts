@@ -12,7 +12,7 @@ export interface Book {
   time: string;
 }
 
-export const openbooksApi = createApi({
+export const api = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: getApiURL().href,
     credentials: "include",
@@ -26,19 +26,38 @@ export const openbooksApi = createApi({
         return ircServers.elevatedUsers ?? [];
       }
     }),
-    getBooks: builder.query<Book[], null>({
+    getBooks: builder.query<Book[], void>({
       query: () => `library`,
       providesTags: ["books"]
     }),
-    deleteBook: builder.mutation<null, string>({
+    deleteBook: builder.mutation<void, string>({
       query: (book) => ({
         url: `library/${book}`,
         method: "DELETE"
       }),
       invalidatesTags: ["books"]
+    }),
+    search: builder.mutation<void, string>({
+      query: (searchQuery) => ({
+        url: `search`,
+        method: "POST",
+        params: { query: searchQuery }
+      })
+    }),
+    download: builder.mutation<void, string>({
+      query: (book) => ({
+        url: `download`,
+        params: { book },
+        method: "POST"
+      })
     })
   })
 });
 
-export const { useGetServersQuery, useGetBooksQuery, useDeleteBookMutation } =
-  openbooksApi;
+export const {
+  useGetServersQuery,
+  useGetBooksQuery,
+  useDeleteBookMutation,
+  useSearchMutation,
+  useDownloadMutation
+} = api;

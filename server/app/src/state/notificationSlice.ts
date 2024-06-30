@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Notification } from "./messages";
 
-interface NotificationState {
+export interface NotificationState {
   isOpen: boolean;
   notifications: Notification[];
 }

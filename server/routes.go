@@ -16,6 +16,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/evan-buss/openbooks/core"
 	"github.com/evan-buss/openbooks/irc"
 
 	"github.com/go-chi/chi/v5"
@@ -28,12 +29,15 @@ var reactClient embed.FS
 func (server *server) registerRoutes() *chi.Mux {
 	router := chi.NewRouter()
 	router.Handle("/*", server.staticFilesHandler("app/dist"))
-	router.Get("/ws", server.serveWs())
+	router.HandleFunc("/events", server.eventsHandler())
 	router.Get("/stats", server.statsHandler())
 	router.Get("/servers", server.serverListHandler())
 
 	router.Group(func(r chi.Router) {
 		r.Use(server.requireUser)
+		r.Post("/search", server.searchHandler())
+		r.Post("/download", server.downloadHandler())
+
 		r.Get("/library", server.getAllBooksHandler())
 		r.Delete("/library/{fileName}", server.deleteBooksHandler())
 		r.Get("/library/*", server.getBookHandler())
@@ -42,8 +46,7 @@ func (server *server) registerRoutes() *chi.Mux {
 	return router
 }
 
-// serveWs handles websocket requests from the peer.
-func (server *server) serveWs() http.HandlerFunc {
+func (server *server) eventsHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		cookie, err := r.Cookie("OpenBooks")
 		if errors.Is(err, http.ErrNoCookie) {
@@ -59,27 +62,24 @@ func (server *server) serveWs() http.HandlerFunc {
 		}
 
 		userId, err := uuid.Parse(cookie.Value)
-		_, alreadyConnected := server.clients[userId]
-
-		// If invalid UUID or the same browser tries to connect again or multiple browser connections
-		// Don't connect to IRC or create new client
-		if err != nil || alreadyConnected || len(server.clients) > 0 {
-			w.WriteHeader(http.StatusBadRequest)
+		if err != nil {
+			http.Error(w, "Invalid user ID.", http.StatusBadRequest)
 			return
 		}
 
-		upgrader.CheckOrigin = func(req *http.Request) bool {
-			return true
+		_, alreadyConnected := server.clients[userId]
+		if alreadyConnected {
+			http.Error(w, "Already connected.", http.StatusBadRequest)
+			return
 		}
 
-		conn, err := upgrader.Upgrade(w, r, w.Header())
-		if err != nil {
-			server.log.Println(err)
+		if len(server.clients) > 0 {
+			http.Error(w, "Multiple connections not allowed.", http.StatusBadRequest)
 			return
 		}
 
 		client := &Client{
-			conn: conn,
+			sse:  server.sse,
 			send: make(chan interface{}, 128),
 			uuid: userId,
 			irc:  irc.New(server.config.UserName, server.config.UserAgent),
@@ -87,10 +87,20 @@ func (server *server) serveWs() http.HandlerFunc {
 			ctx:  context.Background(),
 		}
 
-		server.log.Printf("Client connected from %s\n", conn.RemoteAddr().String())
-		client.log.Println("New client created.")
+		server.log.Printf("Client connected from %s\n", r.RemoteAddr)
+
+		// The SSE library expects a "stream" query parameter to be set
+		newQuery := r.URL.Query()
+		newQuery.Set("stream", client.uuid.String())
+		r.URL.RawQuery = newQuery.Encode()
+
+		go func() {
+			<-r.Context().Done()
+			server.unregister <- client
+		}()
 
 		server.register <- client
+		server.sse.ServeHTTP(w, r)
 	}
 }
 
@@ -108,7 +118,6 @@ func (server *server) staticFilesHandler(assetPath string) http.Handler {
 func (server *server) statsHandler() http.HandlerFunc {
 	type statsReponse struct {
 		UUID string `json:"uuid"`
-		IP   string `json:"ip"`
 		Name string `json:"name"`
 	}
 
@@ -119,7 +128,6 @@ func (server *server) statsHandler() http.HandlerFunc {
 			details := statsReponse{
 				UUID: client.uuid.String(),
 				Name: client.irc.Username,
-				IP:   client.conn.RemoteAddr().String(),
 			}
 
 			result = append(result, details)
@@ -208,5 +216,64 @@ func (server *server) deleteBooksHandler() http.HandlerFunc {
 			server.log.Printf("Error deleting book file: %s\n", err)
 			w.WriteHeader(http.StatusInternalServerError)
 		}
+	}
+}
+
+func (server *server) searchHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		client := server.getClient(r.Context())
+		if client == nil {
+			http.Error(w, "Unable to find client.", http.StatusBadRequest)
+			return
+		}
+
+		server.lastSearchMutex.Lock()
+		defer server.lastSearchMutex.Unlock()
+
+		nextAvailableSearch := server.lastSearch.Add(server.config.SearchTimeout)
+
+		if time.Now().Before(nextAvailableSearch) {
+			remainingSeconds := time.Until(nextAvailableSearch).Seconds()
+			// TODO: Show HTTP errors on client instead of sending SSE message
+			http.Error(w, "Rate limited.", http.StatusTooManyRequests)
+			client.send <- newRateLimitResponse(remainingSeconds)
+			return
+		}
+
+		query := r.URL.Query().Get("query")
+		if query == "" {
+			http.Error(w, "No search query provided.", http.StatusBadRequest)
+			client.send <- newErrorResponse("No search query provided.")
+			return
+		}
+
+		core.SearchBook(client.irc, server.config.SearchBot, query)
+		server.lastSearch = time.Now()
+
+		w.WriteHeader(http.StatusAccepted)
+
+		client.send <- newStatusResponse(NOTIFY, "Search request sent.")
+	}
+}
+
+func (server *server) downloadHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		client := server.getClient(r.Context())
+		if client == nil {
+			http.Error(w, "Unable to find client.", http.StatusBadRequest)
+			return
+		}
+
+		book := r.URL.Query().Get("book")
+		if book == "" {
+			http.Error(w, "No book provided.", http.StatusBadRequest)
+			client.send <- newErrorResponse("No book provided.")
+			return
+		}
+
+		core.DownloadBook(client.irc, book)
+		w.WriteHeader(http.StatusAccepted)
+
+		client.send <- newStatusResponse(NOTIFY, "Download request received.")
 	}
 }

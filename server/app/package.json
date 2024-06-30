@@ -15,7 +15,7 @@
     "@mantine/hooks": "^7.1.2",
     "@mantine/notifications": "^7.1.2",
     "@phosphor-icons/react": "^2.0.13",
-    "@reduxjs/toolkit": "^1.9.6",
+    "@reduxjs/toolkit": "^2.2.6",
     "@tanstack/match-sorter-utils": "^8.8.4",
     "@tanstack/react-table": "^8.10.3",
     "@tanstack/react-virtual": "^3.0.0-beta.62",

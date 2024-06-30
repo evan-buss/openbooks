@@ -15,7 +15,7 @@ import classes from "./SidebarButton.module.css";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 
 export default function Library() {
-  const { data, isLoading, isSuccess, isError } = useGetBooksQuery(null);
+  const { data, isLoading, isSuccess, isError } = useGetBooksQuery();
   const [parent] = useAutoAnimate(/* optional config */);
 
   if (isLoading && !data) {
