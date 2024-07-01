@@ -20,10 +20,12 @@ export const api = createApi({
   }),
   tagTypes: ["books", "servers"],
   endpoints: (builder) => ({
-    getServers: builder.query<Set<string>, void>({
+    getServers: builder.query<Record<string, boolean>, void>({
       query: () => `servers`,
       transformResponse: (ircServers: IrcServer) => {
-        return new Set(ircServers.elevatedUsers ?? []);
+        return Object.fromEntries(
+          ircServers.elevatedUsers?.map((x) => [x, true]) ?? []
+        );
       }
     }),
     getBooks: builder.query<Book[], void>({
