@@ -151,7 +151,7 @@ func (server *server) startEventForwarder(ctx context.Context) {
 			if server.connectedClients.Load() == 0 {
 				// Keep the client and IRC connection alive for 3 minutes in case another client connects
 				server.log.Println("No clients connected. Waiting 3 minutes before closing connection.")
-				destructTimer = time.AfterFunc(time.Second*30, func() {
+				destructTimer = time.AfterFunc(3*time.Minute, func() {
 					if server.connectedClients.Load() == 0 {
 						server.irc.Disconnect()
 						server.log.Println("IRC connection closed.")
