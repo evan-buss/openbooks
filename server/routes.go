@@ -1,13 +1,9 @@
 package server
 
 import (
-	"context"
 	"embed"
 	"encoding/json"
-	"errors"
-	"fmt"
 	"io/fs"
-	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -17,10 +13,8 @@ import (
 	"time"
 
 	"github.com/evan-buss/openbooks/core"
-	"github.com/evan-buss/openbooks/irc"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/google/uuid"
 )
 
 //go:embed app/dist
@@ -30,11 +24,10 @@ func (server *server) registerRoutes() *chi.Mux {
 	router := chi.NewRouter()
 	router.Handle("/*", server.staticFilesHandler("app/dist"))
 	router.HandleFunc("/events", server.eventsHandler())
-	router.Get("/stats", server.statsHandler())
+	// router.Get("/stats", server.statsHandler())
 	router.Get("/servers", server.serverListHandler())
 
 	router.Group(func(r chi.Router) {
-		r.Use(server.requireUser)
 		r.Post("/search", server.searchHandler())
 		r.Post("/download", server.downloadHandler())
 
@@ -48,58 +41,23 @@ func (server *server) registerRoutes() *chi.Mux {
 
 func (server *server) eventsHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		cookie, err := r.Cookie("OpenBooks")
-		if errors.Is(err, http.ErrNoCookie) {
-			cookie = &http.Cookie{
-				Name:     "OpenBooks",
-				Value:    uuid.New().String(),
-				Secure:   false,
-				HttpOnly: true,
-				Expires:  time.Now().Add(time.Hour * 24 * 7),
-				SameSite: http.SameSiteStrictMode,
-			}
-			w.Header().Add("Set-Cookie", cookie.String())
-		}
-
-		userId, err := uuid.Parse(cookie.Value)
-		if err != nil {
-			http.Error(w, "Invalid user ID.", http.StatusBadRequest)
+		if server.connectedClients.Load() > 0 {
+			http.Error(w, "Multiple connections not allowed.", http.StatusServiceUnavailable)
 			return
-		}
-
-		_, alreadyConnected := server.clients[userId]
-		if alreadyConnected {
-			http.Error(w, "Already connected.", http.StatusBadRequest)
-			return
-		}
-
-		if len(server.clients) > 0 {
-			http.Error(w, "Multiple connections not allowed.", http.StatusBadRequest)
-			return
-		}
-
-		client := &Client{
-			sse:  server.sse,
-			send: make(chan interface{}, 128),
-			uuid: userId,
-			irc:  irc.New(server.config.UserName, server.config.UserAgent),
-			log:  log.New(os.Stdout, fmt.Sprintf("CLIENT (%s): ", server.config.UserName), log.LstdFlags|log.Lmsgprefix),
-			ctx:  context.Background(),
 		}
 
 		server.log.Printf("Client connected from %s\n", r.RemoteAddr)
 
 		// The SSE library expects a "stream" query parameter to be set
 		newQuery := r.URL.Query()
-		newQuery.Set("stream", client.uuid.String())
+		newQuery.Set("stream", "events")
 		r.URL.RawQuery = newQuery.Encode()
 
 		go func() {
 			<-r.Context().Done()
-			server.unregister <- client
+			server.log.Println("Client disconnected from", r.RemoteAddr)
 		}()
 
-		server.register <- client
 		server.sse.ServeHTTP(w, r)
 	}
 }
@@ -115,27 +73,27 @@ func (server *server) staticFilesHandler(assetPath string) http.Handler {
 	return http.StripPrefix(server.config.Basepath, http.FileServer(http.FS(app)))
 }
 
-func (server *server) statsHandler() http.HandlerFunc {
-	type statsReponse struct {
-		UUID string `json:"uuid"`
-		Name string `json:"name"`
-	}
+// func (server *server) statsHandler() http.HandlerFunc {
+// 	type statsReponse struct {
+// 		UUID string `json:"uuid"`
+// 		Name string `json:"name"`
+// 	}
 
-	return func(w http.ResponseWriter, r *http.Request) {
-		result := make([]statsReponse, 0, len(server.clients))
+// 	return func(w http.ResponseWriter, r *http.Request) {
+// 		result := make([]statsReponse, 0, len(server.clients))
 
-		for _, client := range server.clients {
-			details := statsReponse{
-				UUID: client.uuid.String(),
-				Name: client.irc.Username,
-			}
+// 		for _, client := range server.clients {
+// 			details := statsReponse{
+// 				UUID: client.uuid.String(),
+// 				Name: client.irc.Username,
+// 			}
 
-			result = append(result, details)
-		}
+// 			result = append(result, details)
+// 		}
 
-		json.NewEncoder(w).Encode(result)
-	}
-}
+// 		json.NewEncoder(w).Encode(result)
+// 	}
+// }
 
 func (server *server) serverListHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -221,12 +179,6 @@ func (server *server) deleteBooksHandler() http.HandlerFunc {
 
 func (server *server) searchHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		client := server.getClient(r.Context())
-		if client == nil {
-			http.Error(w, "Unable to find client.", http.StatusBadRequest)
-			return
-		}
-
 		server.lastSearchMutex.Lock()
 		defer server.lastSearchMutex.Unlock()
 
@@ -236,44 +188,38 @@ func (server *server) searchHandler() http.HandlerFunc {
 			remainingSeconds := time.Until(nextAvailableSearch).Seconds()
 			// TODO: Show HTTP errors on client instead of sending SSE message
 			http.Error(w, "Rate limited.", http.StatusTooManyRequests)
-			client.send <- newRateLimitResponse(remainingSeconds)
+			server.send <- newRateLimitResponse(remainingSeconds)
 			return
 		}
 
 		query := r.URL.Query().Get("query")
 		if query == "" {
 			http.Error(w, "No search query provided.", http.StatusBadRequest)
-			client.send <- newErrorResponse("No search query provided.")
+			server.send <- newErrorResponse("No search query provided.")
 			return
 		}
 
-		core.SearchBook(client.irc, server.config.SearchBot, query)
+		core.SearchBook(server.irc, server.config.SearchBot, query)
 		server.lastSearch = time.Now()
 
 		w.WriteHeader(http.StatusAccepted)
 
-		client.send <- newStatusResponse(NOTIFY, "Search request sent.")
+		server.send <- newStatusResponse(NOTIFY, "Search request sent.")
 	}
 }
 
 func (server *server) downloadHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		client := server.getClient(r.Context())
-		if client == nil {
-			http.Error(w, "Unable to find client.", http.StatusBadRequest)
-			return
-		}
-
 		book := r.URL.Query().Get("book")
 		if book == "" {
 			http.Error(w, "No book provided.", http.StatusBadRequest)
-			client.send <- newErrorResponse("No book provided.")
+			server.send <- newErrorResponse("No book provided.")
 			return
 		}
 
-		core.DownloadBook(client.irc, book)
+		core.DownloadBook(server.irc, book)
 		w.WriteHeader(http.StatusAccepted)
 
-		client.send <- newStatusResponse(NOTIFY, "Download request received.")
+		server.send <- newStatusResponse(NOTIFY, "Download request received.")
 	}
 }
