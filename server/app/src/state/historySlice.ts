@@ -59,12 +59,19 @@ export const historySlice = createSlice({
     }
   },
   extraReducers: (builder) => {
-    builder.addMatcher(api.endpoints.search.matchFulfilled, (state, action) => {
+    // Optimistic updates for search requests as we might get back
+    // the search results before the HTTP request "completes".
+    builder.addMatcher(api.endpoints.search.matchPending, (state, action) => {
       const timestamp = new Date().getTime();
       const query = action.meta.arg.originalArgs;
 
       state.active = timestamp;
       state.items = [{ query, timestamp }, ...state.items].slice(0, 16);
+    });
+    // If the request actually fails, remove the optimistic update
+    builder.addMatcher(api.endpoints.search.matchRejected, (state) => {
+      state.active = undefined;
+      state.items.shift();
     });
   }
 });
