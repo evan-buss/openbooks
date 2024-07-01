@@ -55,6 +55,7 @@ func (i *Conn) Disconnect() {
 	}
 	i.Write([]byte("QUIT :Goodbye\r\n"))
 	i.Conn.Close()
+	i.Conn = nil
 }
 
 // SendMessage sends the given message string to the connected IRC server

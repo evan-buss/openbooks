@@ -2,18 +2,23 @@ package server
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"path/filepath"
 	"sync"
+	"sync/atomic"
 	"syscall"
 	"time"
 
+	"github.com/evan-buss/openbooks/core"
+	"github.com/evan-buss/openbooks/irc"
+	"github.com/evan-buss/openbooks/util"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/google/uuid"
 	"github.com/r3labs/sse/v2"
 	"github.com/rs/cors"
 )
@@ -25,16 +30,17 @@ type server struct {
 	// Shared data
 	repository *Repository
 
-	// Registered clients.
-	clients map[uuid.UUID]*Client
-
 	sse *sse.Server
 
-	// Register requests from the clients.
-	register chan *Client
+	// Send messages to connected clients
+	send chan interface{}
 
-	// Unregister requests from clients.
-	unregister chan *Client
+	// Keep track of connected clients
+	connectedClients atomic.Int32
+	status           chan int
+
+	// Single IRC connection shared among all clients
+	irc *irc.Conn
 
 	log *log.Logger
 
@@ -62,19 +68,31 @@ type Config struct {
 }
 
 func New(config Config) *server {
+	server := &server{
+		config:           &config,
+		repository:       NewRepository(),
+		send:             make(chan interface{}, 128),
+		connectedClients: atomic.Int32{},
+		status:           make(chan int),
+		irc:              irc.New(config.UserName, config.UserAgent),
+		log:              log.New(os.Stdout, "SERVER: ", log.LstdFlags|log.Lmsgprefix),
+		lastSearchMutex:  sync.Mutex{},
+		lastSearch:       time.Time{},
+	}
+
 	sseServer := sse.New()
 	sseServer.AutoReplay = false
 	sseServer.AutoStream = true
-
-	return &server{
-		sse:        sseServer,
-		repository: NewRepository(),
-		config:     &config,
-		register:   make(chan *Client),
-		unregister: make(chan *Client),
-		clients:    make(map[uuid.UUID]*Client),
-		log:        log.New(os.Stdout, "SERVER: ", log.LstdFlags|log.Lmsgprefix),
+	sseServer.OnSubscribe = func(streamID string, sub *sse.Subscriber) {
+		server.status <- 1
 	}
+	sseServer.OnUnsubscribe = func(streamID string, sub *sse.Subscriber) {
+		server.status <- -1
+	}
+
+	server.sse = sseServer
+
+	return server
 }
 
 // Start instantiates the web server and opens the browser
@@ -97,7 +115,7 @@ func Start(config Config) {
 	routes := server.registerRoutes()
 
 	ctx, cancel := context.WithCancel(context.Background())
-	go server.startClientHub(ctx)
+	go server.startEventForwarder(ctx)
 	server.registerGracefulShutdown(cancel)
 	router.Mount(config.Basepath, routes)
 
@@ -108,55 +126,47 @@ func Start(config Config) {
 	server.log.Fatal(http.ListenAndServe(":"+config.Port, router))
 }
 
-// The client hub is to be run in a goroutine and handles management of
-// websocket client registrations.
-func (server *server) startClientHub(ctx context.Context) {
-	type selfDestructor struct {
-		timer  *time.Timer
-		client *Client
-	}
-
-	selfDestructors := make(map[uuid.UUID]selfDestructor)
+func (server *server) startEventForwarder(ctx context.Context) {
+	var destructTimer *time.Timer
 
 	for {
 		select {
-		case client := <-server.register:
-			if destructor, ok := selfDestructors[client.uuid]; ok {
-				destructor.timer.Stop()
-				server.log.Printf("Client %s reconnected\n", client.uuid.String())
-
-				client.irc = destructor.client.irc
-
-				delete(selfDestructors, client.uuid)
+		case message, ok := <-server.send:
+			if !ok {
+				continue
 			}
 
-			server.clients[client.uuid] = client
-			server.connectIRC(client)
-			go server.writePump(client)
-
-		case client := <-server.unregister:
-			// Keep the client and IRC connection alive for 3 minutes in case the client reconnects
-			timer := time.AfterFunc(time.Minute*3, func() {
-				if _, ok := selfDestructors[client.uuid]; ok {
-					client.irc.Disconnect()
-					_, cancel := context.WithCancel(client.ctx)
-					close(client.send)
-					cancel()
-					delete(selfDestructors, client.uuid)
-					server.log.Printf("Client %s self-destructed\n", client.uuid.String())
-				}
+			byteMessage, err := json.Marshal(message)
+			if err != nil {
+				server.log.Printf("Error marshalling message to JSON: %s\n", err)
+				return
+			}
+			server.sse.Publish("events", &sse.Event{
+				Data: byteMessage,
 			})
 
-			selfDestructors[client.uuid] = selfDestructor{timer, client}
-			delete(server.clients, client.uuid)
-			server.log.Printf("Client %s disconnected\n", client.uuid.String())
-		case <-ctx.Done():
-			for _, client := range server.clients {
-				_, cancel := context.WithCancel(client.ctx)
-				close(client.send)
-				cancel()
-				delete(server.clients, client.uuid)
+		case delta := <-server.status:
+			server.connectedClients.Add(int32(delta))
+
+			if server.connectedClients.Load() == 0 {
+				// Keep the client and IRC connection alive for 3 minutes in case another client connects
+				server.log.Println("No clients connected. Waiting 3 minutes before closing connection.")
+				destructTimer = time.AfterFunc(time.Second*30, func() {
+					if server.connectedClients.Load() == 0 {
+						server.irc.Disconnect()
+						server.log.Println("IRC connection closed.")
+					}
+				})
+			} else {
+				if destructTimer != nil && destructTimer.Stop() {
+					server.log.Println("IRC connection kept alive.")
+				}
+
+				server.connectIRC(ctx)
 			}
+
+		case <-ctx.Done():
+			server.irc.Disconnect()
 			return
 		}
 	}
@@ -179,5 +189,53 @@ func createBooksDirectory(config Config) {
 	err := os.MkdirAll(filepath.Join(config.DownloadDir, "books"), os.FileMode(0755))
 	if err != nil {
 		panic(err)
+	}
+}
+
+func (server *server) connectIRC(ctx context.Context) {
+	// The IRC connection is re-used if already connected
+	if server.irc.IsConnected() {
+		server.send <- ConnectionResponse{
+			StatusResponse: StatusResponse{
+				MessageType:      CONNECT,
+				NotificationType: NOTIFY,
+				Title:            "Welcome back, re-using open IRC connection.",
+				Detail:           fmt.Sprintf("IRC username %s", server.irc.Username),
+			},
+			Name: server.irc.Username,
+		}
+
+		return
+	}
+
+	server.log.Println("Connecting to IRC server.")
+
+	err := core.Join(server.irc, server.config.Server, server.config.EnableTLS)
+	if err != nil {
+		server.log.Println(err)
+		server.send <- newErrorResponse("Unable to connect to IRC server.")
+		return
+	}
+
+	handler := server.NewIrcEventHandler()
+
+	if server.config.Log {
+		logger, _, err := util.CreateLogFile(server.irc.Username, server.config.DownloadDir)
+		if err != nil {
+			server.log.Println(err)
+		}
+		handler[core.Message] = func(text string) { logger.Println(text) }
+	}
+
+	go core.StartReader(ctx, server.irc, handler)
+
+	server.send <- ConnectionResponse{
+		StatusResponse: StatusResponse{
+			MessageType:      CONNECT,
+			NotificationType: SUCCESS,
+			Title:            "Welcome, connection established.",
+			Detail:           fmt.Sprintf("IRC username %s", server.irc.Username),
+		},
+		Name: server.irc.Username,
 	}
 }

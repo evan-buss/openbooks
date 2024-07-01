@@ -2,9 +2,13 @@ Future:
 
 - Show IRC logs in the browser
 - Handle IRC name collisions
-- Allow reconnecting to same IRC connection if websocket disconnects.
-  - Currently we immediately terminate the IRC connection and remove the client
-  - Possible use a timer that keeps the Client around for a set period of time
-    after websocket disconnect.
-- Send download progress updates to the browser like we show for the CLI
-- Responsive layout
+- OpenAPI docs
+- OPDS server to search / downoad on KOReader directly
+
+Ideas:
+- Connection pooling to IRC to allow multi users at the same time.
+  - I no longer think it's possible to multi-plex a single connection and route the responses to the correct user.
+    There just isn't enough information to correlate the responses to the correct user. I've thought of using invisible characters in the messages, 
+    but even then the responses wouldn't have it and it's not guarantted that the requests won't be rejected..
+  - Instead, we could have a pool of connections and assign a connection to a user when they connect. If none are available, we deny the connection.
+    - The config could have a set of usernames that would be the limit of connections for that server.

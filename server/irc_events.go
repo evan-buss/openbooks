@@ -8,107 +8,107 @@ import (
 	"github.com/evan-buss/openbooks/core"
 )
 
-func (server *server) NewIrcEventHandler(client *Client) core.EventHandler {
+func (s *server) NewIrcEventHandler() core.EventHandler {
 	handler := core.EventHandler{}
-	handler[core.SearchResult] = client.searchResultHandler(server.config.DownloadDir)
-	handler[core.BookResult] = client.bookResultHandler(server.config.DownloadDir, server.config.DisableBrowserDownloads)
-	handler[core.NoResults] = client.noResultsHandler
-	handler[core.BadServer] = client.badServerHandler
-	handler[core.SearchAccepted] = client.searchAcceptedHandler
-	handler[core.MatchesFound] = client.matchesFoundHandler
-	handler[core.Ping] = client.pingHandler
-	handler[core.ServerList] = client.userListHandler(server.repository)
-	handler[core.Version] = client.versionHandler(server.config.UserAgent)
+	handler[core.SearchResult] = s.searchResultHandler(s.config.DownloadDir)
+	handler[core.BookResult] = s.bookResultHandler(s.config.DownloadDir, s.config.DisableBrowserDownloads)
+	handler[core.NoResults] = s.noResultsHandler
+	handler[core.BadServer] = s.badServerHandler
+	handler[core.SearchAccepted] = s.searchAcceptedHandler
+	handler[core.MatchesFound] = s.matchesFoundHandler
+	handler[core.Ping] = s.pingHandler
+	handler[core.ServerList] = s.userListHandler(s.repository)
+	handler[core.Version] = s.versionHandler(s.config.UserAgent)
 	return handler
 }
 
 // searchResultHandler downloads from DCC server, parses data, and sends data to client
-func (c *Client) searchResultHandler(downloadDir string) core.HandlerFunc {
+func (s *server) searchResultHandler(downloadDir string) core.HandlerFunc {
 	return func(text string) {
 		extractedPath, err := core.DownloadExtractDCCString(filepath.Join(downloadDir, "books"), text, nil)
 		if err != nil {
-			c.log.Println(err)
-			c.send <- newErrorResponse("Error when downloading search results.")
+			s.log.Println(err)
+			s.send <- newErrorResponse("Error when downloading search results.")
 			return
 		}
 
 		bookResults, parseErrors, err := core.ParseSearchFile(extractedPath)
 		if err != nil {
-			c.log.Println(err)
-			c.send <- newErrorResponse("Error when parsing search results.")
+			s.log.Println(err)
+			s.send <- newErrorResponse("Error when parsing search results.")
 			return
 		}
 
 		if len(bookResults) == 0 && len(parseErrors) == 0 {
-			c.noResultsHandler(text)
+			s.noResultsHandler(text)
 			return
 		}
 
 		// Output all errors so parser can be improved over time
 		if len(parseErrors) > 0 {
-			c.log.Printf("%d Search Result Parsing Errors\n", len(parseErrors))
+			s.log.Printf("%d Search Result Parsing Errors\n", len(parseErrors))
 			for _, err := range parseErrors {
-				c.log.Println(err)
+				s.log.Println(err)
 			}
 		}
 
-		c.log.Printf("Sending %d search results.\n", len(bookResults))
-		c.send <- newSearchResponse(bookResults, parseErrors)
+		s.log.Printf("Sending %d search results.\n", len(bookResults))
+		s.send <- newSearchResponse(bookResults, parseErrors)
 
 		err = os.Remove(extractedPath)
 		if err != nil {
-			c.log.Printf("Error deleting search results file: %v", err)
+			s.log.Printf("Error deleting search results file: %v", err)
 		}
 	}
 }
 
 // bookResultHandler downloads the book file and sends it over the websocket
-func (c *Client) bookResultHandler(downloadDir string, disableBrowserDownloads bool) core.HandlerFunc {
+func (s *server) bookResultHandler(downloadDir string, disableBrowserDownloads bool) core.HandlerFunc {
 	return func(text string) {
 		extractedPath, err := core.DownloadExtractDCCString(filepath.Join(downloadDir, "books"), text, nil)
 		if err != nil {
-			c.log.Println(err)
-			c.send <- newErrorResponse("Error when downloading book.")
+			s.log.Println(err)
+			s.send <- newErrorResponse("Error when downloading book.")
 			return
 		}
 
-		c.log.Printf("Sending book entitled '%s'.\n", filepath.Base(extractedPath))
-		c.send <- newDownloadResponse(extractedPath, disableBrowserDownloads)
+		s.log.Printf("Sending book entitled '%s'.\n", filepath.Base(extractedPath))
+		s.send <- newDownloadResponse(extractedPath, disableBrowserDownloads)
 	}
 }
 
 // NoResults is called when the server returns that nothing was found for the query
-func (c *Client) noResultsHandler(_ string) {
-	c.send <- newErrorResponse("No results found for the query.")
+func (s *server) noResultsHandler(_ string) {
+	s.send <- newErrorResponse("No results found for the query.")
 }
 
 // BadServer is called when the requested download fails because the server is not available
-func (c *Client) badServerHandler(_ string) {
-	c.send <- newErrorResponse("Server is not available. Try another one.")
+func (s *server) badServerHandler(_ string) {
+	s.send <- newErrorResponse("Server is not available. Try another one.")
 }
 
 // SearchAccepted is called when the user's query is accepted into the search queue
-func (c *Client) searchAcceptedHandler(_ string) {
-	c.send <- newStatusResponse(NOTIFY, "Search accepted into the queue.")
+func (s *server) searchAcceptedHandler(_ string) {
+	s.send <- newStatusResponse(NOTIFY, "Search accepted into the queue.")
 }
 
 // MatchesFound is called when the server finds matches for the user's query
-func (c *Client) matchesFoundHandler(num string) {
-	c.send <- newStatusResponse(NOTIFY, fmt.Sprintf("Found %s results for your query.", num))
+func (s *server) matchesFoundHandler(num string) {
+	s.send <- newStatusResponse(NOTIFY, fmt.Sprintf("Found %s results for your query.", num))
 }
 
-func (c *Client) pingHandler(serverUrl string) {
-	c.irc.Pong(serverUrl)
+func (s *server) pingHandler(serverUrl string) {
+	s.irc.Pong(serverUrl)
 }
 
-func (c *Client) versionHandler(version string) core.HandlerFunc {
+func (s *server) versionHandler(version string) core.HandlerFunc {
 	return func(line string) {
-		c.log.Printf("Sending CTCP version response: %s", line)
-		core.SendVersionInfo(c.irc, line, version)
+		s.log.Printf("Sending CTCP version response: %s", line)
+		core.SendVersionInfo(s.irc, line, version)
 	}
 }
 
-func (c *Client) userListHandler(repo *Repository) core.HandlerFunc {
+func (s *server) userListHandler(repo *Repository) core.HandlerFunc {
 	return func(text string) {
 		repo.servers = core.ParseServers(text)
 	}
