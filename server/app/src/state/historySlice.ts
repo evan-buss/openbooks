@@ -24,8 +24,16 @@ const loadState = (): HistoryItem[] => {
   }
 };
 
+const loadActiveState = (): number | undefined => {
+  try {
+    return JSON.parse(localStorage.getItem("active")!);
+  } catch (err) {
+    return undefined;
+  }
+};
+
 const initialState: HistoryState = {
-  active: undefined,
+  active: loadActiveState(),
   items: loadState()
 };
 
