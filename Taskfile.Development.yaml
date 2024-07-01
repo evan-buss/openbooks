@@ -25,6 +25,11 @@ tasks:
       - package.json
       - package-lock.json
 
+  irc:
+    desc: Start IRC Server for Development
+    cmds:
+      - docker run --name ergo -d -p 6667:6667 -p 6697:6697 ghcr.io/ergochat/ergo:stable
+
   mock:
     desc: Start Mock Server for Development
     dir: cmd/mock
