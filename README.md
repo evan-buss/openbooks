@@ -11,7 +11,6 @@ Openbooks allows you to download ebooks from irc.irchighway.net quickly and easi
   <img alt="openbooks screenshot" src="./.github/home_v3.png">
 </picture>
 
-
 ## Getting Started
 
 ### Binary
@@ -46,13 +45,13 @@ two modes; Server or CLI. In CLI mode you interact and download books through
 a terminal interface. In server mode the application runs as a web application
 that you can visit in your browser.
 
-Double clicking the executable will open the UI in your browser. In the future it may use [webviews](https://developer.microsoft.com/en-us/microsoft-edge/webview2/) to provide a "native-like" desktop application. 
+Double clicking the executable will open the UI in your browser. In the future it may use [webviews](https://developer.microsoft.com/en-us/microsoft-edge/webview2/) to provide a "native-like" desktop application.
 
 ## Development
 
 ### Install the dependencies
 
-- `go get`
+- `go mod tidy`
 - `cd server/app && npm install`
 - `cd ../..`
 - `go run main.go`
@@ -79,13 +78,13 @@ Double clicking the executable will open the UI in your browser. In the future i
   ```
 
 ### Desktop App
+
 Compile OpenBooks with experimental webview support:
 
-``` shell
+```shell
 cd cmd/openbooks
 go build -tags webview
 ```
-
 
 ## Why / How
 
