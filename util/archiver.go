@@ -30,6 +30,17 @@ func ExtractArchive(archivePath string) (string, error) {
 
 	var newPath string
 	err = w.Walk(archivePath, func(f archiver.File) error {
+		// Extract only one file per archive. Otherwise, stop walking,
+		// remove extracted items, and deliver the archive itself.
+		if newPath != "" {
+			err := os.Remove(newPath)
+			if err != nil {
+				return err
+			}
+			newPath = ""
+			return archiver.ErrStopWalk
+		}
+
 		newPath = filepath.Join(filepath.Dir(archivePath), f.Name()+".temp")
 
 		out, err := os.Create(newPath)
@@ -57,7 +68,8 @@ func ExtractArchive(archivePath string) (string, error) {
 		return "", err
 	}
 
-	// If we extracted a file, send that file and remove the zip file
+	// If we extracted exactly one file, send that file and remove the zip file.
+	// Otherwise, send the archive itself.
 	if newPath != "" {
 		err := os.Remove(archivePath)
 		if err != nil {
