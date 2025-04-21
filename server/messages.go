@@ -53,7 +53,9 @@ type SearchRequest struct {
 
 // DownloadRequest is a request to download a specific book from the IRC server
 type DownloadRequest struct {
-	Book string `json:"book"`
+	Book   string `json:"book"`
+	Author string `json:"author,omitempty"`
+	Title  string `json:"title,omitempty"`
 }
 
 // ConnectionResponse

@@ -26,6 +26,7 @@ These options apply to both Server and CLI mode.
 | `--browser`/`-b`         | `false`     | Open the browser on startup.                              |
 | `--dir`/`-d`             | `/temp`[^1] | Directory where search results and eBooks are saved.      |
 | `--no-browser-downloads` | `false`     | Don't send files to browser but save them to disk.        |
+| `--organize-downloads`   | `false`     | If enabled, downloaded files are placed in subdirectories by author and title (e.g., `books/Author/Title/FILE`). If disabled (default), all files are placed in the root books directory. |
 | `--persist`              | `false`     | Save eBook files after sending to browser.                |
 | `--port`/`-p`            | `5228`      | The port that the server listens on.                      |
 | `--rate-limit`/`-r`      | `10`        | Seconds to wait between IRC search requests. (minimum 10) |

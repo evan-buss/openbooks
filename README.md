@@ -48,6 +48,31 @@ that you can visit in your browser.
 
 Double clicking the executable will open the UI in your browser. In the future it may use [webviews](https://developer.microsoft.com/en-us/microsoft-edge/webview2/) to provide a "native-like" desktop application. 
 
+## Organized Download Directory Structure
+
+Starting in vNEXT, you can opt-in to organize downloaded books into subdirectories by author and title. The structure is:
+
+```
+books/Author Name/Book Title/FILE
+```
+
+This applies to downloads made via both the web UI and CLI if enabled. The frontend sends the author and title in the download request, and the backend saves the file accordingly. Directory names are sanitized for safety.
+
+### CLI Flag: --organize-downloads
+
+You can enable this feature using the `--organize-downloads` CLI flag:
+
+- `--organize-downloads` (default: disabled): If enabled, organizes downloads as shown above.
+- By default, all files are placed in a single directory. Enable the flag to use the organized structure.
+
+### Example
+
+After downloading "The Hobbit" by J.R.R. Tolkien, the file will be saved as:
+
+```
+books/JRR Tolkien/The Hobbit/yourfile.ext
+```
+
 ## Development
 
 ### Install the dependencies

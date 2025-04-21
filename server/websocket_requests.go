@@ -3,6 +3,8 @@ package server
 import (
 	"encoding/json"
 	"fmt"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/evan-buss/openbooks/core"
@@ -101,6 +103,23 @@ func (c *Client) sendSearchRequest(s *SearchRequest, server *server) {
 
 // handle DownloadRequests by sending the request to the book server
 func (c *Client) sendDownloadRequest(d *DownloadRequest) {
+	// Compose the subdirectory path if author/title are provided
+	subDir := "books"
+	if d.Author != "" && d.Title != "" {
+		subDir = filepath.Join("books", sanitizePath(d.Author), sanitizePath(d.Title))
+	}
+	// Pass subDir to the handler via context or a custom field (for now, set on client)
+	c.downloadSubDir = subDir // You may need to add this field to the Client struct
 	core.DownloadBook(c.irc, d.Book)
 	c.send <- newStatusResponse(NOTIFY, "Download request received.")
+}
+
+// Helper to sanitize path components
+func sanitizePath(s string) string {
+	s = strings.TrimSpace(s)
+	s = strings.ReplaceAll(s, "../", "")
+	s = strings.ReplaceAll(s, "./", "")
+	s = strings.ReplaceAll(s, "/", "_")
+	s = strings.ReplaceAll(s, "\\", "_")
+	return s
 }

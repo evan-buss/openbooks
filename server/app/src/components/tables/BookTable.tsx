@@ -256,6 +256,7 @@ export default function BookTable({ books }: BookTableProps) {
 
 function DownloadButton({ book }: { book: string }) {
   const dispatch = useAppDispatch();
+  const activeItem = useSelector((state: RootState) => state.state.activeItem);
 
   const [clicked, setClicked] = useState(false);
   const isInFlight = useSelector((state: RootState) =>
@@ -265,7 +266,17 @@ function DownloadButton({ book }: { book: string }) {
   // Prevent hitting the same button multiple times
   const onClick = () => {
     if (clicked) return;
-    dispatch(sendDownload(book));
+    // Grab author/title from activeItem's results
+    let author = "";
+    let title = "";
+    if (activeItem && activeItem.results) {
+      const found = activeItem.results.find((b) => b.full === book);
+      if (found) {
+        author = found.author;
+        title = found.title;
+      }
+    }
+    dispatch(sendDownload({ book, author, title }));
     setClicked(true);
   };
 
