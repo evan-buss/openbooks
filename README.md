@@ -66,14 +66,12 @@ Organize downloads and replace spaces with dots:
 
 ```sh
 openbooks server --organize-downloads --replace-space .
-# Results in: /books/Amy.Taco/Dark.Fire.Kiss/Book.ext
 ```
 
 Default (spaces preserved):
 
 ```sh
 openbooks server --organize-downloads
-# Results in: /books/Amy Taco/Dark Fire Kiss/Book.ext
 ```
 
 ## Organized Download Directory Structure
