@@ -50,9 +50,9 @@ Double clicking the executable will open the UI in your browser. In the future i
 
 ## Optional Flags
 
-- `--no-browser-downloads`: Prevents downloads from being served to the browser for security reasons.
+- `--no-browser-downloads`: Prevents downloads from being served to the browser.
 - `--organize-downloads`: Organizes downloaded books into subdirectories by author and title, e.g. `/books/Author/Title/Book.ext`.
-- `--replace-space <char>`: Replaces spaces in author and title directory names with the specified character. For example, `--replace-space _` will save `Amy Taco` as `Amy_Taco`. Leave empty to preserve spaces. Works with `--organize-downloads`.
+- `--replace-space <char>`: Replaces spaces in author and title directory names with the specified character. For example, `--replace-space _` will save `Firstname Lastname` as `Firstanme_Lastname`. Leave empty to preserve spaces. Works with `--organize-downloads`.
 
 #### Examples
 
@@ -60,7 +60,6 @@ Organize downloads and replace spaces with underscores:
 
 ```sh
 openbooks server --organize-downloads --replace-space _
-# Results in: /books/Amy_Taco/Dark_Fire_Kiss/Book.ext
 ```
 
 Organize downloads and replace spaces with dots:
