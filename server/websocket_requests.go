@@ -116,15 +116,15 @@ func sanitizePath(s string, replaceSpace string) string {
 // handle DownloadRequests by sending the request to the book server
 func (c *Client) sendDownloadRequest(d *DownloadRequest, server *server) {
 	// Compose the subdirectory path if author/title are provided and organize-downloads is enabled
-	subDir := ""
+	subDir := "books"
 	replaceSpace := ""
 	if server != nil {
 		replaceSpace = server.config.ReplaceSpace
 	}
 	if server != nil && server.config.OrganizeDownloads && d.Author != "" && d.Title != "" {
-		subDir = filepath.Join(sanitizePath(d.Author, replaceSpace), sanitizePath(d.Title, replaceSpace))
+		subDir = filepath.Join("books", sanitizePath(d.Author, replaceSpace), sanitizePath(d.Title, replaceSpace))
 	} else if d.Author != "" && d.Title != "" {
-		subDir = filepath.Join(sanitizePath(d.Author, replaceSpace), sanitizePath(d.Title, replaceSpace))
+		subDir = filepath.Join("books", sanitizePath(d.Author, replaceSpace), sanitizePath(d.Title, replaceSpace))
 	}
 
 	// Ensure the directory exists before downloading
