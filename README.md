@@ -46,7 +46,7 @@ two modes; Server or CLI. In CLI mode you interact and download books through
 a terminal interface. In server mode the application runs as a web application
 that you can visit in your browser.
 
-Double clicking the executable will open the UI in your browser. In the future it may use [webviews](https://developer.microsoft.com/en-us/microsoft-edge/webview2/) to provide a "native-like" desktop application. 
+Double clicking (on windows) the executable will open the UI in your browser. In the future it may use [webviews](https://developer.microsoft.com/en-us/microsoft-edge/webview2/) to provide a "native-like" desktop application. 
 
 ## Optional Flags
 
