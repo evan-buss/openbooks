@@ -74,6 +74,14 @@ func (c *Client) bookResultHandler(downloadDir string, disableBrowserDownloads b
 		}
 
 		c.log.Printf("Sending book entitled '%s'.\n", filepath.Base(extractedPath))
+		
+		// After a book is downloaded, log the absolute host path
+		absPath, err := filepath.Abs(extractedPath)
+		if err != nil {
+			c.log.Printf("Book downloaded: %s (error resolving absolute path: %v)", extractedPath, err)
+		} else {
+			c.log.Printf("Book downloaded (absolute path): %s", absPath)
+		}
 		c.send <- newDownloadResponse(extractedPath, disableBrowserDownloads)
 	}
 }
