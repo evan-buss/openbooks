@@ -50,9 +50,12 @@ Double clicking the executable will open the UI in your browser. In the future i
 
 ## Optional Flags
 
+- `--dir <directory>`: Sets the directory where eBooks are saved (default: `/tmp/openbooks`).
+- `--port <port>`: Sets the port the server listens on (default: `8080`).
+- `--persist`: Persist eBooks in the download directory after sending (default is to delete after sending).
 - `--no-browser-downloads`: Prevents downloads from being served to the browser.
 - `--organize-downloads`: Organizes downloaded books into subdirectories by author and title, e.g. `/books/Author/Title/Book.ext`.
-- `--replace-space <char>`: Replaces spaces in author and title directory names with the specified character. For example, `--replace-space _` will save `Firstname Lastname` as `Firstanme_Lastname`. Leave empty to preserve spaces. Works with `--organize-downloads`.
+- `--replace-space <char>`: Replaces spaces in author and title directory names with the specified character. For example, `--replace-space _` will save `Firstname Lastname` as `Firstname_Lastname`. Leave empty to preserve spaces. Works with `--organize-downloads`.
 
 #### Examples
 
