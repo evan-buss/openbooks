@@ -20,6 +20,7 @@ const loadActive = (): HistoryItem | null => {
   try {
     return JSON.parse(localStorage.getItem("active")!) ?? null;
   } catch (err) {
+    console.error("Failed to load active item from localStorage:", err);
     return null;
   }
 };

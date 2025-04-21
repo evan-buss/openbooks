@@ -47,7 +47,7 @@ const stringInArray: FilterFn<any> = (
 };
 
 interface BookTableProps {
-  books: BookDetail[];
+  readonly books: BookDetail[];
 }
 
 export default function BookTable({ books }: BookTableProps) {
@@ -71,13 +71,14 @@ export default function BookTable({ books }: BookTableProps) {
           />
         ),
         cell: (props) => {
-          const online = servers?.includes(props.getValue());
+          const online = servers?.includes(props.getValue?.());
           return (
             <Text
               size={12}
               weight="normal"
               color="dark"
-              style={{ marginLeft: 20 }}>
+              style={{ marginLeft: 20 }}
+              aria-label={online ? "Online" : "Offline"}>
               <Tooltip
                 position="top-start"
                 label={online ? "Online" : "Offline"}>
@@ -87,7 +88,7 @@ export default function BookTable({ books }: BookTableProps) {
                   offset={-16}
                   size={6}
                   color={online ? "green.6" : "gray"}>
-                  {props.getValue()}
+                  {props.getValue?.()}
                 </Indicator>
               </Tooltip>
             </Text>
@@ -254,7 +255,9 @@ export default function BookTable({ books }: BookTableProps) {
   );
 }
 
-function DownloadButton({ book }: { book: string }) {
+type DownloadButtonProps = Readonly<{ book: string }>;
+
+function DownloadButton({ book }: DownloadButtonProps) {
   const dispatch = useAppDispatch();
   const activeItem = useSelector((state: RootState) => state.state.activeItem);
 
@@ -267,15 +270,9 @@ function DownloadButton({ book }: { book: string }) {
   const onClick = () => {
     if (clicked) return;
     // Grab author/title from activeItem's results
-    let author = "";
-    let title = "";
-    if (activeItem && activeItem.results) {
-      const found = activeItem.results.find((b) => b.full === book);
-      if (found) {
-        author = found.author;
-        title = found.title;
-      }
-    }
+    const found = activeItem?.results?.find((b) => b.full === book);
+    const author = found?.author ?? "";
+    const title = found?.title ?? "";
     dispatch(sendDownload({ book, author, title }));
     setClicked(true);
   };
@@ -286,7 +283,8 @@ function DownloadButton({ book }: { book: string }) {
       size="xs"
       radius="sm"
       onClick={onClick}
-      sx={{ fontWeight: "normal", width: 80 }}>
+      sx={{ fontWeight: "normal", width: 80 }}
+      aria-label="Download">
       {isInFlight ? (
         <Loader variant="dots" color="gray" />
       ) : (
