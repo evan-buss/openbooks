@@ -3,6 +3,7 @@ package server
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 	"time"
@@ -43,7 +44,7 @@ func (server *server) routeMessage(message Request, c *Client) {
 	case SEARCH:
 		c.sendSearchRequest(obj.(*SearchRequest), server)
 	case DOWNLOAD:
-		c.sendDownloadRequest(obj.(*DownloadRequest))
+		c.sendDownloadRequest(obj.(*DownloadRequest), server)
 	default:
 		server.log.Println("Unknown request type received.")
 	}
@@ -101,25 +102,40 @@ func (c *Client) sendSearchRequest(s *SearchRequest, server *server) {
 	c.send <- newStatusResponse(NOTIFY, "Search request sent.")
 }
 
-// handle DownloadRequests by sending the request to the book server
-func (c *Client) sendDownloadRequest(d *DownloadRequest) {
-	// Compose the subdirectory path if author/title are provided
-	subDir := "books"
-	if d.Author != "" && d.Title != "" {
-		subDir = filepath.Join("books", sanitizePath(d.Author), sanitizePath(d.Title))
+// sanitizePath replaces characters for safe filesystem paths, now also handling space replacement.
+func sanitizePath(s string, replaceSpace string) string {
+	s = strings.TrimSpace(s)
+	s = strings.ReplaceAll(s, "/", "-")
+	s = strings.ReplaceAll(s, "\\", "-")
+	if replaceSpace != "" {
+		s = strings.ReplaceAll(s, " ", replaceSpace)
 	}
-	// Pass subDir to the handler via context or a custom field (for now, set on client)
-	c.downloadSubDir = subDir // You may need to add this field to the Client struct
-	core.DownloadBook(c.irc, d.Book)
-	c.send <- newStatusResponse(NOTIFY, "Download request received.")
+	return s
 }
 
-// Helper to sanitize path components
-func sanitizePath(s string) string {
-	s = strings.TrimSpace(s)
-	s = strings.ReplaceAll(s, "../", "")
-	s = strings.ReplaceAll(s, "./", "")
-	s = strings.ReplaceAll(s, "/", "_")
-	s = strings.ReplaceAll(s, "\\", "_")
-	return s
+// handle DownloadRequests by sending the request to the book server
+func (c *Client) sendDownloadRequest(d *DownloadRequest, server *server) {
+	// Compose the subdirectory path if author/title are provided and organize-downloads is enabled
+	subDir := "books"
+	replaceSpace := ""
+	if server != nil {
+		replaceSpace = server.config.ReplaceSpace
+	}
+	if server != nil && server.config.OrganizeDownloads && d.Author != "" && d.Title != "" {
+		subDir = filepath.Join("books", sanitizePath(d.Author, replaceSpace), sanitizePath(d.Title, replaceSpace))
+	} else if d.Author != "" && d.Title != "" {
+		subDir = filepath.Join("books", sanitizePath(d.Author, replaceSpace), sanitizePath(d.Title, replaceSpace))
+	}
+
+	// Ensure the directory exists before downloading
+	dirPath := filepath.Join(server.config.DownloadDir, subDir)
+	if err := os.MkdirAll(dirPath, 0755); err != nil {
+		c.log.Printf("Failed to create directory %s: %v", dirPath, err)
+		c.send <- newErrorResponse("Failed to create download directory.")
+		return
+	}
+
+	c.downloadSubDir = subDir
+	core.DownloadBook(c.irc, d.Book)
+	c.send <- newStatusResponse(NOTIFY, "Download request received.")
 }

@@ -50,14 +50,31 @@ Double clicking the executable will open the UI in your browser. In the future i
 
 ## Optional Flags
 
-### --no-browser-downloads
+- `--no-browser-downloads`: Prevents downloads from being served to the browser for security reasons.
+- `--organize-downloads`: Organizes downloaded books into subdirectories by author and title, e.g. `/books/Author/Title/Book.ext`.
+- `--replace-space <char>`: Replaces spaces in author and title directory names with the specified character. For example, `--replace-space _` will save `Amy Taco` as `Amy_Taco`. Leave empty to preserve spaces. Works with `--organize-downloads`.
 
-If you start the server with the `--no-browser-downloads` flag, users will not be able to download files directly from the browser UI. This can be useful for deployments where you want to restrict file downloads for security or compliance reasons.
+#### Examples
 
-**Example:**
+Organize downloads and replace spaces with underscores:
 
+```sh
+openbooks server --organize-downloads --replace-space _
+# Results in: /books/Amy_Taco/Dark_Fire_Kiss/Book.ext
 ```
-openbooks server --dir /books --port 80 --no-browser-downloads
+
+Organize downloads and replace spaces with dots:
+
+```sh
+openbooks server --organize-downloads --replace-space .
+# Results in: /books/Amy.Taco/Dark.Fire.Kiss/Book.ext
+```
+
+Default (spaces preserved):
+
+```sh
+openbooks server --organize-downloads
+# Results in: /books/Amy Taco/Dark Fire Kiss/Book.ext
 ```
 
 ## Organized Download Directory Structure
