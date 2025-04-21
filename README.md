@@ -48,6 +48,18 @@ that you can visit in your browser.
 
 Double clicking the executable will open the UI in your browser. In the future it may use [webviews](https://developer.microsoft.com/en-us/microsoft-edge/webview2/) to provide a "native-like" desktop application. 
 
+## Optional Flags
+
+### --no-browser-downloads
+
+If you start the server with the `--no-browser-downloads` flag, users will not be able to download files directly from the browser UI. This can be useful for deployments where you want to restrict file downloads for security or compliance reasons.
+
+**Example:**
+
+```
+openbooks server --dir /books --port 80 --no-browser-downloads
+```
+
 ## Organized Download Directory Structure
 
 Starting in vNEXT, you can opt-in to organize downloaded books into subdirectories by author and title. The structure is:
