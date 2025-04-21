@@ -17,6 +17,7 @@ var organizeDownloads bool
 var replaceSpace string
 
 func init() {
+	desktopCmd.AddCommand(serverCmd)
 	defaultDownloadDir := ""
 	// Sonar Security: Avoid predictable, world-writable temp directories for persistent files.
 	// Use user home directory by default for download storage (see go:SS445 and CWE-379).
