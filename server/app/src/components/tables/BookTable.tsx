@@ -47,7 +47,7 @@ const stringInArray: FilterFn<any> = (
 };
 
 interface BookTableProps {
-  books: BookDetail[];
+  readonly books: BookDetail[];
 }
 
 export default function BookTable({ books }: BookTableProps) {
@@ -62,7 +62,7 @@ export default function BookTable({ books }: BookTableProps) {
     const cols = (cols: number) => (width / 12) * cols;
     return [
       columnHelper.accessor("server", {
-        header: (props) => (
+        header: (props: { column: any; table: any }) => (
           <FacetFilter
             placeholder="Server"
             column={props.column}
@@ -70,24 +70,28 @@ export default function BookTable({ books }: BookTableProps) {
             Entry={ServerFacetEntry}
           />
         ),
-        cell: (props) => {
-          const online = servers?.includes(props.getValue());
+        cell: (props: { getValue: () => string }) => {
+          const online = servers?.includes(props.getValue?.());
           return (
             <Text
               size={12}
               weight="normal"
               color="dark"
-              style={{ marginLeft: 20 }}>
+              style={{ marginLeft: 20 }}
+              aria-label={online ? "Online" : "Offline"}
+            >
               <Tooltip
                 position="top-start"
-                label={online ? "Online" : "Offline"}>
+                label={online ? "Online" : "Offline"}
+              >
                 <Indicator
                   zIndex={0}
                   position="middle-start"
                   offset={-16}
                   size={6}
-                  color={online ? "green.6" : "gray"}>
-                  {props.getValue()}
+                  color={online ? "green.6" : "gray"}
+                >
+                  {props.getValue?.()}
                 </Indicator>
               </Tooltip>
             </Text>
@@ -95,10 +99,10 @@ export default function BookTable({ books }: BookTableProps) {
         },
         size: cols(1),
         enableColumnFilter: true,
-        filterFn: stringInArray
+        filterFn: stringInArray,
       }),
       columnHelper.accessor("author", {
-        header: (props) => (
+        header: (props: { column: any; table: any }) => (
           <TextFilter
             icon={<User weight="bold" />}
             placeholder="Author"
@@ -110,7 +114,7 @@ export default function BookTable({ books }: BookTableProps) {
         enableColumnFilter: false
       }),
       columnHelper.accessor("title", {
-        header: (props) => (
+        header: (props: { column: any; table: any }) => (
           <TextFilter
             icon={<MagnifyingGlass weight="bold" />}
             placeholder="Title"
@@ -123,7 +127,7 @@ export default function BookTable({ books }: BookTableProps) {
         enableColumnFilter: false
       }),
       columnHelper.accessor("format", {
-        header: (props) => (
+        header: (props: { column: any; table: any }) => (
           <FacetFilter
             placeholder="Format"
             column={props.column}
@@ -136,15 +140,24 @@ export default function BookTable({ books }: BookTableProps) {
         filterFn: stringInArray
       }),
       columnHelper.accessor("size", {
-        header: "Size",
+        header: (props: { column: any; table: any }) => (
+          <Text weight="bold" color="dark">
+            Size
+          </Text>
+        ),
         size: cols(1),
         enableColumnFilter: false
       }),
       columnHelper.display({
-        header: "Download",
+        id: "download",
+        header: (props: { column: any; table: any }) => (
+          <Text weight="bold" color="dark">
+            Download
+          </Text>
+        ),
         size: cols(1),
         enableColumnFilter: false,
-        cell: ({ row }) => (
+        cell: ({ row }: { row: Row<BookDetail> }) => (
           <DownloadButton book={row.original.full}></DownloadButton>
         )
       })
@@ -188,7 +201,8 @@ export default function BookTable({ books }: BookTableProps) {
       type="hover"
       scrollbarSize={6}
       styles={{ thumb: { ["&::before"]: { minWidth: 4 } } }}
-      offsetScrollbars={false}>
+      offsetScrollbars={false}
+    >
       <Table highlightOnHover verticalSpacing="sm" fontSize="xs">
         <thead className={classes.head}>
           {table.getHeaderGroups().map((headerGroup) => (
@@ -199,7 +213,8 @@ export default function BookTable({ books }: BookTableProps) {
                   className={classes.headerCell}
                   style={{
                     width: header.getSize()
-                  }}>
+                  }}
+                >
                   {flexRender(
                     header.column.columnDef.header,
                     header.getContext()
@@ -254,8 +269,11 @@ export default function BookTable({ books }: BookTableProps) {
   );
 }
 
-function DownloadButton({ book }: { book: string }) {
+type DownloadButtonProps = Readonly<{ book: string }>;
+
+function DownloadButton({ book }: DownloadButtonProps) {
   const dispatch = useAppDispatch();
+  const activeItem = useSelector((state: RootState) => state.state.activeItem);
 
   const [clicked, setClicked] = useState(false);
   const isInFlight = useSelector((state: RootState) =>
@@ -265,7 +283,11 @@ function DownloadButton({ book }: { book: string }) {
   // Prevent hitting the same button multiple times
   const onClick = () => {
     if (clicked) return;
-    dispatch(sendDownload(book));
+    // Grab author/title from activeItem's results
+    const found = activeItem?.results?.find((b) => b.full === book);
+    const author = found?.author ?? "";
+    const title = found?.title ?? "";
+    dispatch(sendDownload({ book, author, title }));
     setClicked(true);
   };
 
@@ -275,7 +297,9 @@ function DownloadButton({ book }: { book: string }) {
       size="xs"
       radius="sm"
       onClick={onClick}
-      sx={{ fontWeight: "normal", width: 80 }}>
+      sx={{ fontWeight: "normal", width: 80 }}
+      aria-label="Download"
+    >
       {isInFlight ? (
         <Loader variant="dots" color="gray" />
       ) : (

@@ -10,6 +10,14 @@ This allows you to self-host OpenBooks without having to install it on every dev
 
 If you'd prefer to use OpenBooks from your terminal, check out [CLI Mode](./configuration.md).
 
+## Organized Downloads
+
+You can opt-in to save downloaded books in a structured directory:
+
+    books/Author Name/Book Title/FILE
+
+This makes managing your library easier. Enable this with the `--organize-downloads` flag. By default, all downloads go into a single directory.
+
 ### Docker
 
 `docker run -p 8080:80 evanbuss/openbooks`

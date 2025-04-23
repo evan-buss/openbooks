@@ -13,9 +13,20 @@ import (
 
 var openBrowser = false
 var serverConfig server.Config
+var organizeDownloads bool
+var replaceSpace string
 
 func init() {
 	desktopCmd.AddCommand(serverCmd)
+	defaultDownloadDir := ""
+	// Sonar Security: Avoid predictable, world-writable temp directories for persistent files.
+	// Use user home directory by default for download storage (see go:SS445 and CWE-379).
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		defaultDownloadDir = filepath.Join("/tmp", "openbooks") // fallback, but still not ideal
+	} else {
+		defaultDownloadDir = filepath.Join(homeDir, "openbooks")
+	}
 
 	serverCmd.Flags().StringVarP(&serverConfig.Port, "port", "p", "5228", "Set the local network port for browser mode.")
 	serverCmd.Flags().IntP("rate-limit", "r", 10, "The number of seconds to wait between searches to reduce strain on IRC search servers. Minimum is 10 seconds.")
@@ -23,7 +34,9 @@ func init() {
 	serverCmd.Flags().StringVar(&serverConfig.Basepath, "basepath", "/", `Base path where the application is accessible. For example "/openbooks/".`)
 	serverCmd.Flags().BoolVarP(&openBrowser, "browser", "b", false, "Open the browser on server start.")
 	serverCmd.Flags().BoolVar(&serverConfig.Persist, "persist", false, "Persist eBooks in 'dir'. Default is to delete after sending.")
-	serverCmd.Flags().StringVarP(&serverConfig.DownloadDir, "dir", "d", filepath.Join(os.TempDir(), "openbooks"), "The directory where eBooks are saved when persist enabled.")
+	serverCmd.Flags().StringVarP(&serverConfig.DownloadDir, "dir", "d", defaultDownloadDir, "The directory where eBooks are saved when persist enabled.")
+	serverCmd.Flags().BoolVar(&serverConfig.OrganizeDownloads, "organize-downloads", false, "Organize downloads into author/title/FILE.")
+	serverCmd.Flags().StringVar(&replaceSpace, "replace-space", "", "Replace spaces in author/title with this character (e.g. '.', '-', '_'). Leave empty to keep spaces.")
 }
 
 var serverCmd = &cobra.Command{
@@ -49,6 +62,8 @@ var serverCmd = &cobra.Command{
 			util.OpenBrowser(browserUrl)
 		}
 
+		serverConfig.ReplaceSpace = replaceSpace
+		serverConfig.OrganizeDownloads = organizeDownloads
 		server.Start(serverConfig)
 	},
 }

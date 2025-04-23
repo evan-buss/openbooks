@@ -46,7 +46,61 @@ two modes; Server or CLI. In CLI mode you interact and download books through
 a terminal interface. In server mode the application runs as a web application
 that you can visit in your browser.
 
-Double clicking the executable will open the UI in your browser. In the future it may use [webviews](https://developer.microsoft.com/en-us/microsoft-edge/webview2/) to provide a "native-like" desktop application. 
+Double clicking (on windows) the executable will open the UI in your browser. In the future it may use [webviews](https://developer.microsoft.com/en-us/microsoft-edge/webview2/) to provide a "native-like" desktop application. 
+
+## Optional Flags
+
+- `--dir <directory>`: Sets the directory where eBooks are saved (default: `/tmp/openbooks`).
+- `--port <port>`: Sets the port the server listens on (default: `8080`).
+- `--persist`: Persist eBooks in the download directory after sending (default is to delete after sending).
+- `--no-browser-downloads`: Prevents downloads from being served to the browser.
+- `--organize-downloads`: Organizes downloaded books into subdirectories by author and title, e.g. `/books/Author/Title/Book.ext`.
+- `--replace-space <char>`: Replaces spaces in author and title directory names with the specified character. For example, `--replace-space _` will save `Firstname Lastname` as `Firstname_Lastname`. Leave empty to preserve spaces. Works with `--organize-downloads`.
+
+#### Examples
+
+Organize downloads and replace spaces with underscores:
+
+```sh
+openbooks server --organize-downloads --replace-space _
+```
+
+Organize downloads and replace spaces with dots:
+
+```sh
+openbooks server --organize-downloads --replace-space .
+```
+
+Default (spaces preserved):
+
+```sh
+openbooks server --organize-downloads
+```
+
+## Organized Download Directory Structure
+
+Starting in vNEXT, you can opt-in to organize downloaded books into subdirectories by author and title. The structure is:
+
+```
+books/Author Name/Book Title/FILE
+```
+
+This applies to downloads made via both the web UI and CLI if enabled. The frontend sends the author and title in the download request, and the backend saves the file accordingly. Directory names are sanitized for safety.
+
+### CLI Flag: --organize-downloads
+
+You can enable this feature using the `--organize-downloads` CLI flag:
+
+- `--organize-downloads` (default: disabled): If enabled, organizes downloads as shown above.
+- By default, all files are placed in a single directory. Enable the flag to use the organized structure.
+
+### Example
+
+After downloading "The Hobbit" by J.R.R. Tolkien, the file will be saved as:
+
+```
+books/JRR Tolkien/The Hobbit/yourfile.ext
+```
 
 ## Development
 

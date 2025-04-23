@@ -18,6 +18,10 @@ type Config struct {
 	SearchBot string
 	Version   string
 	irc       *irc.Conn
+	// Add a flag to disable browser downloads in CLI mode
+	NoBrowserDl bool
+	// Organize downloads into author/title/FILE if set
+	OrganizeDownloads bool
 }
 
 // StartInteractive instantiates the OpenBooks CLI interface

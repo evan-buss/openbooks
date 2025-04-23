@@ -65,7 +65,8 @@ func (c *Client) searchResultHandler(downloadDir string) core.HandlerFunc {
 // bookResultHandler downloads the book file and sends it over the websocket
 func (c *Client) bookResultHandler(downloadDir string, disableBrowserDownloads bool) core.HandlerFunc {
 	return func(text string) {
-		extractedPath, err := core.DownloadExtractDCCString(filepath.Join(downloadDir, "books"), text, nil)
+		dir := filepath.Join(downloadDir, c.downloadSubDir)
+		extractedPath, err := core.DownloadExtractDCCString(dir, text, nil)
 		if err != nil {
 			c.log.Println(err)
 			c.send <- newErrorResponse("Error when downloading book.")
@@ -73,6 +74,14 @@ func (c *Client) bookResultHandler(downloadDir string, disableBrowserDownloads b
 		}
 
 		c.log.Printf("Sending book entitled '%s'.\n", filepath.Base(extractedPath))
+		
+		// After a book is downloaded, log the absolute host path
+		absPath, err := filepath.Abs(extractedPath)
+		if err != nil {
+			c.log.Printf("Book downloaded: %s (error resolving absolute path: %v)", extractedPath, err)
+		} else {
+			c.log.Printf("Book downloaded (absolute path): %s", absPath)
+		}
 		c.send <- newDownloadResponse(extractedPath, disableBrowserDownloads)
 	}
 }

@@ -51,6 +51,9 @@ type Client struct {
 
 	// Context is used to signal when this client should close.
 	ctx context.Context
+
+	// Directory for organized downloads (set per download request)
+	downloadSubDir string
 }
 
 // readPump pumps messages from the websocket connection to the hub.

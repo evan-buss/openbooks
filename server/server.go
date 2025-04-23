@@ -56,6 +56,8 @@ type Config struct {
 	SearchBot               string
 	DisableBrowserDownloads bool
 	UserAgent               string
+	OrganizeDownloads       bool
+	ReplaceSpace            string
 }
 
 func New(config Config) *server {
@@ -95,7 +97,28 @@ func Start(config Config) {
 
 	server.log.Printf("Base Path: %s\n", config.Basepath)
 	server.log.Printf("OpenBooks is listening on port %v", config.Port)
-	server.log.Printf("Download Directory: %s\n", config.DownloadDir)
+
+	// Print DownloadDir config value and absolute path
+	absDownloadDir, err := filepath.Abs(config.DownloadDir)
+	if err != nil {
+		server.log.Printf("Download Directory (config): %s (error resolving absolute path: %v)", config.DownloadDir, err)
+	} else {
+		server.log.Printf("Download Directory (config): %s", config.DownloadDir)
+		server.log.Printf("Download Directory (absolute): %s", absDownloadDir)
+	}
+
+	// Print all other config flags
+	server.log.Printf("Persist: %v", config.Persist)
+	server.log.Printf("DisableBrowserDownloads: %v", config.DisableBrowserDownloads)
+	server.log.Printf("OrganizeDownloads: %v", config.OrganizeDownloads)
+	server.log.Printf("ReplaceSpace: %q", config.ReplaceSpace)
+	server.log.Printf("UserName: %s", config.UserName)
+	server.log.Printf("UserAgent: %s", config.UserAgent)
+	server.log.Printf("Server: %s", config.Server)
+	server.log.Printf("EnableTLS: %v", config.EnableTLS)
+	server.log.Printf("SearchTimeout: %v", config.SearchTimeout)
+	server.log.Printf("SearchBot: %s", config.SearchBot)
+
 	server.log.Printf("Open http://localhost:%v%s in your browser.", config.Port, config.Basepath)
 	server.log.Fatal(http.ListenAndServe(":"+config.Port, router))
 }
