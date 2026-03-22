@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"regexp"
 	"sort"
 	"strings"
 )
@@ -91,6 +92,7 @@ func ParseSearch(reader io.Reader) ([]BookDetail, []ParseError) {
 		}
 	}
 
+	books = normalizeBookDetailFields(books)
 	sort.Slice(books, func(i, j int) bool { return books[i].Server < books[j].Server })
 
 	return books, parseErrors
@@ -176,9 +178,225 @@ func ParseSearchV2(reader io.Reader) ([]BookDetail, []ParseError) {
 		}
 	}
 
+	books = normalizeBookDetailFields(books)
 	sort.Slice(books, func(i, j int) bool { return books[i].Server < books[j].Server })
 
 	return books, parseErrors
+}
+
+var (
+	nonAuthorTokenPattern = regexp.MustCompile(`\d|[_:/\\|@]`)
+	initialPattern        = regexp.MustCompile(`\b[A-Z]\.`)
+	tokenSplitPattern     = regexp.MustCompile(`[^a-z0-9']+`)
+)
+
+var tokenStopWords = map[string]struct{}{
+	"": {}, "a": {}, "an": {}, "and": {}, "the": {}, "of": {}, "in": {}, "on": {}, "to": {}, "for": {}, "from": {}, "with": {}, "by": {},
+	"book": {}, "books": {}, "series": {}, "vol": {}, "volume": {}, "edition": {}, "ed": {},
+}
+
+func normalizeBookDetailFields(books []BookDetail) []BookDetail {
+	if len(books) == 0 {
+		return books
+	}
+
+	normalized := make([]BookDetail, len(books))
+	copy(normalized, books)
+	orientations := make([]bool, len(normalized))
+
+	for i := range normalized {
+		book := &normalized[i]
+
+		baseScore := orientationScore(book.Author, book.Title)
+		swappedScore := orientationScore(book.Title, book.Author)
+
+		if swappedScore >= baseScore+4 {
+			orientations[i] = true
+		}
+	}
+
+	for iteration := 0; iteration < 4; iteration++ {
+		authorFreq, titleFreq := buildColumnTokenFrequencies(normalized, orientations)
+		changed := false
+
+		for i := range normalized {
+			book := normalized[i]
+
+			authorKeep, titleKeep := book.Author, book.Title
+			authorSwap, titleSwap := book.Title, book.Author
+
+			keepScore := orientationScore(authorKeep, titleKeep)
+			keepScore += tokenSimilarityScore(authorKeep, authorFreq) + tokenSimilarityScore(titleKeep, titleFreq)
+
+			swapScore := orientationScore(authorSwap, titleSwap)
+			swapScore += tokenSimilarityScore(authorSwap, authorFreq) + tokenSimilarityScore(titleSwap, titleFreq)
+
+			shouldSwap := swapScore > keepScore
+			if shouldSwap != orientations[i] {
+				orientations[i] = shouldSwap
+				changed = true
+			}
+		}
+
+		if !changed {
+			break
+		}
+	}
+
+	for i := range normalized {
+		if orientations[i] {
+			normalized[i].Author, normalized[i].Title = normalized[i].Title, normalized[i].Author
+		}
+	}
+
+	return normalized
+}
+
+func buildColumnTokenFrequencies(books []BookDetail, orientations []bool) (map[string]int, map[string]int) {
+	authorFreq := make(map[string]int)
+	titleFreq := make(map[string]int)
+
+	for i, book := range books {
+		author, title := book.Author, book.Title
+		if orientations[i] {
+			author, title = title, author
+		}
+
+		for _, token := range scoreTokens(author) {
+			authorFreq[token]++
+		}
+		for _, token := range scoreTokens(title) {
+			titleFreq[token]++
+		}
+	}
+
+	return authorFreq, titleFreq
+}
+
+func tokenSimilarityScore(value string, columnFreq map[string]int) int {
+	score := 0
+	for _, token := range scoreTokens(value) {
+		freq := columnFreq[token]
+		if freq <= 1 {
+			continue
+		}
+		score += freq
+	}
+	return score
+}
+
+func scoreTokens(value string) []string {
+	lower := strings.ToLower(strings.TrimSpace(value))
+	if lower == "" {
+		return nil
+	}
+
+	parts := tokenSplitPattern.Split(lower, -1)
+	tokens := make([]string, 0, len(parts)*2)
+	for _, part := range parts {
+		if len(part) < 2 {
+			continue
+		}
+		if _, isStopWord := tokenStopWords[part]; isStopWord {
+			continue
+		}
+		tokens = append(tokens, part)
+	}
+
+	originalLen := len(tokens)
+	for i := 0; i < originalLen-1; i++ {
+		tokens = append(tokens, tokens[i]+"_"+tokens[i+1])
+	}
+
+	return tokens
+}
+
+func orientationScore(author string, title string) int {
+	return authorLikelihood(author) + titleLikelihood(title)
+}
+
+func authorLikelihood(value string) int {
+	value = strings.TrimSpace(value)
+	if value == "" {
+		return -10
+	}
+
+	words := strings.Fields(value)
+	wordCount := len(words)
+	score := 0
+
+	switch {
+	case wordCount <= 4:
+		score += 3
+	case wordCount <= 7:
+		score += 1
+	case wordCount >= 10:
+		score -= 4
+	}
+
+	if strings.Contains(value, ",") {
+		score += 2
+	}
+
+	if initialPattern.MatchString(value) {
+		score += 1
+	}
+
+	if nonAuthorTokenPattern.MatchString(value) {
+		score -= 3
+	}
+
+	lower := strings.ToLower(value)
+	for _, token := range []string{" the ", " and ", " of ", " in ", " with ", " for ", " to ", " from ", " volume ", " edition "} {
+		if strings.Contains(" "+lower+" ", token) {
+			score -= 1
+		}
+	}
+
+	if strings.ContainsAny(value, "[]()!?") {
+		score -= 1
+	}
+
+	return score
+}
+
+func titleLikelihood(value string) int {
+	value = strings.TrimSpace(value)
+	if value == "" {
+		return -10
+	}
+
+	words := strings.Fields(value)
+	wordCount := len(words)
+	score := 0
+
+	if wordCount >= 3 {
+		score += 2
+	}
+	if wordCount >= 7 {
+		score += 1
+	}
+
+	lower := strings.ToLower(value)
+	for _, token := range []string{" the ", " and ", " of ", " in ", " with ", " for ", " to ", " from ", " volume ", " edition "} {
+		if strings.Contains(" "+lower+" ", token) {
+			score += 1
+		}
+	}
+
+	if strings.ContainsAny(value, "[]()!?:") {
+		score += 1
+	}
+
+	if nonAuthorTokenPattern.MatchString(value) {
+		score += 1
+	}
+
+	if strings.Contains(value, ",") && !strings.ContainsAny(lower, "0123456789") {
+		score -= 1
+	}
+
+	return score
 }
 
 func parseLineV2(line string) (BookDetail, error) {

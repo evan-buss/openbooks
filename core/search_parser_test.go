@@ -114,6 +114,41 @@ func TestSpecialCases(t *testing.T) {
 	}
 }
 
+func TestNormalizeBookDetailFields(t *testing.T) {
+	reader := strings.NewReader(`
+!Ook So we Read on -How the Great Gatsby came to be and why it Endures (2014) - Maureen Corrigan.epub  ::INFO:: 5MB
+!DV8 F. Scott Fitzgerald - The Great Gatsby (Epub).rar  ::INFO:: 394.7KB
+`)
+
+	results, errs := ParseSearchV2(reader)
+	require.Len(t, errs, 0)
+	require.Len(t, results, 2)
+
+	bookByServer := map[string]BookDetail{}
+	for _, book := range results {
+		bookByServer[book.Server] = book
+	}
+
+	assert.Equal(t, "Maureen Corrigan", bookByServer["Ook"].Author)
+	assert.Equal(t, "So we Read on -How the Great Gatsby came to be and why it Endures (2014)", bookByServer["Ook"].Title)
+	assert.Equal(t, "F. Scott Fitzgerald", bookByServer["DV8"].Author)
+	assert.Equal(t, "The Great Gatsby (Epub)", bookByServer["DV8"].Title)
+}
+
+func TestNormalizeBookDetailFieldsClustersRepeatedAuthor(t *testing.T) {
+	books := []BookDetail{
+		{Server: "S1", Author: "Dave Blah", Title: "A Story of Time"},
+		{Server: "S2", Author: "A Story of Time (Special Edition)", Title: "Dave Blah"},
+		{Server: "S3", Author: "Dave Blah", Title: "A Story of Time - Volume 2"},
+		{Server: "S4", Author: "A Story of Time and Space", Title: "Dave Blah"},
+	}
+
+	normalized := normalizeBookDetailFields(books)
+	for _, book := range normalized {
+		assert.Equal(t, "Dave Blah", book.Author)
+	}
+}
+
 var sampleData = `Search results from SearchBot v3.00.07 by Ook, searching dll written by Iczelion, Based on Searchbot v2.22 by Dukelupus
 Searched 20 lists for "the great gatsby" , found 27 matches. Enjoy!
 This list includes results from ALL the lists SearchBot v3.00.07 currently has, some of these servers may be offline.
