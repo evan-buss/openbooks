@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/evan-buss/openbooks/core"
 )
@@ -11,7 +12,7 @@ import (
 func (server *server) NewIrcEventHandler(client *Client) core.EventHandler {
 	handler := core.EventHandler{}
 	handler[core.SearchResult] = client.searchResultHandler(server.config.DownloadDir)
-	handler[core.BookResult] = client.bookResultHandler(server.config.DownloadDir, server.config.DisableBrowserDownloads)
+	handler[core.BookResult] = client.bookResultHandler(server.config.DownloadDir, server.config.DisableBrowserDownloads, server.config.PostDownloadHook, server.config.PostDownloadHookTimeout)
 	handler[core.NoResults] = client.noResultsHandler
 	handler[core.BadServer] = client.badServerHandler
 	handler[core.SearchAccepted] = client.searchAcceptedHandler
@@ -25,7 +26,7 @@ func (server *server) NewIrcEventHandler(client *Client) core.EventHandler {
 // searchResultHandler downloads from DCC server, parses data, and sends data to client
 func (c *Client) searchResultHandler(downloadDir string) core.HandlerFunc {
 	return func(text string) {
-		extractedPath, err := core.DownloadExtractDCCString(filepath.Join(downloadDir, "books"), text, nil)
+		extractedPath, err := core.DownloadExtractDCCString(downloadDir, text, nil)
 		if err != nil {
 			c.log.Println(err)
 			c.send <- newErrorResponse("Error when downloading search results.")
@@ -63,13 +64,18 @@ func (c *Client) searchResultHandler(downloadDir string) core.HandlerFunc {
 }
 
 // bookResultHandler downloads the book file and sends it over the websocket
-func (c *Client) bookResultHandler(downloadDir string, disableBrowserDownloads bool) core.HandlerFunc {
+func (c *Client) bookResultHandler(downloadDir string, disableBrowserDownloads bool, postDownloadHook string, postDownloadHookTimeout time.Duration) core.HandlerFunc {
 	return func(text string) {
-		extractedPath, err := core.DownloadExtractDCCString(filepath.Join(downloadDir, "books"), text, nil)
+		extractedPath, err := core.DownloadExtractDCCString(downloadDir, text, nil)
 		if err != nil {
 			c.log.Println(err)
 			c.send <- newErrorResponse("Error when downloading book.")
 			return
+		}
+
+		metadata := c.nextDownloadMetadata()
+		if postDownloadHook != "" {
+			go c.runPostDownloadHook(postDownloadHook, postDownloadHookTimeout, extractedPath, metadata)
 		}
 
 		c.log.Printf("Sending book entitled '%s'.\n", filepath.Base(extractedPath))
@@ -84,6 +90,7 @@ func (c *Client) noResultsHandler(_ string) {
 
 // BadServer is called when the requested download fails because the server is not available
 func (c *Client) badServerHandler(_ string) {
+	c.nextDownloadMetadata()
 	c.send <- newErrorResponse("Server is not available. Try another one.")
 }
 

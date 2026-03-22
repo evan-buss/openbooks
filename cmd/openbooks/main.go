@@ -5,6 +5,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"time"
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/evan-buss/openbooks/desktop"
@@ -52,6 +53,8 @@ func init() {
 	desktopCmd.Flags().StringVarP(&desktopConfig.Port, "port", "p", "5228", "Set the local network port for browser mode.")
 	desktopCmd.Flags().IntP("rate-limit", "r", 10, "The number of seconds to wait between searches to reduce strain on IRC search servers. Minimum is 10 seconds.")
 	desktopCmd.Flags().StringVarP(&desktopConfig.DownloadDir, "dir", "d", downloadDir, "The directory where eBooks are saved.")
+	desktopCmd.Flags().StringVar(&desktopConfig.PostDownloadHook, "post-download-hook", "", "Executable path to run after a book download completes.")
+	desktopCmd.Flags().Int("post-download-hook-timeout", 20, "Seconds to wait before terminating post-download-hook.")
 }
 
 var desktopCmd = &cobra.Command{
@@ -61,6 +64,11 @@ var desktopCmd = &cobra.Command{
 	PreRun: func(cmd *cobra.Command, args []string) {
 		bindGlobalServerFlags(&desktopConfig)
 		rateLimit, _ := cmd.Flags().GetInt("rate-limit")
+		hookTimeout, _ := cmd.Flags().GetInt("post-download-hook-timeout")
+		if hookTimeout < 1 {
+			hookTimeout = 20
+		}
+		desktopConfig.PostDownloadHookTimeout = time.Duration(hookTimeout) * time.Second
 		ensureValidRate(rateLimit, &desktopConfig)
 		desktopConfig.DisableBrowserDownloads = true
 		desktopConfig.Basepath = "/"

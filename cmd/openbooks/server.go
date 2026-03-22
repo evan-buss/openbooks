@@ -4,6 +4,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"time"
 
 	"github.com/evan-buss/openbooks/server"
 	"github.com/evan-buss/openbooks/util"
@@ -24,6 +25,8 @@ func init() {
 	serverCmd.Flags().BoolVarP(&openBrowser, "browser", "b", false, "Open the browser on server start.")
 	serverCmd.Flags().BoolVar(&serverConfig.Persist, "persist", false, "Persist eBooks in 'dir'. Default is to delete after sending.")
 	serverCmd.Flags().StringVarP(&serverConfig.DownloadDir, "dir", "d", filepath.Join(os.TempDir(), "openbooks"), "The directory where eBooks are saved when persist enabled.")
+	serverCmd.Flags().StringVar(&serverConfig.PostDownloadHook, "post-download-hook", "", "Executable path to run after a book download completes.")
+	serverCmd.Flags().Int("post-download-hook-timeout", 20, "Seconds to wait before terminating post-download-hook.")
 }
 
 var serverCmd = &cobra.Command{
@@ -33,6 +36,11 @@ var serverCmd = &cobra.Command{
 	PreRun: func(cmd *cobra.Command, args []string) {
 		bindGlobalServerFlags(&serverConfig)
 		rateLimit, _ := cmd.Flags().GetInt("rate-limit")
+		hookTimeout, _ := cmd.Flags().GetInt("post-download-hook-timeout")
+		if hookTimeout < 1 {
+			hookTimeout = 20
+		}
+		serverConfig.PostDownloadHookTimeout = time.Duration(hookTimeout) * time.Second
 		ensureValidRate(rateLimit, &serverConfig)
 		// If cli flag isn't set (default value) check for the presence of an
 		// environment variable and use it if found.

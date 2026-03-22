@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"log"
+	"sync"
 	"time"
 
 	"github.com/evan-buss/openbooks/irc"
@@ -51,6 +52,34 @@ type Client struct {
 
 	// Context is used to signal when this client should close.
 	ctx context.Context
+
+	pendingDownloadsMutex sync.Mutex
+	pendingDownloads      []downloadMetadata
+}
+
+type downloadMetadata struct {
+	Author string
+	Title  string
+}
+
+func (c *Client) queueDownloadMetadata(metadata downloadMetadata) {
+	c.pendingDownloadsMutex.Lock()
+	defer c.pendingDownloadsMutex.Unlock()
+
+	c.pendingDownloads = append(c.pendingDownloads, metadata)
+}
+
+func (c *Client) nextDownloadMetadata() downloadMetadata {
+	c.pendingDownloadsMutex.Lock()
+	defer c.pendingDownloadsMutex.Unlock()
+
+	if len(c.pendingDownloads) == 0 {
+		return downloadMetadata{}
+	}
+
+	metadata := c.pendingDownloads[0]
+	c.pendingDownloads = c.pendingDownloads[1:]
+	return metadata
 }
 
 // readPump pumps messages from the websocket connection to the hub.

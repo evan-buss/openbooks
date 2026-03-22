@@ -29,6 +29,14 @@ See the [configuration docs](../configuration.md) for a complete list of Server 
 
 Use the `environment` property to optionally set a custom base path for the server.
 
+## Post Download Hook Notes
+
+- The runtime image includes Python `3.14.2` and `bash`.
+- If your hook uses a mounted virtual environment, the venv must match the container Python version (`3.14.2`).
+- For Python venv scripts, ensure `.venv/bin/python3` resolves to `/usr/local/bin/python3` inside the container.
+- Your Python script should have a shebang of the .venv python such as `#!/path/to/script-dir/.venv/bin/python3` so as to include the dependencies
+- Hooks are executed directly by path, not through a shell command parser.
+
 ## Image Tags
 
 `evanbuss/openbooks:latest`

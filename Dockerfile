@@ -16,8 +16,9 @@ RUN go install -v ./...
 WORKDIR /go/src/cmd/openbooks/
 RUN go build
 
-FROM gcr.io/distroless/static as app
+FROM python:3.14.2-slim as app
 WORKDIR /app
+RUN apt-get update && apt-get install -y --no-install-recommends bash ca-certificates && rm -rf /var/lib/apt/lists/*
 COPY --from=build /go/src/cmd/openbooks/openbooks .
 
 EXPOSE 80
