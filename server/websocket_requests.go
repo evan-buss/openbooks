@@ -3,6 +3,8 @@ package server
 import (
 	"encoding/json"
 	"fmt"
+	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/evan-buss/openbooks/core"
@@ -49,33 +51,60 @@ func (server *server) routeMessage(message Request, c *Client) {
 
 // handle ConnectionRequests and either connect to the server or do nothing
 func (c *Client) startIrcConnection(server *server) {
-	err := core.Join(c.irc, server.config.Server, server.config.EnableTLS)
+	err := c.bookClient.Connect(server.config.Server, server.config.EnableTLS)
 	if err != nil {
 		c.log.Println(err)
 		c.send <- newErrorResponse("Unable to connect to IRC server.")
 		return
 	}
 
-	handler := server.NewIrcEventHandler(c)
-
-	if server.config.Log {
-		logger, _, err := util.CreateLogFile(c.irc.Username, server.config.DownloadDir)
-		if err != nil {
-			server.log.Println(err)
-		}
-		handler[core.Message] = func(text string) { logger.Println(text) }
+	handlers := core.Handlers{
+		SearchResults: func(books []core.BookDetail, parseErrors []core.ParseError, resultsFilePath string) {
+			if len(parseErrors) > 0 {
+				c.log.Printf("%d Search Result Parsing Errors\n", len(parseErrors))
+			}
+			c.log.Printf("Sending %d search results.\n", len(books))
+			c.send <- newSearchResponse(books, parseErrors)
+			if err := os.Remove(resultsFilePath); err != nil {
+				c.log.Printf("Error deleting search results file: %v", err)
+			}
+		},
+		BookDownloaded: func(filePath string) {
+			c.log.Printf("Sending book entitled '%s'.\n", filepath.Base(filePath))
+			c.send <- newDownloadResponse(filePath, server.config.DisableBrowserDownloads)
+		},
+		NoResults:      func() { c.send <- newErrorResponse("No results found for the query.") },
+		BadServer:      func() { c.send <- newErrorResponse("Server is not available. Try another one.") },
+		SearchAccepted: func() { c.send <- newStatusResponse(NOTIFY, "Search accepted into the queue.") },
+		MatchesFound: func(num string) {
+			c.send <- newStatusResponse(NOTIFY, fmt.Sprintf("Found %s results for your query.", num))
+		},
+		ServerList: func(servers core.IrcServers) { server.repository.servers = servers },
+		Erred: func(err error) {
+			c.log.Println(err)
+			c.send <- newErrorResponse("Error processing request.")
+		},
 	}
 
-	go core.StartReader(c.ctx, c.irc, handler)
+	if server.config.Log {
+		logger, _, err := util.CreateLogFile(c.bookClient.Username(), server.config.DownloadDir)
+		if err != nil {
+			server.log.Println(err)
+		} else {
+			handlers.Message = func(text string) { logger.Println(text) }
+		}
+	}
+
+	c.bookClient.StartReader(c.ctx, handlers)
 
 	c.send <- ConnectionResponse{
 		StatusResponse: StatusResponse{
 			MessageType:      CONNECT,
 			NotificationType: SUCCESS,
 			Title:            "Welcome, connection established.",
-			Detail:           fmt.Sprintf("IRC username %s", c.irc.Username),
+			Detail:           fmt.Sprintf("IRC username %s", c.bookClient.Username()),
 		},
-		Name: c.irc.Username,
+		Name: c.bookClient.Username(),
 	}
 }
 
@@ -93,7 +122,7 @@ func (c *Client) sendSearchRequest(s *SearchRequest, server *server) {
 		return
 	}
 
-	core.SearchBook(c.irc, server.config.SearchBot, s.Query)
+	c.bookClient.Search(server.config.SearchBot, s.Query)
 	server.lastSearch = time.Now()
 
 	c.send <- newStatusResponse(NOTIFY, "Search request sent.")
@@ -101,6 +130,6 @@ func (c *Client) sendSearchRequest(s *SearchRequest, server *server) {
 
 // handle DownloadRequests by sending the request to the book server
 func (c *Client) sendDownloadRequest(d *DownloadRequest) {
-	core.DownloadBook(c.irc, d.Book)
+	c.bookClient.Download(d.Book)
 	c.send <- newStatusResponse(NOTIFY, "Download request received.")
 }

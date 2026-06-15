@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/evan-buss/openbooks/irc"
+	"github.com/evan-buss/openbooks/core"
 	"github.com/google/uuid"
 
 	"github.com/gorilla/websocket"
@@ -44,8 +44,8 @@ type Client struct {
 	// Message to send to the client ws connection
 	send chan interface{}
 
-	// Individual IRC connection per connected client.
-	irc *irc.Conn
+	// Individual IRC book client per connected websocket client.
+	bookClient *core.IrcClient
 
 	log *log.Logger
 
@@ -60,7 +60,7 @@ type Client struct {
 // reads from this goroutine.
 func (server *server) readPump(c *Client) {
 	defer func() {
-		c.irc.Disconnect()
+		c.bookClient.Disconnect()
 		c.conn.Close()
 		server.unregister <- c
 	}()

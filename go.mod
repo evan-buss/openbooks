@@ -31,6 +31,7 @@ require (
 require (
 	git.wow.st/gmp/jni v0.0.0-20210610011705-34026c7e22d0 // indirect
 	github.com/andybalholm/brotli v1.0.4 // indirect
+	github.com/bwmarrin/discordgo v0.29.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect
 	github.com/inkeliz/w32 v1.0.2 // indirect
 	github.com/klauspost/compress v1.15.9 // indirect

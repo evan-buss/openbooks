@@ -7,7 +7,16 @@ import (
 	"net"
 	"regexp"
 	"strconv"
+	"time"
 )
+
+// dialTimeout bounds how long we wait to establish the DCC connection.
+const dialTimeout = 30 * time.Second
+
+// idleTimeout is the maximum time to wait for more data during a transfer.
+// It is reset after every successful read, so it only fires when the sender
+// stalls (stops sending) rather than limiting the total transfer duration.
+const idleTimeout = 60 * time.Second
 
 // There are two types of DCC strings this program accepts.
 // Download contains all of the necessary DCC info parsed from the DCC SEND string
@@ -55,8 +64,7 @@ func ParseString(text string) (*Download, error) {
 
 // Download writes the data contained in the DCC Download
 func (download Download) Download(writer io.Writer) error {
-	// TODO: Maybe specify deadline?
-	conn, err := net.Dial("tcp", download.IP+":"+download.Port)
+	conn, err := net.DialTimeout("tcp", download.IP+":"+download.Port, dialTimeout)
 	if err != nil {
 		return err
 	}
@@ -75,6 +83,12 @@ func (download Download) Download(writer io.Writer) error {
 	received := 0
 	bytes := make([]byte, 4096)
 	for int64(received) < download.Size {
+		// Reset the idle deadline before each read so a stalled sender causes
+		// the transfer to fail instead of blocking forever.
+		if err := conn.SetReadDeadline(time.Now().Add(idleTimeout)); err != nil {
+			return err
+		}
+
 		n, err := conn.Read(bytes)
 		if err != nil {
 			return err

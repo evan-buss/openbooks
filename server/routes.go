@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/evan-buss/openbooks/irc"
 	"io/fs"
 	"log"
 	"net/http"
@@ -17,6 +16,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/evan-buss/openbooks/core"
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 )
@@ -78,12 +78,12 @@ func (server *server) serveWs() http.HandlerFunc {
 		}
 
 		client := &Client{
-			conn: conn,
-			send: make(chan interface{}, 128),
-			uuid: userId,
-			irc:  irc.New(server.config.UserName, server.config.UserAgent),
-			log:  log.New(os.Stdout, fmt.Sprintf("CLIENT (%s): ", server.config.UserName), log.LstdFlags|log.Lmsgprefix),
-			ctx:  context.Background(),
+			conn:       conn,
+			send:       make(chan interface{}, 128),
+			uuid:       userId,
+			bookClient: core.NewIrcClient(server.config.UserName, server.config.UserAgent, filepath.Join(server.config.DownloadDir, "books")),
+			log:        log.New(os.Stdout, fmt.Sprintf("CLIENT (%s): ", server.config.UserName), log.LstdFlags|log.Lmsgprefix),
+			ctx:        context.Background(),
 		}
 
 		server.log.Printf("Client connected from %s\n", conn.RemoteAddr().String())
@@ -120,7 +120,7 @@ func (server *server) statsHandler() http.HandlerFunc {
 		for _, client := range server.clients {
 			details := statsReponse{
 				UUID: client.uuid.String(),
-				Name: client.irc.Username,
+				Name: client.bookClient.Username(),
 				IP:   client.conn.RemoteAddr().String(),
 			}
 

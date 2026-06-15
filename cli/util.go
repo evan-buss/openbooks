@@ -14,31 +14,30 @@ import (
 	"time"
 
 	"github.com/evan-buss/openbooks/core"
-	"github.com/evan-buss/openbooks/irc"
 	"github.com/evan-buss/openbooks/util"
+	"github.com/schollz/progressbar/v3"
 )
 
 var servers []string
 
 const clearLine = "\r\033[2K"
 
-func registerShutdown(conn *irc.Conn, cancel context.CancelFunc) {
+func registerShutdown(client *core.IrcClient, cancel context.CancelFunc) {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-c
-		conn.Disconnect()
+		client.Disconnect()
 		cancel()
 		os.Exit(0)
 	}()
 }
 
-// Connect to IRC server and save connection to Config
+// Connect to IRC server and save the client to Config
 func instantiate(config *Config) {
 	fmt.Printf("Connecting to %s.", config.Server)
-	conn := irc.New(config.UserName, config.Version)
-	config.irc = conn
-	err := core.Join(conn, config.Server, config.EnableTLS)
+	config.client = core.NewIrcClient(config.UserName, config.Version, config.Dir)
+	err := config.client.Connect(config.Server, config.EnableTLS)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -46,26 +45,28 @@ func instantiate(config *Config) {
 	fmt.Printf("%sConnected to %s.\n", clearLine, config.Server)
 }
 
-// Required handlers are used regardless of what CLI mode is selected.
-// Keep alive pings and other core IRC client features
-func addEssentialHandlers(handler core.EventHandler, config *Config) {
-	handler[core.Ping] = config.pingHandler
-	handler[core.Version] = config.versionHandler
-	handler[core.ServerList] = func(text string) {
-		servers = core.ParseServers(text).ElevatedUsers
+// baseHandlers returns the Handlers common to every CLI mode: server-list
+// tracking, a terminal progress bar, and (optionally) raw IRC logging. The
+// returned io.Closer (the log file) is nil when logging is disabled.
+func (config *Config) baseHandlers() (core.Handlers, io.Closer) {
+	handlers := core.Handlers{
+		ServerList: func(s core.IrcServers) { servers = s.ElevatedUsers },
+		Progress: func(filename string, size int64) io.Writer {
+			return progressbar.DefaultBytes(size, filename)
+		},
+		Erred: func(err error) { log.Println(err) },
 	}
-}
 
-func (config *Config) setupLogger(handler core.EventHandler) io.Closer {
+	if !config.Log {
+		return handlers, nil
+	}
+
 	logger, file, err := util.CreateLogFile(config.UserName, config.Dir)
 	if err != nil {
 		log.Fatalf("Error setting up logger: %s\n", err)
 	}
-	handler[core.Message] = func(text string) {
-		logger.Println(text)
-	}
-
-	return file
+	handlers.Message = func(text string) { logger.Println(text) }
+	return handlers, file
 }
 
 // Show warning message if the server they are downloading from is not online.

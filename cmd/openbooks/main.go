@@ -21,12 +21,14 @@ var version = "4.5.0"
 var ircVersion = "4.3.0"
 
 type GlobalFlags struct {
-	UserName  string
-	Server    string
-	Log       bool
-	SearchBot string
-	EnableTLS bool
-	UserAgent string
+	UserName     string
+	Server       string
+	Log          bool
+	SearchBot    string
+	EnableTLS    bool
+	UserAgent    string
+	DiscordToken string
+	DiscordGuild string
 }
 
 var debug bool
@@ -42,6 +44,8 @@ func init() {
 	desktopCmd.PersistentFlags().BoolVarP(&globalFlags.Log, "log", "l", false, "Save raw IRC logs for each client connection.")
 	desktopCmd.PersistentFlags().StringVar(&globalFlags.SearchBot, "searchbot", "search", "The IRC bot that handles search queries. Try 'searchook' if 'search' is down.")
 	desktopCmd.PersistentFlags().StringVarP(&globalFlags.UserAgent, "useragent", "u", fmt.Sprintf("OpenBooks %s", ircVersion), "UserAgent / Version Reported to IRC Server.")
+	desktopCmd.PersistentFlags().StringVar(&globalFlags.DiscordToken, "discord-token", "", "Discord bot token. Enables the Discord bot (with --discord-guild). Falls back to the DISCORD_TOKEN env var.")
+	desktopCmd.PersistentFlags().StringVar(&globalFlags.DiscordGuild, "discord-guild", "", "Discord guild (server) ID to register the /request-book command in. Required to enable the Discord bot.")
 
 	homeDir, err := os.UserHomeDir()
 	if err != nil {

@@ -11,6 +11,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/evan-buss/openbooks/discord"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/google/uuid"
@@ -56,6 +57,12 @@ type Config struct {
 	SearchBot               string
 	DisableBrowserDownloads bool
 	UserAgent               string
+
+	// Discord bot (optional). When both DiscordToken and DiscordGuildID are
+	// set, a Discord bot runs alongside the web server.
+	DiscordToken   string
+	DiscordGuildID string
+	Debug          bool
 }
 
 func New(config Config) *server {
@@ -90,6 +97,7 @@ func Start(config Config) {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	go server.startClientHub(ctx)
+	server.startDiscordBot(ctx)
 	server.registerGracefulShutdown(cancel)
 	router.Mount(config.Basepath, routes)
 
@@ -136,6 +144,37 @@ func (server *server) registerGracefulShutdown(cancel context.CancelFunc) {
 		cancel()
 		time.Sleep(time.Second)
 		os.Exit(0)
+	}()
+}
+
+// startDiscordBot launches the Discord bot alongside the web server when a
+// token and guild are configured. It connects with a distinct IRC nick to avoid
+// colliding with the web server's per-browser connections, and shares the same
+// download directory and search rate limit.
+func (server *server) startDiscordBot(ctx context.Context) {
+	cfg := server.config
+	if cfg.DiscordToken == "" || cfg.DiscordGuildID == "" {
+		return
+	}
+
+	discordCfg := discord.Config{
+		Token:       cfg.DiscordToken,
+		GuildID:     cfg.DiscordGuildID,
+		DownloadDir: cfg.DownloadDir,
+		RateLimit:   cfg.SearchTimeout,
+		Debug:       cfg.Debug,
+		Log:         cfg.Log,
+		UserName:    cfg.UserName + "-bot",
+		Server:      cfg.Server,
+		EnableTLS:   cfg.EnableTLS,
+		SearchBot:   cfg.SearchBot,
+		Version:     cfg.UserAgent,
+	}
+
+	go func() {
+		if err := discord.Run(ctx, discordCfg); err != nil {
+			server.log.Printf("Discord bot stopped: %v", err)
+		}
 	}()
 }
 

@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/evan-buss/openbooks/core"
-	"github.com/evan-buss/openbooks/irc"
 )
 
 type Config struct {
@@ -17,7 +16,7 @@ type Config struct {
 	EnableTLS bool
 	SearchBot string
 	Version   string
-	irc       *irc.Conn
+	client    *core.IrcClient
 }
 
 // StartInteractive instantiates the OpenBooks CLI interface
@@ -27,18 +26,35 @@ func StartInteractive(config Config) {
 	fmt.Println("=======================================")
 
 	instantiate(&config)
-	defer config.irc.Close()
+	defer config.client.Disconnect()
 
 	ctx, cancel := context.WithCancel(context.Background())
-	registerShutdown(config.irc, cancel)
+	registerShutdown(config.client, cancel)
 
-	handler := fullHandler(config)
-	if config.Log {
-		file := config.setupLogger(handler)
-		defer file.Close()
+	handlers, closer := config.baseHandlers()
+	if closer != nil {
+		defer closer.Close()
 	}
+	handlers.SearchResults = func(_ []core.BookDetail, _ []core.ParseError, path string) {
+		fmt.Println("Results location: " + path)
+		terminalMenu(config)
+	}
+	handlers.BookDownloaded = func(path string) {
+		fmt.Println("File location: " + path)
+		terminalMenu(config)
+	}
+	handlers.NoResults = func() {
+		fmt.Println("No results returned for your search...")
+		terminalMenu(config)
+	}
+	handlers.BadServer = func() {
+		fmt.Println("That server is not available. Try again...")
+		terminalMenu(config)
+	}
+	handlers.SearchAccepted = func() { fmt.Println("Search has been accepted. Please wait.") }
+	handlers.MatchesFound = func(num string) { fmt.Printf("Found %s search results.", num) }
 
-	go core.StartReader(ctx, config.irc, handler)
+	config.client.StartReader(ctx, handlers)
 	terminalMenu(config)
 
 	<-ctx.Done()
@@ -46,61 +62,65 @@ func StartInteractive(config Config) {
 
 func StartDownload(config Config, download string) {
 	instantiate(&config)
-	defer config.irc.Close()
+	defer config.client.Disconnect()
 	ctx, cancel := context.WithCancel(context.Background())
 
-	handler := core.EventHandler{}
-	addEssentialHandlers(handler, &config)
-	handler[core.BookResult] = func(text string) {
+	handlers, closer := config.baseHandlers()
+	if closer != nil {
+		defer closer.Close()
+	}
+	handlers.BookDownloaded = func(path string) {
 		fmt.Printf("%sReceived file response.\n", clearLine)
-		config.downloadHandler(text)
+		fmt.Println("File location: " + path)
 		cancel()
 	}
-	if config.Log {
-		file := config.setupLogger(handler)
-		defer file.Close()
+	handlers.BadServer = func() {
+		fmt.Println("That server is not available. Try again...")
+		cancel()
 	}
 
 	fmt.Printf("Sending download request.")
-	go core.StartReader(ctx, config.irc, handler)
-	core.DownloadBook(config.irc, download)
+	config.client.StartReader(ctx, handlers)
+	config.client.Download(download)
 	fmt.Printf("%sSent download request.", clearLine)
 	fmt.Printf("Waiting for file response.")
 
-	registerShutdown(config.irc, cancel)
+	registerShutdown(config.client, cancel)
 	<-ctx.Done()
 }
 
 func StartSearch(config Config, query string) {
 	nextSearchTime := getLastSearchTime().Add(15 * time.Second)
 	instantiate(&config)
-	defer config.irc.Close()
+	defer config.client.Disconnect()
 	ctx, cancel := context.WithCancel(context.Background())
 
-	handler := core.EventHandler{}
-	addEssentialHandlers(handler, &config)
-	handler[core.SearchResult] = func(text string) {
+	handlers, closer := config.baseHandlers()
+	if closer != nil {
+		defer closer.Close()
+	}
+	handlers.SearchResults = func(_ []core.BookDetail, _ []core.ParseError, path string) {
 		fmt.Printf("%sReceived file response.\n", clearLine)
-		config.searchHandler(text)
+		fmt.Println("Results location: " + path)
 		cancel()
 	}
-	handler[core.MatchesFound] = config.matchesFoundHandler
-	if config.Log {
-		file := config.setupLogger(handler)
-		defer file.Close()
+	handlers.NoResults = func() {
+		fmt.Println("No results returned for your search...")
+		cancel()
 	}
+	handlers.MatchesFound = func(num string) { fmt.Printf("Found %s search results.", num) }
 
 	fmt.Printf("Sending search request.")
 	warnIfServerOffline(query)
 	time.Sleep(time.Until(nextSearchTime))
 
-	go core.StartReader(ctx, config.irc, handler)
-	core.SearchBook(config.irc, config.SearchBot, query)
+	config.client.StartReader(ctx, handlers)
+	config.client.Search(config.SearchBot, query)
 
 	setLastSearchTime()
 	fmt.Printf("%sSent search request.", clearLine)
 	fmt.Printf("Waiting for file response.")
 
-	registerShutdown(config.irc, cancel)
+	registerShutdown(config.client, cancel)
 	<-ctx.Done()
 }
