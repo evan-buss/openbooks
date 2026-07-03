@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"log"
+	"mime"
 	"net/http"
 	"os"
 	"os/signal"
@@ -71,6 +72,7 @@ func New(config Config) *server {
 
 // Start instantiates the web server and opens the browser
 func Start(config Config) {
+	registerMimeTypes()
 	createBooksDirectory(config)
 	router := chi.NewRouter()
 	router.Use(middleware.RequestID)
@@ -137,6 +139,24 @@ func (server *server) registerGracefulShutdown(cancel context.CancelFunc) {
 		time.Sleep(time.Second)
 		os.Exit(0)
 	}()
+}
+
+// Register ebook MIME types that aren't in the system MIME table so that
+// http.ServeFile doesn't fall back to content sniffing (which reports
+// epub files as application/zip).
+func registerMimeTypes() {
+	mimeTypes := map[string]string{
+		".epub": "application/epub+zip",
+		".mobi": "application/x-mobipocket-ebook",
+		".azw3": "application/vnd.amazon.mobi8-ebook",
+	}
+
+	for extension, mimeType := range mimeTypes {
+		err := mime.AddExtensionType(extension, mimeType)
+		if err != nil {
+			log.Printf("Error registering MIME type for %s: %s\n", extension, err)
+		}
+	}
 }
 
 func createBooksDirectory(config Config) {
