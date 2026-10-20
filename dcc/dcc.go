@@ -7,6 +7,24 @@ import (
 	"net"
 	"regexp"
 	"strconv"
+	"time"
+)
+
+const (
+	// ackInterval is how many bytes may arrive before the receiver must send a
+	// DCC "SENT" acknowledgement. Senders gate their send window on these; a
+	// receiver that never sends them stalls the transfer once the window fills.
+	ackInterval = 1024
+
+	// stallTimeout aborts a transfer when the sender stops sending for this
+	// long. Without it a stalled sender leaves a permanent .temp file behind
+	// and the caller never learns the download died.
+	stallTimeout = 5 * time.Minute
+
+	// dialTimeout bounds how long we wait for the sender's DCC listener to
+	// accept the connection. net.Dial without a timeout can hang indefinitely
+	// on an unreachable sender.
+	dialTimeout = 30 * time.Second
 )
 
 // There are two types of DCC strings this program accepts.
@@ -53,15 +71,37 @@ func ParseString(text string) (*Download, error) {
 	}, nil
 }
 
+// receiver is the subset of net.Conn the transfer loop depends on. Using an
+// interface keeps the protocol logic testable without a real socket.
+type receiver interface {
+	io.Reader
+	io.Writer
+	SetReadDeadline(time.Time) error
+}
+
 // Download writes the data contained in the DCC Download
 func (download Download) Download(writer io.Writer) error {
-	// TODO: Maybe specify deadline?
-	conn, err := net.Dial("tcp", download.IP+":"+download.Port)
+	conn, err := net.DialTimeout("tcp", download.IP+":"+download.Port, dialTimeout)
 	if err != nil {
 		return err
 	}
 	defer conn.Close()
 
+	received, err := receive(conn, writer, download.Size)
+	if err != nil {
+		return err
+	}
+	if received != download.Size {
+		return ErrMissingBytes
+	}
+
+	return nil
+}
+
+// receive copies exactly size bytes from conn into writer while acknowledging
+// the sender's window. It returns the number of bytes written even when it
+// returns an error, so a caller can tell how much actually arrived.
+func receive(conn receiver, writer io.Writer, size int64) (int64, error) {
 	// NOTE: Not using the idiomatic io.Copy or io.CopyBuffer because they are
 	// much slower in real world tests than the manual way. I suspect it has to
 	// do with the way the DCC server is sending data. I don't think it ever sends
@@ -72,26 +112,57 @@ func (download Download) Download(writer io.Writer) error {
 	// Copy - 2m35s
 	// Custom - 1024 - 35s
 	// Custom - 4096 - 46s, 14s
-	received := 0
+	var received, acked int64
 	bytes := make([]byte, 4096)
-	for int64(received) < download.Size {
+	for received < size {
+		// The deadline is refreshed on every read, so slow but steady transfers
+		// finish while a sender that goes silent is abandoned.
+		if err := conn.SetReadDeadline(time.Now().Add(stallTimeout)); err != nil {
+			return received, err
+		}
+
 		n, err := conn.Read(bytes)
-		if err != nil {
-			return err
+
+		// A Read may return data together with an error. Writing the data first
+		// is essential: senders that reset the connection right after the final
+		// bytes (a common XDCC failure) would otherwise lose that tail and the
+		// transfer would be reported as incomplete.
+		if n > 0 {
+			if _, werr := writer.Write(bytes[:n]); werr != nil {
+				return received, werr
+			}
+			received += int64(n)
+
+			// Open the sender's window by reporting progress. Senders with a
+			// limited window (commonly 1-2 MiB) stop permanently otherwise.
+			if received-acked >= ackInterval || received == size {
+				if aerr := sendAck(conn, received); aerr != nil {
+					return received, aerr
+				}
+				acked = received
+			}
 		}
 
-		_, err = writer.Write(bytes[:n])
 		if err != nil {
-			return err
+			// If the final bytes and the error arrived together, the download
+			// is actually complete.
+			if received == size {
+				return received, nil
+			}
+			return received, err
 		}
-		received += n
 	}
 
-	if int64(received) != download.Size {
-		return ErrMissingBytes
-	}
+	return received, nil
+}
 
-	return nil
+// sendAck reports the number of bytes received so far, as required by the DCC
+// SEND protocol.
+func sendAck(w io.Writer, received int64) error {
+	var ack [4]byte
+	binary.BigEndian.PutUint32(ack[:], uint32(received))
+	_, err := w.Write(ack[:])
+	return err
 }
 
 // Convert a given 32 bit IP integer to an IP string

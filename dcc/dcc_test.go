@@ -2,9 +2,12 @@ package dcc
 
 import (
 	"bytes"
+	"io"
+	"testing"
+	"time"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"testing"
 
 	"github.com/evan-buss/openbooks/mock"
 )
@@ -63,4 +66,112 @@ func TestDownload(t *testing.T) {
 	err := textDownload.Download(received)
 	require.NoError(t, err)
 	assert.Equal(t, text, string(received.Data))
+}
+
+// TestDownloadAcknowledgesSenderWindow reproduces the real world stall where a
+// DCC sender with a limited window stops permanently if the receiver never
+// acknowledges the bytes it has received. Without acknowledgements the transfer
+// hangs once the window is full.
+func TestDownloadAcknowledgesSenderWindow(t *testing.T) {
+	const window = 100 * 1024
+	const total = window*2 + 512
+
+	data := make([]byte, total)
+	for i := range data {
+		data[i] = byte(i % 251)
+	}
+
+	textDownload := Download{
+		Filename: "windowed.bin",
+		IP:       "localhost",
+		Port:     "6971",
+		Size:     int64(total),
+	}
+
+	server := mock.AckDccServer{
+		Port:       ":" + textDownload.Port,
+		Data:       data,
+		WindowSize: window,
+	}
+
+	ready := make(chan struct{}, 1)
+	go server.Start(ready)
+	<-ready
+
+	received := new(mock.WriteCloser)
+
+	done := make(chan error, 1)
+	go func() {
+		done <- textDownload.Download(received)
+	}()
+
+	select {
+	case err := <-done:
+		require.NoError(t, err)
+	case <-time.After(20 * time.Second):
+		t.Fatal("download stalled: receiver never acknowledged the sender window")
+	}
+
+	assert.Equal(t, total, len(received.Data))
+	assert.True(t, bytes.Equal(data, received.Data))
+}
+
+// scriptedReceiver plays back a fixed sequence of Read results so the transfer
+// loop can be tested without a real socket.
+type scriptedReceiver struct {
+	frames []frame
+	index  int
+	acks   bytes.Buffer
+}
+
+type frame struct {
+	data []byte
+	err  error
+}
+
+func (s *scriptedReceiver) Read(p []byte) (int, error) {
+	if s.index >= len(s.frames) {
+		return 0, io.EOF
+	}
+	f := s.frames[s.index]
+	s.index++
+	return copy(p, f.data), f.err
+}
+
+func (s *scriptedReceiver) Write(p []byte) (int, error) { return s.acks.Write(p) }
+func (s *scriptedReceiver) SetReadDeadline(time.Time) error {
+	return nil
+}
+
+// TestReceiveKeepsDataReturnedWithError covers the case where the sender resets
+// the connection in the same Read that carries the final bytes. The tail must
+// not be dropped; the transfer is complete.
+func TestReceiveKeepsDataReturnedWithError(t *testing.T) {
+	payload := bytes.Repeat([]byte("A"), 5000)
+
+	conn := &scriptedReceiver{frames: []frame{
+		{data: payload[:4096]},
+		{data: payload[4096:], err: io.ErrUnexpectedEOF},
+	}}
+
+	var out bytes.Buffer
+	n, err := receive(conn, &out, int64(len(payload)))
+
+	require.NoError(t, err)
+	assert.EqualValues(t, len(payload), n)
+	assert.True(t, bytes.Equal(payload, out.Bytes()))
+}
+
+// TestReceiveReportsIncompleteTransfer makes sure a genuine mid-transfer error
+// is still surfaced together with the byte count that actually arrived.
+func TestReceiveReportsIncompleteTransfer(t *testing.T) {
+	conn := &scriptedReceiver{frames: []frame{
+		{data: bytes.Repeat([]byte("B"), 1000), err: io.ErrUnexpectedEOF},
+	}}
+
+	var out bytes.Buffer
+	n, err := receive(conn, &out, 5000)
+
+	require.Error(t, err)
+	assert.EqualValues(t, 1000, n)
 }
