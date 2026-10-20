@@ -28,11 +28,16 @@ func DownloadExtractDCCString(baseDir, dccStr string, progress io.Writer) (strin
 	}
 
 	// Download DCC data to the file
-	err = download.Download(writer)
-	if err != nil {
+	if err := download.Download(writer); err != nil {
+		// Close the handle before cleaning up; an open handle keeps the partial
+		// file locked on Windows.
+		file.Close()
+		os.Remove(dccPath)
 		return "", err
 	}
-	file.Close()
+	if err := file.Close(); err != nil {
+		return "", err
+	}
 	if !util.IsArchive(dccPath) {
 		return renameTempFile(dccPath), nil
 	}
